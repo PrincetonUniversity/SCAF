@@ -1,3 +1,5 @@
+#ifdef SVF_AVAILABLE
+
 #ifndef LLVM_LIBERTY_SVF_RESULTS_H
 #define LLVM_LIBERTY_SVF_RESULTS_H
 
@@ -63,5 +65,7 @@ public:
                       const Instruction *i2, const Loop *L, Remedies &R);
 };
 } // namespace liberty
+
+#endif
 
 #endif

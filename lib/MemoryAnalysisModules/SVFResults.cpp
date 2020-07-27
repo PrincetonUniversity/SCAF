@@ -1,3 +1,5 @@
+#ifdef SVF_AVAILABLE
+
 #define DEBUG_TYPE "svf-results"
 
 #include "llvm/ADT/Statistic.h"
@@ -83,3 +85,4 @@ char SVFResults::ID = 0;
 
 } // namespace liberty
 
+#endif
