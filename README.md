@@ -1,4 +1,4 @@
-# SCAF: A Speculation-Aware Collaborative Dependence Analysis Framework
+## SCAF: A Speculation-Aware Collaborative Dependence Analysis Framework
 
 Note that the full implementation of SCAF is not yet integrated in this repo. The speculation modules along with a few other components are missing. The memory analysis modules are included though.
 
