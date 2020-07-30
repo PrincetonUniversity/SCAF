@@ -33,6 +33,10 @@ series = {PLDI 2020}
 }
 ```
 
+### Prerequisites
+
+LLVM 9.0.1
+
 ### Build SCAF
 To build, run from the repository root directory: `make`
 
