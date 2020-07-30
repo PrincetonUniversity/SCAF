@@ -1,8 +1,8 @@
 ## SCAF: A Speculation-Aware Collaborative Dependence Analysis Framework
 
-Note that the full implementation of SCAF is not yet integrated in this repo. The speculation modules along with a few other components are missing. The memory analysis modules are included though.
+Note that the full implementation of SCAF is not yet integrated in this repository. The speculation modules along with a few other components are missing. The memory analysis modules are included though.
 
-Disclaimer: this codebase is part of a research project and it lacks industrial-level robustness in implementation (i.e., there will be bugs).
+Disclaimer: this repository is part of a research project and it lacks industrial-level robustness in implementation (i.e., there will be bugs).
 
 SCAF is customizable and can be used as a conservative memory analysis if the speculation modules are disabled.
 
@@ -32,3 +32,8 @@ location = {London, UK},
 series = {PLDI 2020}
 }
 ```
+
+### Build SCAF
+To build, run from the repository root directory: `make`
+
+Run `make clean` from the root directory to clean the repository.
