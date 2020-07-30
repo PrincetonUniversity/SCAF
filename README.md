@@ -1,12 +1,18 @@
-# SCAF: Speculation-Aware Collaborative Dependence Analysis Framework
+## SCAF: A Speculation-Aware Collaborative Dependence Analysis Framework
 
-Note that the full implementation of SCAF is not yet integrated in this repo. The speculation modules along with some other functionalities are missing.
+Note that the full implementation of SCAF is not yet integrated in this repository. The speculation modules along with a few other components are missing. The memory analysis modules are included though.
 
-The novelty, design, implementation, and evaluation of this work is described in the PLDI '20 paper by Apostolakis et al. titled "SCAF: A Speculation-Aware Dependence Analysis Framework"
+Disclaimer: this repository is part of a research project and it lacks industrial-level robustness in implementation (i.e., there will be bugs).
 
-This work builds upon CAF (CGO '17 by Johnson et al.).
+SCAF is customizable and can be used as a conservative memory analysis if the speculation modules are disabled.
 
-<p>If you use SCAF in a publication, we would appreciate citation to the following paper that describes SCAF: </p>
+The novelty, design, implementation, and evaluation of this work is described in the PLDI '20 paper by Apostolakis et al. titled "SCAF: A Speculation-Aware Dependence Analysis Framework" (https://dl.acm.org/doi/10.1145/3385412.3386028).
+
+To reproduce the evaluation results presented in the PLDI 2020 paper, please refer to the artifact of the paper: [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.3751586.svg)](https://doi.org/10.5281/zenodo.3751586)
+
+This work builds upon CAF (CGO '17 by Johnson et al., https://dl.acm.org/doi/10.5555/3049832.3049849).
+
+If you use SCAF in a publication, we would appreciate a citation to the PLDI '20 paper:
 
 ```
 @inproceedings{apostolakis:2020:pldi,
@@ -26,3 +32,12 @@ location = {London, UK},
 series = {PLDI 2020}
 }
 ```
+
+### Prerequisites
+
+LLVM 9.0.1
+
+### Build SCAF
+To build, run from the repository root directory: `make`
+
+Run `make clean` from the root directory to clean the repository.
