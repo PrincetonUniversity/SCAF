@@ -2,10 +2,10 @@
 
 Note that the full implementation of SCAF is not yet integrated in this repository. The speculation modules along with a few other components are missing. The memory analysis modules are included though.
 
-Disclaimer: this repository is part of a research project and it lacks industrial-level robustness in implementation (i.e., there will be bugs).
+### Disclaimer
+This repository is part of a research project and it lacks industrial-level robustness in implementation (i.e., there will be bugs).
 
-SCAF is customizable and can be used as a conservative memory analysis if the speculation modules are disabled.
-
+### Publications
 The novelty, design, implementation, and evaluation of this work is described in the PLDI '20 paper by Apostolakis et al. titled "SCAF: A Speculation-Aware Dependence Analysis Framework" (https://dl.acm.org/doi/10.1145/3385412.3386028).
 
 To reproduce the evaluation results presented in the PLDI 2020 paper, please refer to the artifact of the paper: [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.3751586.svg)](https://doi.org/10.5281/zenodo.3751586)
@@ -41,3 +41,6 @@ LLVM 9.0.1
 To build, run from the repository root directory: `make`
 
 Run `make clean` from the root directory to clean the repository.
+
+### Configuration
+SCAF is customizable and can be used as a conservative memory analysis if the speculation modules are disabled.
