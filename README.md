@@ -43,9 +43,11 @@ series = {PLDI 2020}
 LLVM 9.0.1
 
 ### Build SCAF
-To build, run from the repository root directory: `make`
+To build and install SCAF, run from the repository root directory: `make`
 
 Run `make clean` from the root directory to clean the repository.
+
+Run `make uninstall` from the root directory to uninstall SCAF.
 
 ### Configuration
 SCAF is customizable and can be used as a conservative memory analysis if the speculation modules are disabled.
