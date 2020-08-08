@@ -6,7 +6,10 @@ CXX= g++
 all: scaf-debug
 
 clean:
-		rm -rf scaf-build-debug $(SCAF_INSTALL_DIR)
+		rm -rf scaf-build-debug
+
+uninstall:
+		rm -rf $(SCAF_INSTALL_DIR)
 
 scaf-debug:
 	mkdir -p scaf-build-debug
