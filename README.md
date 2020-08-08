@@ -1,9 +1,15 @@
 ## SCAF: A Speculation-Aware Collaborative Dependence Analysis Framework
 
-Note that the full implementation of SCAF is not yet integrated in this repository. The speculation modules along with a few other components are missing. The memory analysis modules are included though.
+SCAF is an innovative dependence analysis framework that combines in a modular fashion memory analyses and (optionally) speculative assertions.
 
-### Disclaimer
-This repository is part of a research project and it lacks industrial-level robustness in implementation (i.e., there will be bugs).
+### Notice
+The full implementation of SCAF is not yet integrated in this repository. The speculation modules along with a few other components are missing. All the currectly available memory analysis modules are included though.
+
+### Users
+If you have any trouble using this framework feel free to reach out to us for help (contact sapostolakis@princeton.edu).
+
+### Contributions
+We welcome contributions from the community to improve this research-grade framework and evolve it to cater for more users.
 
 ### Publications
 The novelty, design, implementation, and evaluation of this work is described in the PLDI '20 paper by Apostolakis et al. titled "SCAF: A Speculation-Aware Dependence Analysis Framework" (https://dl.acm.org/doi/10.1145/3385412.3386028).
@@ -34,7 +40,6 @@ series = {PLDI 2020}
 ```
 
 ### Prerequisites
-
 LLVM 9.0.1
 
 ### Build SCAF
@@ -44,3 +49,6 @@ Run `make clean` from the root directory to clean the repository.
 
 ### Configuration
 SCAF is customizable and can be used as a conservative memory analysis if the speculation modules are disabled.
+
+### License
+SCAF is licensed under [MIT License](./LICENSE.TXT).
