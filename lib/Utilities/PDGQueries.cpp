@@ -91,7 +91,7 @@ uint8_t liberty::disproveLoopCarriedMemoryDep(Instruction *src,
     return disproveMemoryDep(src, dst, LoopAA::Same, LoopAA::Same, depTypes,
                              loop, aa);
 
-  // if not rechable then all reported deps are dispoved
+  // if not reachable then all reported deps are disproved
   return depTypes;
 }
 
