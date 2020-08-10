@@ -129,10 +129,10 @@ bool PureFunAA::isRecursiveProperty(const Function *fun,
     return true;
   }
 
+  StringRef fcn_name = fun->getName();
   for(StringRef knownFun : knownFunSet) {
-    StringRef fcn_name = fun->getName();
-    if(fcn_name.contains(knownFun))
-       return true;
+    if(!knownFun.empty() && fcn_name.startswith(knownFun)) {
+      return true;
   }
 
   if(fun->isDeclaration()) {
@@ -407,19 +407,10 @@ StringRef  const PureFunAA::pureFunNames[] = {
 ""
 };
 
-/* StringRef  const PureFunAA::pureFunNames[] = { */
-/* "#include \"PureFun.h\"", */
-/* "" */
-/* }; */
-
 StringRef  const PureFunAA::localFunNames[] = {
 #include "LocalFun.h"
 ""
 };
-/* StringRef  const PureFunAA::localFunNames[] = { */
-/* "#include \"LocalFun.h\"", */
-/* "" */
-/* }; */
 
 StringRef  const PureFunAA::noMemFunNames[] = {
 #include "NoMemFun.h"
