@@ -50,7 +50,7 @@ SCAF is customizable and can be used as a conservative memory analysis if the sp
 If you have any trouble using this framework feel free to reach out to us for help (contact sapostolakis@princeton.edu).
 
 ### Contributions
-We welcome contributions from the community to improve this research-grade framework and evolve it to cater for more users.
+We welcome contributions from the community to improve this framework and evolve it to cater for more users.
 
 ### License
-SCAF is licensed under [MIT License](./LICENSE.TXT).
+SCAF is licensed under the [MIT License](./LICENSE.TXT).
