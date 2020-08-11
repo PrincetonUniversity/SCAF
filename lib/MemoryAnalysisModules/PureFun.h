@@ -311,9 +311,6 @@
 
 // stdlib.h
   "atoi",
-  "calloc",
-  "malloc",
-  "free",
 
   "__isnan",
   "__mulsc3",

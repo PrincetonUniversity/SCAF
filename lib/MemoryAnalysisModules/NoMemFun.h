@@ -293,6 +293,4 @@
   "__ctype_tolower_loc",
 
 // stdlib.h
-  "calloc",
-  "malloc",
-  "free",
+  "atoi",
