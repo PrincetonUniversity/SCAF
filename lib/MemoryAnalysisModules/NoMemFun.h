@@ -69,8 +69,6 @@
   "llvm.floor.f64",
   "llvm.ceil.f32",
   "llvm.ceil.f64",
-
-// New with llvm 135637
   "llvm.lifetime.start",
   "llvm.lifetime.start.p0i8",
   "llvm.lifetime.end",
@@ -86,6 +84,8 @@
   "llvm.annotation.i64",
   "llvm.objectsize.i32",
   "llvm.objectsize.i64",
+  "llvm.prefetch",
+  "llvm.pcmarker",
 
 // llvm debug
   "llvm.dbg.value",
