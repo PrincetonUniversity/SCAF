@@ -79,10 +79,10 @@ uint8_t liberty::disproveMemoryDep(Instruction *src, Instruction *dst,
   return disprovedDeps;
 }
 
-uint8_t liberty::disproveLoopCarriedMemoryDep(Instruction *src,
-                                              Instruction *dst,
-                                              uint8_t depTypes, Loop *loop,
-                                              LoopAA *aa) {
+uint8_t liberty::disproveIntraIterationMemoryDep(Instruction *src,
+                                                 Instruction *dst,
+                                                 uint8_t depTypes, Loop *loop,
+                                                 LoopAA *aa) {
   NoControlSpeculation noctrlspec;
   noctrlspec.setLoopOfInterest(loop->getHeader());
   // check if dst is reachable from src within the same iteration of the given
@@ -95,10 +95,10 @@ uint8_t liberty::disproveLoopCarriedMemoryDep(Instruction *src,
   return depTypes;
 }
 
-uint8_t liberty::disproveIntraIterationMemoryDep(Instruction *src,
-                                                 Instruction *dst,
-                                                 uint8_t depTypes, Loop *loop,
-                                                 LoopAA *aa) {
+uint8_t liberty::disproveLoopCarriedMemoryDep(Instruction *src,
+                                              Instruction *dst,
+                                              uint8_t depTypes, Loop *loop,
+                                              LoopAA *aa) {
   // there is always a feasible path for inter-iteration deps
   // (there is a path from any node in the loop to the header
   //  and the header dominates all the nodes of the loops)
