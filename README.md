@@ -6,11 +6,11 @@ SCAF is an innovative dependence analysis framework that combines in a modular f
 The full implementation of SCAF is not yet integrated in this repository. The speculation modules along with a few other components are missing. All the currectly available memory analysis modules are included though.
 
 ### Publications
-The novelty, design, implementation, and evaluation of this work is described in the PLDI '20 paper by Apostolakis et al. titled "SCAF: A Speculation-Aware Dependence Analysis Framework" (https://dl.acm.org/doi/10.1145/3385412.3386028).
+The novelty, design, implementation, and evaluation of this work is described in the PLDI '20 paper by Apostolakis et al. titled "SCAF: A Speculation-Aware Dependence Analysis Framework" ([ACM DL](https://dl.acm.org/doi/10.1145/3385412.3386028)).
 
 To reproduce the evaluation results presented in the PLDI 2020 paper, please refer to the artifact of the paper: [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.3751586.svg)](https://doi.org/10.5281/zenodo.3751586)
 
-This work builds upon CAF (CGO '17 by Johnson et al., https://dl.acm.org/doi/10.5555/3049832.3049849).
+This work builds upon CAF (CGO '17 by Johnson et al., [ACM DL](https://dl.acm.org/doi/10.5555/3049832.3049849)).
 
 If you use SCAF in a publication, we would appreciate a citation to the PLDI '20 paper:
 
