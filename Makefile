@@ -14,6 +14,6 @@ uninstall:
 scaf-debug:
 	mkdir -p scaf-build-debug
 	cd ./scaf-build-debug && \
-	cmake -DCMAKE_INSTALL_PREFIX="$(SCAF_INSTALL_DIR)" -DCMAKE_BUILD_TYPE=Debug -DCMAKE_CXX_FLAGS="-std=c++17" -DSVF_AVAILABLE=$(SVF_AVAILABLE) ../ && \
+	cmake -DCMAKE_INSTALL_PREFIX="$(SCAF_INSTALL_DIR)" -DCMAKE_BUILD_TYPE=Debug -DLLVM_ENABLE_UNWIND_TABLES=On -DCMAKE_CXX_FLAGS="-std=c++17" -DSVF_AVAILABLE=$(SVF_AVAILABLE) ../ && \
 	make -j8 && \
 	make install
