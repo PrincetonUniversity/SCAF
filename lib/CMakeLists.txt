@@ -1,2 +1,2 @@
-add_subdirectory(AnalysisUtilities)
+add_subdirectory(Utilities)
 add_subdirectory(MemoryAnalysisModules)
