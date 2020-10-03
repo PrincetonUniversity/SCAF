@@ -5,9 +5,9 @@
 #include "llvm/IR/IntrinsicInst.h"
 #include "llvm/Analysis/TargetLibraryInfo.h"
 
-#include "AnalysisUtilities/CallSiteFactory.h"
-#include "AnalysisUtilities/GetMemOper.h"
-#include "MemoryAnalysisModules/LoopAA.h"
+#include "scaf/Utilities/CallSiteFactory.h"
+#include "scaf/Utilities/GetMemOper.h"
+#include "scaf/MemoryAnalysisModules/LoopAA.h"
 
 #include <cstdio>
 

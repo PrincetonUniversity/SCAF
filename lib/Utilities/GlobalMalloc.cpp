@@ -13,9 +13,9 @@
 #include "llvm/Support/Debug.h"
 #include "llvm/Support/raw_ostream.h"
 
-#include "MemoryAnalysisModules/FindSource.h"
-#include "AnalysisUtilities/CaptureUtil.h"
-#include "AnalysisUtilities/GlobalMalloc.h"
+#include "scaf/MemoryAnalysisModules/FindSource.h"
+#include "scaf/Utilities/CaptureUtil.h"
+#include "scaf/Utilities/GlobalMalloc.h"
 
 #include <vector>
 #include <cmath>

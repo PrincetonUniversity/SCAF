@@ -1,6 +1,6 @@
 #define DEBUG_TYPE "nocapturefcn"
 
-#include "MemoryAnalysisModules/NoCaptureFcn.h"
+#include "scaf/MemoryAnalysisModules/NoCaptureFcn.h"
 
 #include "llvm/IR/Module.h"
 #include "llvm/IR/Operator.h"
@@ -8,8 +8,8 @@
 #include "llvm/Support/Debug.h"
 #include "llvm/Support/raw_ostream.h"
 
-#include "AnalysisUtilities/FindUnderlyingObjects.h"
-#include "AnalysisUtilities/CallSiteFactory.h"
+#include "scaf/Utilities/FindUnderlyingObjects.h"
+#include "scaf/Utilities/CallSiteFactory.h"
 
 namespace liberty
 {

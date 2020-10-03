@@ -7,10 +7,10 @@
 #include "llvm/IR/CallSite.h"
 #include "llvm/Support/raw_ostream.h"
 
-#include "AnalysisUtilities/CallSiteFactory.h"
-#include "AnalysisUtilities/GetMemOper.h"
+#include "scaf/Utilities/CallSiteFactory.h"
+#include "scaf/Utilities/GetMemOper.h"
 
-#include "MemoryAnalysisModules/FindSource.h"
+#include "scaf/MemoryAnalysisModules/FindSource.h"
 
 using namespace llvm;
 

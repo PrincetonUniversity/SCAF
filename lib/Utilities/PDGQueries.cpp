@@ -1,5 +1,5 @@
-#include "AnalysisUtilities/PDGQueries.h"
-#include "AnalysisUtilities/ControlSpeculation.h"
+#include "scaf/Utilities/PDGQueries.h"
+#include "scaf/Utilities/ControlSpeculation.h"
 
 using namespace llvm;
 using namespace liberty;

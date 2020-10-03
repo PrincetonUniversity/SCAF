@@ -22,8 +22,8 @@
 #include "llvm/Analysis/ValueTracking.h"
 #include "llvm/IR/DataLayout.h"
 
-#include "MemoryAnalysisModules/CallsiteSearch.h"
-#include "MemoryAnalysisModules/QueryCacheing.h"
+#include "scaf/MemoryAnalysisModules/CallsiteSearch.h"
+#include "scaf/MemoryAnalysisModules/QueryCacheing.h"
 
 
 namespace liberty

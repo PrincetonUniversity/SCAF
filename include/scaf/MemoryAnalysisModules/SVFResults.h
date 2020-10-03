@@ -10,7 +10,7 @@
 #include "llvm/Analysis/BasicAliasAnalysis.h"
 #include "llvm/IR/Dominators.h"
 
-#include "MemoryAnalysisModules/LoopAA.h"
+#include "scaf/MemoryAnalysisModules/LoopAA.h"
 
 #include "WPA/WPAPass.h"
 

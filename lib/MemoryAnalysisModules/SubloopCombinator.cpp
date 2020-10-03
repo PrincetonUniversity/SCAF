@@ -15,7 +15,7 @@
 #define DEBUG_TYPE "subloop-combinator-aa"
 
 #include "llvm/ADT/Statistic.h"
-#include "MemoryAnalysisModules/LoopAA.h"
+#include "scaf/MemoryAnalysisModules/LoopAA.h"
 
 namespace liberty
 {

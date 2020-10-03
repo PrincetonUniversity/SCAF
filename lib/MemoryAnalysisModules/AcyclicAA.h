@@ -8,7 +8,7 @@
 #include "llvm/ADT/DenseSet.h"
 #include "llvm/Analysis/TargetLibraryInfo.h"
 
-#include "MemoryAnalysisModules/ClassicLoopAA.h"
+#include "scaf/MemoryAnalysisModules/ClassicLoopAA.h"
 
 namespace liberty {
   using namespace llvm;

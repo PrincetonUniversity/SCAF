@@ -1,11 +1,11 @@
 #define DEBUG_TYPE "ctrlspec"
 
-#include "MemoryAnalysisModules/CallsiteSearch.h"
-#include "MemoryAnalysisModules/Introspection.h"
-#include "MemoryAnalysisModules/CallsiteSearch.h"
-#include "AnalysisUtilities/ControlSpeculation.h"
-#include "AnalysisUtilities/ControlSpecIterators.h"
-#include "AnalysisUtilities/Timer.h"
+#include "scaf/MemoryAnalysisModules/CallsiteSearch.h"
+#include "scaf/MemoryAnalysisModules/Introspection.h"
+#include "scaf/MemoryAnalysisModules/CallsiteSearch.h"
+#include "scaf/Utilities/ControlSpeculation.h"
+#include "scaf/Utilities/ControlSpecIterators.h"
+#include "scaf/Utilities/Timer.h"
 
 #include "llvm/IR/IntrinsicInst.h"
 #include "llvm/ADT/Statistic.h"

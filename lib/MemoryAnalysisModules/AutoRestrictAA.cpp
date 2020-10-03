@@ -9,12 +9,12 @@
 #include "llvm/IR/InstIterator.h"
 #include "llvm/Support/raw_ostream.h"
 
-#include "MemoryAnalysisModules/ClassicLoopAA.h"
-#include "MemoryAnalysisModules/LoopAA.h"
+#include "scaf/MemoryAnalysisModules/ClassicLoopAA.h"
+#include "scaf/MemoryAnalysisModules/LoopAA.h"
 
-#include "MemoryAnalysisModules/FindSource.h"
+#include "scaf/MemoryAnalysisModules/FindSource.h"
 
-#include "AnalysisUtilities/CallSiteFactory.h"
+#include "scaf/Utilities/CallSiteFactory.h"
 
 using namespace llvm;
 using namespace liberty;

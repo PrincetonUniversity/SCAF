@@ -1,7 +1,7 @@
 #ifndef CLASSIC_LOOP_AA
 #define CLASSIC_LOOP_AA
 
-#include "MemoryAnalysisModules/LoopAA.h"
+#include "scaf/MemoryAnalysisModules/LoopAA.h"
 
 namespace liberty {
 

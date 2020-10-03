@@ -5,10 +5,10 @@
 #include "llvm/IR/GetElementPtrTypeIterator.h"
 #include "llvm/IR/InstIterator.h"
 
-#include "AnalysisUtilities/CaptureUtil.h"
-#include "AnalysisUtilities/FindAllTransUses.h"
+#include "scaf/Utilities/CaptureUtil.h"
+#include "scaf/Utilities/FindAllTransUses.h"
 
-#include "MemoryAnalysisModules/TypeSanity.h"
+#include "scaf/MemoryAnalysisModules/TypeSanity.h"
 
 using namespace llvm;
 

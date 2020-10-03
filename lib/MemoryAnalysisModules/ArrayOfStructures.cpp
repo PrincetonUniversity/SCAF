@@ -10,10 +10,10 @@
 #include "llvm/Support/Debug.h"
 #include "llvm/IR/Constants.h"
 
-#include "MemoryAnalysisModules/ClassicLoopAA.h"
-#include "MemoryAnalysisModules/NoCaptureFcn.h"
-#include "MemoryAnalysisModules/TraceData.h"
-#include "AnalysisUtilities/ModuleLoops.h"
+#include "scaf/MemoryAnalysisModules/ClassicLoopAA.h"
+#include "scaf/MemoryAnalysisModules/NoCaptureFcn.h"
+#include "scaf/MemoryAnalysisModules/TraceData.h"
+#include "scaf/Utilities/ModuleLoops.h"
 
 #include "NoEscapeFieldsAA.h"
 

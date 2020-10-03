@@ -1,5 +1,5 @@
-#include "AnalysisUtilities/InstInsertPt.h"
-#include "AnalysisUtilities/SplitEdge.h"
+#include "scaf/Utilities/InstInsertPt.h"
+#include "scaf/Utilities/SplitEdge.h"
 
 #include "llvm/IR/Instructions.h"
 #include "llvm/IR/LLVMContext.h"

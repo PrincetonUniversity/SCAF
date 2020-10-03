@@ -1,8 +1,8 @@
 #ifndef LLVM_LIBERTY_SPEC_PRIV_LOOP_DOMINATORS_H
 #define LLVM_LIBERTY_SPEC_PRIV_LOOP_DOMINATORS_H
 
-#include "MemoryAnalysisModules/LoopAA.h"
-#include "AnalysisUtilities/ControlSpeculation.h"
+#include "scaf/MemoryAnalysisModules/LoopAA.h"
+#include "scaf/Utilities/ControlSpeculation.h"
 
 #include <vector>
 

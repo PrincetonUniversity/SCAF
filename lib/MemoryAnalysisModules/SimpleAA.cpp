@@ -1,4 +1,4 @@
-#include "MemoryAnalysisModules/SimpleAA.h"
+#include "scaf/MemoryAnalysisModules/SimpleAA.h"
 
 namespace liberty
 {

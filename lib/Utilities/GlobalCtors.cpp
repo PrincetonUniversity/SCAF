@@ -6,7 +6,7 @@
 #include "llvm/IR/Module.h"
 #include "llvm/IR/Instructions.h"
 
-#include "AnalysisUtilities/GlobalCtors.h"
+#include "scaf/Utilities/GlobalCtors.h"
 
 
 namespace liberty {

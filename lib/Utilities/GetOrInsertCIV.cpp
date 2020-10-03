@@ -1,8 +1,8 @@
 //#include "llvm/Support/CFG.h"
 #include "llvm/IR/Instructions.h"
 
-#include "AnalysisUtilities/GetOrInsertCIV.h"
-#include "AnalysisUtilities/InstInsertPt.h"
+#include "scaf/Utilities/GetOrInsertCIV.h"
+#include "scaf/Utilities/InstInsertPt.h"
 
 namespace liberty
 {

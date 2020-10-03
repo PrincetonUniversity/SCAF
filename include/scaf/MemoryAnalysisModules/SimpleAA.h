@@ -1,7 +1,7 @@
 #ifndef LLVM_LIBERTY_SIMPLEAA_H
 #define LLVM_LIBERTY_SIMPLEAA_H
 
-#include "MemoryAnalysisModules/LoopAA.h"
+#include "scaf/MemoryAnalysisModules/LoopAA.h"
 namespace liberty {
 using namespace llvm;
 

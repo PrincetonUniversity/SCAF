@@ -2,9 +2,9 @@
 
 #include "llvm/ADT/Statistic.h"
 
-#include "MemoryAnalysisModules/LLVMAAResults.h"
-#include "AnalysisUtilities/GetMemOper.h"
-#include "AnalysisUtilities/CallSiteFactory.h"
+#include "scaf/MemoryAnalysisModules/LLVMAAResults.h"
+#include "scaf/Utilities/GetMemOper.h"
+#include "scaf/Utilities/CallSiteFactory.h"
 
 #include <vector>
 

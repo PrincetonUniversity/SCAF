@@ -4,7 +4,7 @@
 #include "llvm/IR/InstIterator.h"
 #include "llvm/Support/raw_os_ostream.h"
 
-#include "AnalysisUtilities/StaticID.h"
+#include "scaf/Utilities/StaticID.h"
 
 #include <iostream>
 #include <fstream>

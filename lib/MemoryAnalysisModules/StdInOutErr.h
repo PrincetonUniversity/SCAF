@@ -4,8 +4,8 @@
 #include "llvm/IR/Module.h"
 #include "llvm/Pass.h"
 
-#include "MemoryAnalysisModules/ClassicLoopAA.h"
-#include "MemoryAnalysisModules/LoopAA.h"
+#include "scaf/MemoryAnalysisModules/ClassicLoopAA.h"
+#include "scaf/MemoryAnalysisModules/LoopAA.h"
 
 namespace liberty
 {

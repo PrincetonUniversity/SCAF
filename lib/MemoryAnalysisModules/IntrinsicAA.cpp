@@ -4,7 +4,7 @@
 #include "llvm/IR/Module.h"
 #include "llvm/IR/Instructions.h"
 
-#include "MemoryAnalysisModules/ClassicLoopAA.h"
+#include "scaf/MemoryAnalysisModules/ClassicLoopAA.h"
 
 using namespace llvm;
 

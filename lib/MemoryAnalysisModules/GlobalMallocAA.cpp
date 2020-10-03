@@ -13,10 +13,10 @@
 #include "llvm/Support/Debug.h"
 #include "llvm/Support/raw_ostream.h"
 
-#include "MemoryAnalysisModules/ClassicLoopAA.h"
-#include "MemoryAnalysisModules/FindSource.h"
-#include "MemoryAnalysisModules/LoopAA.h"
-#include "AnalysisUtilities/CaptureUtil.h"
+#include "scaf/MemoryAnalysisModules/ClassicLoopAA.h"
+#include "scaf/MemoryAnalysisModules/FindSource.h"
+#include "scaf/MemoryAnalysisModules/LoopAA.h"
+#include "scaf/Utilities/CaptureUtil.h"
 
 
 using namespace llvm;

@@ -1,7 +1,7 @@
 #include "llvm/IR/Constants.h"
-#include "MemoryAnalysisModules/LoopAA.h"  // for FULL_UNIVERSAL
-#include "AnalysisUtilities/CallSiteFactory.h"
-#include "MemoryAnalysisModules/GetCallers.h"
+#include "scaf/MemoryAnalysisModules/LoopAA.h"  // for FULL_UNIVERSAL
+#include "scaf/Utilities/CallSiteFactory.h"
+#include "scaf/MemoryAnalysisModules/GetCallers.h"
 
 namespace liberty
 {

@@ -5,8 +5,8 @@
 #include "llvm/ADT/DenseSet.h"
 #include "llvm/Analysis/ValueTracking.h"
 
-#include "MemoryAnalysisModules/ClassicLoopAA.h"
-#include "MemoryAnalysisModules/LoopAA.h"
+#include "scaf/MemoryAnalysisModules/ClassicLoopAA.h"
+#include "scaf/MemoryAnalysisModules/LoopAA.h"
 
 using namespace llvm;
 

@@ -2,7 +2,7 @@
 #include "llvm/IR/Type.h"
 #include "llvm/IR/DataLayout.h"
 
-#include "AnalysisUtilities/GetSize.h"
+#include "scaf/Utilities/GetSize.h"
 
 using namespace llvm;
 

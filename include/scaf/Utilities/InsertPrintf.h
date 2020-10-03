@@ -3,7 +3,7 @@
 
 #include "llvm/IR/LLVMContext.h"
 
-#include "AnalysisUtilities/InstInsertPt.h"
+#include "scaf/Utilities/InstInsertPt.h"
 
 #include <list>
 

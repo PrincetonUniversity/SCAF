@@ -1,4 +1,4 @@
-#include "AnalysisUtilities/ComputeGEPOffset.h"
+#include "scaf/Utilities/ComputeGEPOffset.h"
 
 #include "llvm/Analysis/ValueTracking.h"
 #include "llvm/IR/GetElementPtrTypeIterator.h"

@@ -2,13 +2,13 @@
 #include "llvm/IR/IntrinsicInst.h"
 #include "llvm/IR/DataLayout.h"
 
-#include "MemoryAnalysisModules/AnalysisTimeout.h"
-#include "MemoryAnalysisModules/CallsiteSearch.h"
-#include "MemoryAnalysisModules/Introspection.h"
-#include "MemoryAnalysisModules/KillFlow.h"
-#include "MemoryAnalysisModules/PureFunAA.h"
-#include "MemoryAnalysisModules/SemiLocalFunAA.h"
-#include "AnalysisUtilities/CallSiteFactory.h"
+#include "scaf/MemoryAnalysisModules/AnalysisTimeout.h"
+#include "scaf/MemoryAnalysisModules/CallsiteSearch.h"
+#include "scaf/MemoryAnalysisModules/Introspection.h"
+#include "scaf/MemoryAnalysisModules/KillFlow.h"
+#include "scaf/MemoryAnalysisModules/PureFunAA.h"
+#include "scaf/MemoryAnalysisModules/SemiLocalFunAA.h"
+#include "scaf/Utilities/CallSiteFactory.h"
 
 namespace liberty
 {

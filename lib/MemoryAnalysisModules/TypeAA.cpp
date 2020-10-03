@@ -17,11 +17,11 @@
 #include "llvm/IR/DataLayout.h"
 #include "llvm/IR/DebugLoc.h"
 
-#include "MemoryAnalysisModules/LoopAA.h"
-#include "MemoryAnalysisModules/TypeSanity.h"
-#include "AnalysisUtilities/CallSiteFactory.h"
-#include "AnalysisUtilities/Count.h"
-#include "AnalysisUtilities/GetSize.h"
+#include "scaf/MemoryAnalysisModules/LoopAA.h"
+#include "scaf/MemoryAnalysisModules/TypeSanity.h"
+#include "scaf/Utilities/CallSiteFactory.h"
+#include "scaf/Utilities/Count.h"
+#include "scaf/Utilities/GetSize.h"
 
 
 namespace liberty

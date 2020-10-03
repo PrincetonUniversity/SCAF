@@ -6,8 +6,8 @@
 #include "llvm/ADT/DenseSet.h"
 #include "llvm/Analysis/CallGraph.h"
 
-#include "MemoryAnalysisModules/ClassicLoopAA.h"
-#include "MemoryAnalysisModules/LoopAA.h"
+#include "scaf/MemoryAnalysisModules/ClassicLoopAA.h"
+#include "scaf/MemoryAnalysisModules/LoopAA.h"
 
 #include <set>
 #include <vector>

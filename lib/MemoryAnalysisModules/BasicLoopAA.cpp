@@ -33,10 +33,10 @@
 #include "llvm/Support/ErrorHandling.h"
 #include "llvm/IR/GetElementPtrTypeIterator.h"
 
-#include "AnalysisUtilities/GetMemOper.h"
-#include "AnalysisUtilities/GetSize.h"
-#include "MemoryAnalysisModules/ClassicLoopAA.h"
-#include "MemoryAnalysisModules/LoopAA.h"
+#include "scaf/Utilities/GetMemOper.h"
+#include "scaf/Utilities/GetSize.h"
+#include "scaf/MemoryAnalysisModules/ClassicLoopAA.h"
+#include "scaf/MemoryAnalysisModules/LoopAA.h"
 
 #include <algorithm>
 using namespace llvm;

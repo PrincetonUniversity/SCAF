@@ -11,9 +11,9 @@
 #include "llvm/Support/raw_ostream.h"
 #include "llvm/Analysis/ValueTracking.h"
 
-#include "MemoryAnalysisModules/PureFunAA.h"
-#include "AnalysisUtilities/CallSiteFactory.h"
-#include "AnalysisUtilities/GetSize.h"
+#include "scaf/MemoryAnalysisModules/PureFunAA.h"
+#include "scaf/Utilities/CallSiteFactory.h"
+#include "scaf/Utilities/GetSize.h"
 
 #include "RefineCFG.h"
 

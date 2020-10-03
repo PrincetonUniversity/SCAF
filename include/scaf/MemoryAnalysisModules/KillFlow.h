@@ -8,9 +8,9 @@
 #include "llvm/IR/Module.h"
 #include "llvm/IR/DataLayout.h"
 
-#include "MemoryAnalysisModules/LoopAA.h"
-#include "AnalysisUtilities/ModuleLoops.h"
-#include "MemoryAnalysisModules/FindSource.h"
+#include "scaf/MemoryAnalysisModules/LoopAA.h"
+#include "scaf/Utilities/ModuleLoops.h"
+#include "scaf/MemoryAnalysisModules/FindSource.h"
 
 namespace liberty
 {

@@ -1,7 +1,7 @@
 #include "llvm/IR/Module.h"
 #include "llvm/Analysis/ValueTracking.h"
 
-#include "AnalysisUtilities/FindUnderlyingObjects.h"
+#include "scaf/Utilities/FindUnderlyingObjects.h"
 
 using namespace llvm;
 

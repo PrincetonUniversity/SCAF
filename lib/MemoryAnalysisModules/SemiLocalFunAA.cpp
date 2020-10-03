@@ -5,9 +5,9 @@
 #include "llvm/IR/InstIterator.h"
 #include "llvm/Support/raw_ostream.h"
 
-#include "MemoryAnalysisModules/PureFunAA.h"
-#include "MemoryAnalysisModules/SemiLocalFunAA.h"
-#include "AnalysisUtilities/GetSize.h"
+#include "scaf/MemoryAnalysisModules/PureFunAA.h"
+#include "scaf/MemoryAnalysisModules/SemiLocalFunAA.h"
+#include "scaf/Utilities/GetSize.h"
 
 
 namespace liberty {

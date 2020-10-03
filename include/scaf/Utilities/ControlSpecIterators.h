@@ -16,7 +16,7 @@
 #include "llvm/IR/Module.h"
 #include "llvm/Pass.h"
 
-#include "AnalysisUtilities/LoopDominators.h"
+#include "scaf/Utilities/LoopDominators.h"
 
 #include <set>
 

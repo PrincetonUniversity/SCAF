@@ -4,8 +4,8 @@
 #include "llvm/IR/Dominators.h"
 #include "llvm/IR/Instructions.h"
 
-#include "AnalysisUtilities/ModuleLoops.h"
-#include "AnalysisUtilities/ReachabilityUtil.h"
+#include "scaf/Utilities/ModuleLoops.h"
+#include "scaf/Utilities/ReachabilityUtil.h"
 
 #include <queue>
 #include <unordered_set>

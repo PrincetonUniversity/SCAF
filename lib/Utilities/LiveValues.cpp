@@ -7,7 +7,7 @@
 #include "llvm/IR/CFG.h"
 #include "llvm/Support/MathExtras.h"
 
-#include "AnalysisUtilities/LiveValues.h"
+#include "scaf/Utilities/LiveValues.h"
 
 namespace liberty
 {

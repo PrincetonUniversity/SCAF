@@ -6,16 +6,16 @@
 #include "llvm/Support/Debug.h"
 #include "llvm/ADT/Statistic.h"
 
-#include "MemoryAnalysisModules/AnalysisTimeout.h"
-#include "MemoryAnalysisModules/Introspection.h"
-#include "MemoryAnalysisModules/KillFlow.h"
-#include "AnalysisUtilities/CallSiteFactory.h"
-#include "AnalysisUtilities/FindUnderlyingObjects.h"
-#include "AnalysisUtilities/GepRange.h"
-#include "AnalysisUtilities/GetMemOper.h"
-#include "AnalysisUtilities/GlobalMalloc.h"
-#include "AnalysisUtilities/ModuleLoops.h"
-#include "AnalysisUtilities/ReachabilityUtil.h"
+#include "scaf/MemoryAnalysisModules/AnalysisTimeout.h"
+#include "scaf/MemoryAnalysisModules/Introspection.h"
+#include "scaf/MemoryAnalysisModules/KillFlow.h"
+#include "scaf/Utilities/CallSiteFactory.h"
+#include "scaf/Utilities/FindUnderlyingObjects.h"
+#include "scaf/Utilities/GepRange.h"
+#include "scaf/Utilities/GetMemOper.h"
+#include "scaf/Utilities/GlobalMalloc.h"
+#include "scaf/Utilities/ModuleLoops.h"
+#include "scaf/Utilities/ReachabilityUtil.h"
 
 #include <ctime>
 #include <cmath>

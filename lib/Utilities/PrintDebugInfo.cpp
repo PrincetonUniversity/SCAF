@@ -1,4 +1,4 @@
-#include "AnalysisUtilities/PrintDebugInfo.h"
+#include "scaf/Utilities/PrintDebugInfo.h"
 
 #include "llvm/IR/Instruction.h"
 #include "llvm/IR/DebugInfoMetadata.h"

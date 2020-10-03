@@ -3,8 +3,8 @@
 
 #include "llvm/Support/CommandLine.h"
 #include "llvm/IR/CallSite.h"
-#include "MemoryAnalysisModules/LoopAA.h"
-#include "MemoryAnalysisModules/ClassicLoopAA.h"
+#include "scaf/MemoryAnalysisModules/LoopAA.h"
+#include "scaf/MemoryAnalysisModules/ClassicLoopAA.h"
 
 namespace liberty
 {

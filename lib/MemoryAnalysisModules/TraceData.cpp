@@ -1,15 +1,15 @@
 #define DEBUG_TYPE "tracedata"
 
-#include "MemoryAnalysisModules/TraceData.h"
-#include "MemoryAnalysisModules/NoCaptureFcn.h"
+#include "scaf/MemoryAnalysisModules/TraceData.h"
+#include "scaf/MemoryAnalysisModules/NoCaptureFcn.h"
 
 #include "llvm/IR/Operator.h"
 #include "llvm/ADT/Statistic.h"
 #include "llvm/Support/Debug.h"
 #include "llvm/Support/raw_ostream.h"
 
-#include "AnalysisUtilities/FindUnderlyingObjects.h"
-#include "AnalysisUtilities/CallSiteFactory.h"
+#include "scaf/Utilities/FindUnderlyingObjects.h"
+#include "scaf/Utilities/CallSiteFactory.h"
 
 #include "NoEscapeFieldsAA.h"
 

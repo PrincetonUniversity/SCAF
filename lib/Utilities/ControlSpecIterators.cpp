@@ -1,7 +1,7 @@
 #define DEBUG_TYPE "ctrlspec"
 
-#include "AnalysisUtilities/ControlSpeculation.h"
-#include "AnalysisUtilities/ControlSpecIterators.h"
+#include "scaf/Utilities/ControlSpeculation.h"
+#include "scaf/Utilities/ControlSpecIterators.h"
 
 namespace liberty
 {

@@ -1,9 +1,9 @@
 #ifndef LLVM_LIBERTY_VALUE_REPLACEMENT_AA
 #define LLVM_LIBERTY_VALUE_REPLACEMENT_AA
 
-#include "MemoryAnalysisModules/LoopAA.h"
-#include "AnalysisUtilities/GetMemOper.h"
-#include "AnalysisUtilities/GetSize.h"
+#include "scaf/MemoryAnalysisModules/LoopAA.h"
+#include "scaf/Utilities/GetMemOper.h"
+#include "scaf/Utilities/GetSize.h"
 
 namespace liberty
 {

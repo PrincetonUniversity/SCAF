@@ -16,10 +16,10 @@
 #include "llvm/Support/MathExtras.h"
 #include "llvm/Support/raw_ostream.h"
 
-#include "MemoryAnalysisModules/LoopAA.h"
-#include "MemoryAnalysisModules/TypeSanity.h"
-#include "AnalysisUtilities/CallSiteFactory.h"
-#include "AnalysisUtilities/FindUnderlyingObjects.h"
+#include "scaf/MemoryAnalysisModules/LoopAA.h"
+#include "scaf/MemoryAnalysisModules/TypeSanity.h"
+#include "scaf/Utilities/CallSiteFactory.h"
+#include "scaf/Utilities/FindUnderlyingObjects.h"
 #include "AcyclicAA.h"
 #include "NoEscapeFieldsAA.h"
 

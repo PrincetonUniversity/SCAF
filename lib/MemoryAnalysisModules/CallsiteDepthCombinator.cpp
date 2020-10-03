@@ -3,13 +3,13 @@
 #include "llvm/ADT/Statistic.h"
 #include "llvm/Support/Debug.h"
 
-#include "MemoryAnalysisModules/AnalysisTimeout.h"
-#include "MemoryAnalysisModules/CallsiteDepthCombinator.h"
-#include "MemoryAnalysisModules/Introspection.h"
-#include "MemoryAnalysisModules/KillFlow.h"
-#include "MemoryAnalysisModules/PureFunAA.h"
-#include "MemoryAnalysisModules/SemiLocalFunAA.h"
-#include "AnalysisUtilities/CallSiteFactory.h"
+#include "scaf/MemoryAnalysisModules/AnalysisTimeout.h"
+#include "scaf/MemoryAnalysisModules/CallsiteDepthCombinator.h"
+#include "scaf/MemoryAnalysisModules/Introspection.h"
+#include "scaf/MemoryAnalysisModules/KillFlow.h"
+#include "scaf/MemoryAnalysisModules/PureFunAA.h"
+#include "scaf/MemoryAnalysisModules/SemiLocalFunAA.h"
+#include "scaf/Utilities/CallSiteFactory.h"
 
 #include <ctime>
 

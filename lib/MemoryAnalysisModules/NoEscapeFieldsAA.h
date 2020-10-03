@@ -7,7 +7,7 @@
 #include "llvm/ADT/BitVector.h"
 #include "llvm/ADT/DenseSet.h"
 
-#include "MemoryAnalysisModules/ClassicLoopAA.h"
+#include "scaf/MemoryAnalysisModules/ClassicLoopAA.h"
 #include <set>
 
 namespace liberty {

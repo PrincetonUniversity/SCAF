@@ -11,11 +11,11 @@
 #include "llvm/Support/Debug.h"
 #include "llvm/IR/InstIterator.h"
 
-#include "MemoryAnalysisModules/ClassicLoopAA.h"
-#include "MemoryAnalysisModules/FindSource.h"
-#include "MemoryAnalysisModules/TypeSanity.h"
-#include "AnalysisUtilities/CallSiteFactory.h"
-#include "AnalysisUtilities/CaptureUtil.h"
+#include "scaf/MemoryAnalysisModules/ClassicLoopAA.h"
+#include "scaf/MemoryAnalysisModules/FindSource.h"
+#include "scaf/MemoryAnalysisModules/TypeSanity.h"
+#include "scaf/Utilities/CallSiteFactory.h"
+#include "scaf/Utilities/CaptureUtil.h"
 
 #include "NoEscapeFieldsAA.h"
 

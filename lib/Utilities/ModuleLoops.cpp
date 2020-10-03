@@ -4,7 +4,7 @@
 #include "llvm/Support/raw_ostream.h"
 #include "llvm/IR/DataLayout.h"
 
-#include "AnalysisUtilities/ModuleLoops.h"
+#include "scaf/Utilities/ModuleLoops.h"
 
 namespace liberty
 {

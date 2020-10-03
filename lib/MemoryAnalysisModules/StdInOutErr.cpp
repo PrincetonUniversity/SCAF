@@ -8,8 +8,8 @@
 #include "llvm/Support/raw_ostream.h"
 
 #include "StdInOutErr.h"
-#include "MemoryAnalysisModules/Introspection.h"
-#include "AnalysisUtilities/FindUnderlyingObjects.h"
+#include "scaf/MemoryAnalysisModules/Introspection.h"
+#include "scaf/Utilities/FindUnderlyingObjects.h"
 
 namespace liberty
 {

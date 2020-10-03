@@ -4,8 +4,8 @@
 // Defines several types which are used
 // as hash-table keys for various query types.
 
-#include "MemoryAnalysisModules/LoopAA.h"
-#include "MemoryAnalysisModules/ClassicLoopAA.h"
+#include "scaf/MemoryAnalysisModules/LoopAA.h"
+#include "scaf/MemoryAnalysisModules/ClassicLoopAA.h"
 
 namespace liberty
 {

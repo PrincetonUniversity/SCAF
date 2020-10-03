@@ -3,7 +3,7 @@
 #include "llvm/Support/raw_ostream.h"
 #include "llvm/Support/CommandLine.h"
 
-#include "MemoryAnalysisModules/Introspection.h"
+#include "scaf/MemoryAnalysisModules/Introspection.h"
 
 namespace liberty
 {
