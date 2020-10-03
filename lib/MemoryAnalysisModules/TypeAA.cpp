@@ -19,9 +19,9 @@
 
 #include "MemoryAnalysisModules/LoopAA.h"
 #include "MemoryAnalysisModules/TypeSanity.h"
-#include "Utilities/CallSiteFactory.h"
-#include "Utilities/Count.h"
-#include "Utilities/GetSize.h"
+#include "AnalysisUtilities/CallSiteFactory.h"
+#include "AnalysisUtilities/Count.h"
+#include "AnalysisUtilities/GetSize.h"
 
 
 namespace liberty

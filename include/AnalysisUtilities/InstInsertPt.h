@@ -1,7 +1,7 @@
 #ifndef INST_INSERTION_POINT_H
 #define INST_INSERTION_POINT_H
 
-/* Utilities/InstInsertPt.h
+/* AnalysisUtilities/InstInsertPt.h
  *
  * Defines class InstInsertPt, which
  * is effectively a /better/ output iterator

@@ -9,7 +9,7 @@
 #include "MemoryAnalysisModules/KillFlow.h"
 #include "MemoryAnalysisModules/PureFunAA.h"
 #include "MemoryAnalysisModules/SemiLocalFunAA.h"
-#include "Utilities/CallSiteFactory.h"
+#include "AnalysisUtilities/CallSiteFactory.h"
 
 #include <ctime>
 

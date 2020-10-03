@@ -1,5 +1,5 @@
-#include "Utilities/PDGQueries.h"
-#include "Utilities/ControlSpeculation.h"
+#include "AnalysisUtilities/PDGQueries.h"
+#include "AnalysisUtilities/ControlSpeculation.h"
 
 using namespace llvm;
 using namespace liberty;

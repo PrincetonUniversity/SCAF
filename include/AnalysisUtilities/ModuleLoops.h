@@ -10,7 +10,7 @@
 #include "llvm/Analysis/TargetLibraryInfo.h"
 #include "llvm/IR/Module.h"
 
-#include "Utilities/GimmeLoops.h"
+#include "AnalysisUtilities/GimmeLoops.h"
 
 #include <map>
 

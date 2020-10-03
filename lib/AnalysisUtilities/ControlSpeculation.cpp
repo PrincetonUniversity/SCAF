@@ -3,9 +3,9 @@
 #include "MemoryAnalysisModules/CallsiteSearch.h"
 #include "MemoryAnalysisModules/Introspection.h"
 #include "MemoryAnalysisModules/CallsiteSearch.h"
-#include "Utilities/ControlSpeculation.h"
-#include "Utilities/ControlSpecIterators.h"
-#include "Utilities/Timer.h"
+#include "AnalysisUtilities/ControlSpeculation.h"
+#include "AnalysisUtilities/ControlSpecIterators.h"
+#include "AnalysisUtilities/Timer.h"
 
 #include "llvm/IR/IntrinsicInst.h"
 #include "llvm/ADT/Statistic.h"

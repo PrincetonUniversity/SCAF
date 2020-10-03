@@ -1,8 +1,8 @@
 #define DEBUG_TYPE "loop-dominators"
 
-#include "Utilities/ControlSpeculation.h"
-#include "Utilities/ControlSpecIterators.h"
-#include "Utilities/LoopDominators.h"
+#include "AnalysisUtilities/ControlSpeculation.h"
+#include "AnalysisUtilities/ControlSpecIterators.h"
+#include "AnalysisUtilities/LoopDominators.h"
 
 namespace liberty
 {

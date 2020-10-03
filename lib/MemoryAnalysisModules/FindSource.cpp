@@ -7,8 +7,8 @@
 #include "llvm/IR/CallSite.h"
 #include "llvm/Support/raw_ostream.h"
 
-#include "Utilities/CallSiteFactory.h"
-#include "Utilities/GetMemOper.h"
+#include "AnalysisUtilities/CallSiteFactory.h"
+#include "AnalysisUtilities/GetMemOper.h"
 
 #include "MemoryAnalysisModules/FindSource.h"
 

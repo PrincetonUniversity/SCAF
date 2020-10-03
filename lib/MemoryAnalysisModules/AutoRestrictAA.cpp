@@ -14,7 +14,7 @@
 
 #include "MemoryAnalysisModules/FindSource.h"
 
-#include "Utilities/CallSiteFactory.h"
+#include "AnalysisUtilities/CallSiteFactory.h"
 
 using namespace llvm;
 using namespace liberty;

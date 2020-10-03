@@ -12,8 +12,8 @@
 #include "llvm/Analysis/ValueTracking.h"
 
 #include "MemoryAnalysisModules/PureFunAA.h"
-#include "Utilities/CallSiteFactory.h"
-#include "Utilities/GetSize.h"
+#include "AnalysisUtilities/CallSiteFactory.h"
+#include "AnalysisUtilities/GetSize.h"
 
 #include "RefineCFG.h"
 

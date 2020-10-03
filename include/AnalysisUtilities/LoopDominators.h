@@ -2,7 +2,7 @@
 #define LLVM_LIBERTY_SPEC_PRIV_LOOP_DOMINATORS_H
 
 #include "MemoryAnalysisModules/LoopAA.h"
-#include "Utilities/ControlSpeculation.h"
+#include "AnalysisUtilities/ControlSpeculation.h"
 
 #include <vector>
 

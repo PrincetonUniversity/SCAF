@@ -10,7 +10,7 @@
 #include "llvm/Analysis/TargetLibraryInfo.h"
 #include "llvm/IR/LegacyPassManagers.h"
 
-#include "Utilities/GimmeLoops.h"
+#include "AnalysisUtilities/GimmeLoops.h"
 
 namespace liberty
 {

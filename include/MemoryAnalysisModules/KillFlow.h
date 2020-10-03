@@ -9,7 +9,7 @@
 #include "llvm/IR/DataLayout.h"
 
 #include "MemoryAnalysisModules/LoopAA.h"
-#include "Utilities/ModuleLoops.h"
+#include "AnalysisUtilities/ModuleLoops.h"
 #include "MemoryAnalysisModules/FindSource.h"
 
 namespace liberty

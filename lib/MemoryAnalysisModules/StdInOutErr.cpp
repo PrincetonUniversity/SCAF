@@ -9,7 +9,7 @@
 
 #include "StdInOutErr.h"
 #include "MemoryAnalysisModules/Introspection.h"
-#include "Utilities/FindUnderlyingObjects.h"
+#include "AnalysisUtilities/FindUnderlyingObjects.h"
 
 namespace liberty
 {

@@ -10,8 +10,8 @@
 #include "llvm/Support/Debug.h"
 #include "llvm/Support/raw_ostream.h"
 
-#include "Utilities/CallSiteFactory.h"
-#include "Utilities/CaptureUtil.h"
+#include "AnalysisUtilities/CallSiteFactory.h"
+#include "AnalysisUtilities/CaptureUtil.h"
 
 #include <set>
 

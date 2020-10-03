@@ -3,7 +3,7 @@
 
 #include "llvm/IR/Instructions.h"
 
-#include "Utilities/ModuleLoops.h"
+#include "AnalysisUtilities/ModuleLoops.h"
 
 #include <vector>
 #include <unordered_map>

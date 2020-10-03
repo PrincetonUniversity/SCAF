@@ -14,8 +14,8 @@
 #include "MemoryAnalysisModules/ClassicLoopAA.h"
 #include "MemoryAnalysisModules/FindSource.h"
 #include "MemoryAnalysisModules/TypeSanity.h"
-#include "Utilities/CallSiteFactory.h"
-#include "Utilities/CaptureUtil.h"
+#include "AnalysisUtilities/CallSiteFactory.h"
+#include "AnalysisUtilities/CaptureUtil.h"
 
 #include "NoEscapeFieldsAA.h"
 

@@ -33,8 +33,8 @@
 #include "llvm/Support/ErrorHandling.h"
 #include "llvm/IR/GetElementPtrTypeIterator.h"
 
-#include "Utilities/GetMemOper.h"
-#include "Utilities/GetSize.h"
+#include "AnalysisUtilities/GetMemOper.h"
+#include "AnalysisUtilities/GetSize.h"
 #include "MemoryAnalysisModules/ClassicLoopAA.h"
 #include "MemoryAnalysisModules/LoopAA.h"
 

@@ -13,7 +13,7 @@
 #include "MemoryAnalysisModules/ClassicLoopAA.h"
 #include "MemoryAnalysisModules/NoCaptureFcn.h"
 #include "MemoryAnalysisModules/TraceData.h"
-#include "Utilities/ModuleLoops.h"
+#include "AnalysisUtilities/ModuleLoops.h"
 
 #include "NoEscapeFieldsAA.h"
 

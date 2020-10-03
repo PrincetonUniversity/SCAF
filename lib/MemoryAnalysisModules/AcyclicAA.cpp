@@ -18,8 +18,8 @@
 
 #include "MemoryAnalysisModules/LoopAA.h"
 #include "MemoryAnalysisModules/TypeSanity.h"
-#include "Utilities/CallSiteFactory.h"
-#include "Utilities/FindUnderlyingObjects.h"
+#include "AnalysisUtilities/CallSiteFactory.h"
+#include "AnalysisUtilities/FindUnderlyingObjects.h"
 #include "AcyclicAA.h"
 #include "NoEscapeFieldsAA.h"
 

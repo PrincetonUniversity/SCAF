@@ -7,7 +7,7 @@
 
 #include "MemoryAnalysisModules/PureFunAA.h"
 #include "MemoryAnalysisModules/SemiLocalFunAA.h"
-#include "Utilities/GetSize.h"
+#include "AnalysisUtilities/GetSize.h"
 
 
 namespace liberty {

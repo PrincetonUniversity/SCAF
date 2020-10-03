@@ -16,7 +16,7 @@
 #include "MemoryAnalysisModules/ClassicLoopAA.h"
 #include "MemoryAnalysisModules/FindSource.h"
 #include "MemoryAnalysisModules/LoopAA.h"
-#include "Utilities/CaptureUtil.h"
+#include "AnalysisUtilities/CaptureUtil.h"
 
 
 using namespace llvm;

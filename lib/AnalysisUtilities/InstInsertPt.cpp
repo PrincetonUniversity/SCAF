@@ -11,7 +11,7 @@
 #include "llvm/Support/Debug.h"
 #include "llvm/Support/raw_ostream.h"
 
-#include "Utilities/InstInsertPt.h"
+#include "AnalysisUtilities/InstInsertPt.h"
 
 namespace liberty {
 

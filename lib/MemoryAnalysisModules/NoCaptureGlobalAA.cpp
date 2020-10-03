@@ -9,8 +9,8 @@
 #include "MemoryAnalysisModules/ClassicLoopAA.h"
 #include "MemoryAnalysisModules/FindSource.h"
 #include "MemoryAnalysisModules/LoopAA.h"
-#include "Utilities/CaptureUtil.h"
-#include "Utilities/FindUnderlyingObjects.h"
+#include "AnalysisUtilities/CaptureUtil.h"
+#include "AnalysisUtilities/FindUnderlyingObjects.h"
 
 #include "MemoryAnalysisModules/Introspection.h"
 

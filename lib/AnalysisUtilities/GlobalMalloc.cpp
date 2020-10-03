@@ -14,8 +14,8 @@
 #include "llvm/Support/raw_ostream.h"
 
 #include "MemoryAnalysisModules/FindSource.h"
-#include "Utilities/CaptureUtil.h"
-#include "Utilities/GlobalMalloc.h"
+#include "AnalysisUtilities/CaptureUtil.h"
+#include "AnalysisUtilities/GlobalMalloc.h"
 
 #include <vector>
 #include <cmath>

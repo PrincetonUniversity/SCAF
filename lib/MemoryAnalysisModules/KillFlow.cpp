@@ -9,13 +9,13 @@
 #include "MemoryAnalysisModules/AnalysisTimeout.h"
 #include "MemoryAnalysisModules/Introspection.h"
 #include "MemoryAnalysisModules/KillFlow.h"
-#include "Utilities/CallSiteFactory.h"
-#include "Utilities/FindUnderlyingObjects.h"
-#include "Utilities/GepRange.h"
-#include "Utilities/GetMemOper.h"
-#include "Utilities/GlobalMalloc.h"
-#include "Utilities/ModuleLoops.h"
-#include "Utilities/ReachabilityUtil.h"
+#include "AnalysisUtilities/CallSiteFactory.h"
+#include "AnalysisUtilities/FindUnderlyingObjects.h"
+#include "AnalysisUtilities/GepRange.h"
+#include "AnalysisUtilities/GetMemOper.h"
+#include "AnalysisUtilities/GlobalMalloc.h"
+#include "AnalysisUtilities/ModuleLoops.h"
+#include "AnalysisUtilities/ReachabilityUtil.h"
 
 #include <ctime>
 #include <cmath>

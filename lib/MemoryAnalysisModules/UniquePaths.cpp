@@ -7,9 +7,9 @@
 #include "MemoryAnalysisModules/Introspection.h"
 #include "MemoryAnalysisModules/LoopAA.h"
 #include "MemoryAnalysisModules/QueryCacheing.h"
-#include "Utilities/CallSiteFactory.h"
-#include "Utilities/CaptureUtil.h"
-#include "Utilities/FindUnderlyingObjects.h"
+#include "AnalysisUtilities/CallSiteFactory.h"
+#include "AnalysisUtilities/CaptureUtil.h"
+#include "AnalysisUtilities/FindUnderlyingObjects.h"
 
 #include "llvm/ADT/DenseMap.h"
 #include "llvm/ADT/FoldingSet.h"

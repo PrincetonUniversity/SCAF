@@ -1,5 +1,5 @@
-#include "Utilities/InstInsertPt.h"
-#include "Utilities/SplitEdge.h"
+#include "AnalysisUtilities/InstInsertPt.h"
+#include "AnalysisUtilities/SplitEdge.h"
 
 #include "llvm/IR/Instructions.h"
 #include "llvm/IR/LLVMContext.h"

@@ -9,8 +9,8 @@
 
 #include "MemoryAnalysisModules/ClassicLoopAA.h"
 #include "MemoryAnalysisModules/LoopAA.h"
-#include "Utilities/CaptureUtil.h"
-#include "Utilities/FindAllTransUses.h"
+#include "AnalysisUtilities/CaptureUtil.h"
+#include "AnalysisUtilities/FindAllTransUses.h"
 
 using namespace llvm;
 

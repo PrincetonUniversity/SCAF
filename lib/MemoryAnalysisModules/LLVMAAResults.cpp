@@ -3,8 +3,8 @@
 #include "llvm/ADT/Statistic.h"
 
 #include "MemoryAnalysisModules/LLVMAAResults.h"
-#include "Utilities/GetMemOper.h"
-#include "Utilities/CallSiteFactory.h"
+#include "AnalysisUtilities/GetMemOper.h"
+#include "AnalysisUtilities/CallSiteFactory.h"
 
 #include <vector>
 

@@ -5,8 +5,8 @@
 #include "llvm/ADT/Statistic.h"
 
 #include "MemoryAnalysisModules/SVFResults.h"
-#include "Utilities/CallSiteFactory.h"
-#include "Utilities/GetMemOper.h"
+#include "AnalysisUtilities/CallSiteFactory.h"
+#include "AnalysisUtilities/GetMemOper.h"
 
 namespace liberty {
 using namespace llvm;

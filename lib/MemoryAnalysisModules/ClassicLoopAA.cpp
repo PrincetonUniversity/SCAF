@@ -1,8 +1,8 @@
 #include "MemoryAnalysisModules/ClassicLoopAA.h"
-#include "Utilities/CallSiteFactory.h"
-#include "Utilities/GetMemOper.h"
-#include "Utilities/GetSize.h"
-#include "Utilities/IsVolatile.h"
+#include "AnalysisUtilities/CallSiteFactory.h"
+#include "AnalysisUtilities/GetMemOper.h"
+#include "AnalysisUtilities/GetSize.h"
+#include "AnalysisUtilities/IsVolatile.h"
 
 using namespace llvm;
 using namespace liberty;

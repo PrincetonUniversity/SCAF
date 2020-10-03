@@ -5,8 +5,8 @@
 #include "llvm/IR/IntrinsicInst.h"
 #include "llvm/Analysis/TargetLibraryInfo.h"
 
-#include "Utilities/CallSiteFactory.h"
-#include "Utilities/GetMemOper.h"
+#include "AnalysisUtilities/CallSiteFactory.h"
+#include "AnalysisUtilities/GetMemOper.h"
 #include "MemoryAnalysisModules/LoopAA.h"
 
 #include <cstdio>

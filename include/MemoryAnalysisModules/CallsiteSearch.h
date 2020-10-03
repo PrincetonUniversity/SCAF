@@ -26,7 +26,7 @@
 #include "llvm/IR/CallSite.h"
 #include "llvm/IR/DataLayout.h"
 
-#include "Utilities/FindUnderlyingObjects.h"
+#include "AnalysisUtilities/FindUnderlyingObjects.h"
 
 #include "Assumptions.h"
 

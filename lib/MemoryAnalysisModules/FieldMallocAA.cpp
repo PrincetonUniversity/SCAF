@@ -5,8 +5,8 @@
 #include "llvm/IR/GetElementPtrTypeIterator.h"
 #include "llvm/IR/InstIterator.h"
 
-#include "Utilities/CaptureUtil.h"
-#include "Utilities/FindAllTransUses.h"
+#include "AnalysisUtilities/CaptureUtil.h"
+#include "AnalysisUtilities/FindAllTransUses.h"
 
 #include "MemoryAnalysisModules/TypeSanity.h"
 

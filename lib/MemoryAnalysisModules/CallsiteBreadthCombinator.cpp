@@ -6,8 +6,8 @@
 #include "MemoryAnalysisModules/KillFlow.h"
 #include "MemoryAnalysisModules/LoopAA.h"
 #include "MemoryAnalysisModules/QueryCacheing.h"
-#include "Utilities/CallSiteFactory.h"
-#include "Utilities/CaptureUtil.h"
+#include "AnalysisUtilities/CallSiteFactory.h"
+#include "AnalysisUtilities/CaptureUtil.h"
 
 #include "llvm/ADT/DenseMap.h"
 #include "llvm/ADT/Statistic.h"

@@ -1,6 +1,6 @@
 #include "llvm/IR/User.h"
 
-#include "Utilities/FindAllTransUses.h"
+#include "AnalysisUtilities/FindAllTransUses.h"
 
 using namespace llvm;
 

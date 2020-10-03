@@ -16,7 +16,7 @@
 #include "llvm/IR/Module.h"
 #include "llvm/Pass.h"
 
-#include "Utilities/LoopDominators.h"
+#include "AnalysisUtilities/LoopDominators.h"
 
 #include <set>
 

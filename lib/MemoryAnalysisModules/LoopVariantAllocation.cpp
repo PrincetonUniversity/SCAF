@@ -9,7 +9,7 @@
 #include "llvm/IR/InstIterator.h"
 #include "llvm/Support/raw_ostream.h"
 
-#include "Utilities/CallSiteFactory.h"
+#include "AnalysisUtilities/CallSiteFactory.h"
 
 #include "LoopVariantAllocation.h"
 
