@@ -1,7 +1,7 @@
 #include "llvm/Analysis/ScalarEvolutionExpressions.h"
 #include "llvm/IR/Instructions.h"
 
-#include "liberty/Analysis/FindSource.h"
+#include "scaf/MemoryAnalysisModules/FindSource.h"
 #include "scaf/Utilities/GepRange.h"
 #include "scaf/Utilities/GlobalMalloc.h"
 
