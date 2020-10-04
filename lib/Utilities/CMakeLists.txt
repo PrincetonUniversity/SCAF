@@ -5,7 +5,7 @@ file(GLOB SRCS
 # Compilation flags
 execute_process(COMMAND which tred OUTPUT_VARIABLE TRED_BINARY OUTPUT_STRIP_TRAILING_WHITESPACE)
 set_source_files_properties(${SRCS} PROPERTIES COMPILE_FLAGS "-std=c++17 -fPIC -DPATH_TO_TRED=\\\"${TRED_BINARY}\\\"")
-set(PassName "scafUtilities")
+set(PassName "SCAFUtilities")
 
 list(APPEND CMAKE_MODULE_PATH "${LLVM_CMAKE_DIR}")
 #include(HandleLLVMOptions)
