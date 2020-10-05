@@ -5,8 +5,8 @@
 
 #include "scaf/Utilities/ModuleLoops.h"
 
-#include <vector>
 #include <unordered_map>
+#include <vector>
 
 using namespace llvm;
 

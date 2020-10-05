@@ -8,21 +8,18 @@
 
 #include "llvm/Analysis/LoopInfo.h"
 
-namespace liberty
-{
-namespace SpecPriv
-{
+namespace liberty {
+namespace SpecPriv {
 using namespace llvm;
 
 // Compute the dominators of a single iteration
 // of a loop from the CFG in conjunction with control
 // speculation information.
-struct LoopDom
-{
-  typedef std::vector< ControlSpeculation::LoopBlock > BBList;
+struct LoopDom {
+  typedef std::vector<ControlSpeculation::LoopBlock> BBList;
 
-  LoopDom(ControlSpeculation &cs, Loop *l) : ctrlspec(cs), loop(l), dt(), idt()
-  {
+  LoopDom(ControlSpeculation &cs, Loop *l)
+      : ctrlspec(cs), loop(l), dt(), idt() {
     computeDT();
     computeIDT();
   }
@@ -30,7 +27,8 @@ struct LoopDom
   typedef BBList::const_iterator dt_iterator;
 
   // Does A dominate B ?
-  bool dom(ControlSpeculation::LoopBlock A, ControlSpeculation::LoopBlock B) const;
+  bool dom(ControlSpeculation::LoopBlock A,
+           ControlSpeculation::LoopBlock B) const;
 
   // Inspect dominance relation
   /// Enumerate those nodes which dominate bb.
@@ -39,7 +37,6 @@ struct LoopDom
 
   // Get the immediate dominator for a block
   ControlSpeculation::LoopBlock idom(ControlSpeculation::LoopBlock bb) const;
-
 
   const Loop *getLoop() const { return loop; }
   ControlSpeculation &getControlSpeculation() const { return ctrlspec; }
@@ -54,11 +51,12 @@ private:
   // For every basic block bb, dt[bb] represents the
   // nodes that dominate bb.
   // Invariant: forall i. pd[i] is sorted ascending by pointer address.
-  typedef std::map< ControlSpeculation::LoopBlock, BBList> AdjList;
+  typedef std::map<ControlSpeculation::LoopBlock, BBList> AdjList;
   AdjList dt;
 
   // Immediate dominators.
-  typedef std::map< ControlSpeculation::LoopBlock, ControlSpeculation::LoopBlock > BB2BB;
+  typedef std::map<ControlSpeculation::LoopBlock, ControlSpeculation::LoopBlock>
+      BB2BB;
   BB2BB idt;
 
   // Compute the Post-Dominators of the control flow graph
@@ -69,19 +67,17 @@ private:
   void computeIDT();
 
   // acc := INTERSECT PD[i] for all i in predecessors(bb)
-  void intersectDTPredecessors( ControlSpeculation::LoopBlock, BBList &acc);
+  void intersectDTPredecessors(ControlSpeculation::LoopBlock, BBList &acc);
 };
-
 
 // Compute the post-dominators of a single iteration
 // of a loop from the CFG in conjunction with control
 // speculation information.
-struct LoopPostDom
-{
-  typedef std::vector< ControlSpeculation::LoopBlock > BBList;
+struct LoopPostDom {
+  typedef std::vector<ControlSpeculation::LoopBlock> BBList;
 
-  LoopPostDom(ControlSpeculation &cs, Loop *l) : ctrlspec(cs), loop(l), pd(), pdf(), ipd()
-  {
+  LoopPostDom(ControlSpeculation &cs, Loop *l)
+      : ctrlspec(cs), loop(l), pd(), pdf(), ipd() {
     computePD();
     computeIPD();
     computePDF();
@@ -94,7 +90,8 @@ struct LoopPostDom
   typedef BBList::const_iterator pdf_iterator;
 
   // Does A post-dominate B ?
-  bool pdom(ControlSpeculation::LoopBlock A, ControlSpeculation::LoopBlock B) const;
+  bool pdom(ControlSpeculation::LoopBlock A,
+            ControlSpeculation::LoopBlock B) const;
 
   /// Enumerate those nodes which post-dominate bb.
   pd_iterator pd_begin(ControlSpeculation::LoopBlock bb) const;
@@ -136,7 +133,8 @@ private:
   AdjList pdf;
 
   // Immediate dominators.
-  typedef std::map< ControlSpeculation::LoopBlock, ControlSpeculation::LoopBlock> BB2BB;
+  typedef std::map<ControlSpeculation::LoopBlock, ControlSpeculation::LoopBlock>
+      BB2BB;
   BB2BB ipd;
 
   // Compute the Post-Dominators of the control flow graph
@@ -145,16 +143,16 @@ private:
   // exit node.
   void computePD();
   void computeIPD();
-  void computePDF( ControlSpeculation::LoopBlock lb );
+  void computePDF(ControlSpeculation::LoopBlock lb);
   void computePDF();
 
   // acc := INTERSECT PD[i] for all i in successors(bb)
-  void intersectPDSuccessors( ControlSpeculation::LoopBlock lb, BBList &acc);
+  void intersectPDSuccessors(ControlSpeculation::LoopBlock lb, BBList &acc);
 
   void print(raw_ostream &fout, const AdjList &rel, StringRef desc) const;
 };
 
-}
-}
+} // namespace SpecPriv
+} // namespace liberty
 #endif
 

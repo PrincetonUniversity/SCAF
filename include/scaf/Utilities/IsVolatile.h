@@ -4,7 +4,7 @@
 #include "llvm/IR/Instructions.h"
 
 namespace liberty {
-  bool isVolatile(const llvm::Instruction *inst);
+bool isVolatile(const llvm::Instruction *inst);
 }
 
 #endif /* IS_VOLATILE_H */

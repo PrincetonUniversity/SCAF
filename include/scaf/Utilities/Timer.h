@@ -16,36 +16,25 @@
 
 #ifndef LONG_TIME
 /// Make a big deal about tasks which take longer than this many seconds
-#define LONG_TIME   (0.10)
+#define LONG_TIME (0.10)
 #endif
 
-#define TIME(name, ...)                             \
-  do                                                \
-  {                                                 \
-    struct timeval start, stop;                     \
-    LLVM_DEBUG(                                          \
-      errs() << "Starting task " << name << ".\n";  \
-      gettimeofday(&start,0);                       \
-    );                                              \
-    __VA_ARGS__;                                    \
-    LLVM_DEBUG(                                          \
-      gettimeofday(&stop,0);                        \
-      double latency = (stop.tv_sec - start.tv_sec) \
-           + 1.e-6 * (stop.tv_usec - start.tv_usec);\
-      static double sum = 0.0;                      \
-      static int num = 0;                           \
-      sum += latency;                               \
-      num ++;                                       \
-      if( latency > 1.0 )                           \
-        errs() << "*******************************" \
-                  "*******************************" \
-                  "*******************************";\
-      errs() << "Task " << name                     \
-             << " completed in " << latency         \
-             << " seconds; average is "             \
-             << (sum/num) << " seconds.\n";         \
-    );                                              \
-  } while(0)                                        \
-
+#define TIME(name, ...)                                                        \
+  do {                                                                         \
+    struct timeval start, stop;                                                \
+    LLVM_DEBUG(errs() << "Starting task " << name << ".\n";                    \
+               gettimeofday(&start, 0););                                      \
+    __VA_ARGS__;                                                               \
+    LLVM_DEBUG(                                                                \
+        gettimeofday(&stop, 0);                                                \
+        double latency = (stop.tv_sec - start.tv_sec) +                        \
+                         1.e-6 * (stop.tv_usec - start.tv_usec);               \
+        static double sum = 0.0; static int num = 0; sum += latency; num++;    \
+        if (latency > 1.0) errs() << "*******************************"         \
+                                     "*******************************"         \
+                                     "*******************************";        \
+        errs() << "Task " << name << " completed in " << latency               \
+               << " seconds; average is " << (sum / num) << " seconds.\n";);   \
+  } while (0)
 
 #endif // LLVM_LIBERTY_TIMER_H

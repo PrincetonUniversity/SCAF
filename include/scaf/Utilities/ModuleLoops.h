@@ -1,46 +1,42 @@
 #ifndef LLVM_LIBERTY_MODULE_LOOPS_H
 #define LLVM_LIBERTY_MODULE_LOOPS_H
 
-#include "llvm/Pass.h"
-#include "llvm/IR/DataLayout.h"
-#include "llvm/IR/Dominators.h"
-#include "llvm/Analysis/PostDominators.h"
 #include "llvm/Analysis/LoopInfo.h"
+#include "llvm/Analysis/PostDominators.h"
 #include "llvm/Analysis/ScalarEvolution.h"
 #include "llvm/Analysis/TargetLibraryInfo.h"
+#include "llvm/IR/DataLayout.h"
+#include "llvm/IR/Dominators.h"
 #include "llvm/IR/Module.h"
+#include "llvm/Pass.h"
 
 #include "scaf/Utilities/GimmeLoops.h"
 
 #include <map>
 
-namespace llvm
-{
-  class DominatorTree;
-  class PostDominatorTree;
-  class LoopInfo;
-  class ScalarEvolution;
-}
+namespace llvm {
+class DominatorTree;
+class PostDominatorTree;
+class LoopInfo;
+class ScalarEvolution;
+} // namespace llvm
 
-namespace liberty
-{
+namespace liberty {
 using namespace llvm;
 
-struct ModuleLoops : public ModulePass
-{
+struct ModuleLoops : public ModulePass {
   static char ID;
   ModuleLoops() : ModulePass(ID) {}
 
-  void getAnalysisUsage(AnalysisUsage &au) const
-  {
-    au.addRequired< TargetLibraryInfoWrapperPass>();
+  void getAnalysisUsage(AnalysisUsage &au) const {
+    au.addRequired<TargetLibraryInfoWrapperPass>();
     au.setPreservesAll();
   }
 
-  bool runOnModule(Module &mod)
-  {
+  bool runOnModule(Module &mod) {
     td = &mod.getDataLayout();
-    TargetLibraryInfoWrapperPass *tliWrap = &getAnalysis< TargetLibraryInfoWrapperPass>();
+    TargetLibraryInfoWrapperPass *tliWrap =
+        &getAnalysis<TargetLibraryInfoWrapperPass>();
     tli = &tliWrap->getTLI();
     return false;
   }
@@ -48,7 +44,7 @@ struct ModuleLoops : public ModulePass
   void reset() { results.clear(); }
   void forget(Function *fcn) {
     if (results.count(fcn)) {
-      GimmeLoops* gl = results[fcn];
+      GimmeLoops *gl = results[fcn];
       results.erase(fcn);
       delete gl;
     }
@@ -62,13 +58,12 @@ struct ModuleLoops : public ModulePass
 private:
   const DataLayout *td;
   TargetLibraryInfo *tli;
-  std::map<const Function*, GimmeLoops*> results;
+  std::map<const Function *, GimmeLoops *> results;
 
   GimmeLoops &compute(const Function *fcn);
 };
 
-}
-
+} // namespace liberty
 
 #endif
 
