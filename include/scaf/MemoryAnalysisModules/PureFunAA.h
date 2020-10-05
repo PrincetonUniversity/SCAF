@@ -1,10 +1,10 @@
 #ifndef PURE_FUN_AA_H
 #define PURE_FUN_AA_H
 
-#include "llvm/IR/Module.h"
-#include "llvm/Pass.h"
 #include "llvm/ADT/DenseSet.h"
 #include "llvm/Analysis/CallGraph.h"
+#include "llvm/IR/Module.h"
+#include "llvm/Pass.h"
 
 #include "scaf/MemoryAnalysisModules/ClassicLoopAA.h"
 #include "scaf/MemoryAnalysisModules/LoopAA.h"
@@ -12,32 +12,28 @@
 #include <set>
 #include <vector>
 
-namespace liberty
-{
+namespace liberty {
 
 class PureFunAA : public llvm::ModulePass, public liberty::ClassicLoopAA {
 
   struct ltstr {
-    bool operator()(const char* s1, const char* s2) const {
+    bool operator()(const char *s1, const char *s2) const {
       return strcmp(s1, s2) < 0;
     }
 
     bool operator()(const StringRef s1, const StringRef s2) const {
       return s1.compare(s2) < 0;
     }
-
-
   };
 
- public:
+public:
   typedef unsigned SCCNum;
   typedef llvm::DenseSet<SCCNum> SCCNumSet;
   typedef std::vector<llvm::CallGraphNode *> SCC;
   typedef SCC::const_iterator SCCIt;
-  typedef std::set<StringRef , ltstr> StringSet;
+  typedef std::set<StringRef, ltstr> StringSet;
 
- private:
-
+private:
   typedef llvm::DenseMap<const llvm::Function *, SCCNum> FunToSCCMap;
   typedef FunToSCCMap::const_iterator FunToSCCMapIt;
 
@@ -52,12 +48,12 @@ class PureFunAA : public llvm::ModulePass, public liberty::ClassicLoopAA {
   SCCNumSet localSet;
   SCCNumSet globalSet;
 
- public:
-  static StringRef  const pureFunNames[];
-  static StringRef  const localFunNames[];
-  static StringRef  const noMemFunNames[];
+public:
+  static StringRef const pureFunNames[];
+  static StringRef const localFunNames[];
+  static StringRef const noMemFunNames[];
 
- private:
+private:
   static StringSet pureFunSet;
   static StringSet localFunSet;
   static StringSet noMemFunSet;
@@ -65,20 +61,15 @@ class PureFunAA : public llvm::ModulePass, public liberty::ClassicLoopAA {
   void runOnSCC(const SCC &scc);
 
 public:
-  static
-  bool argumentsAlias(const llvm::ImmutableCallSite CS1,
-                      const llvm::ImmutableCallSite CS2,
-                      liberty::LoopAA *aa,
-                      const llvm::DataLayout *TD,
-                      Remedies &R);
+  static bool argumentsAlias(const llvm::ImmutableCallSite CS1,
+                             const llvm::ImmutableCallSite CS2,
+                             liberty::LoopAA *aa, const llvm::DataLayout *TD,
+                             Remedies &R);
 
-  static
-  bool argumentsAlias(const llvm::ImmutableCallSite CS,
-                      const llvm::Value *P,
-                      const unsigned Size,
-                      liberty::LoopAA *aa,
-                      const llvm::DataLayout *TD,
-                      Remedies &R);
+  static bool argumentsAlias(const llvm::ImmutableCallSite CS,
+                             const llvm::Value *P, const unsigned Size,
+                             liberty::LoopAA *aa, const llvm::DataLayout *TD,
+                             Remedies &R);
 
   static char ID;
 
@@ -95,8 +86,7 @@ public:
   SCCNum getSCCNum(const SCC &scc) const;
   SCCNum getSCCNum(const llvm::Function *fun) const;
 
-  bool isRecursiveProperty(const llvm::Function *fun,
-                           const SCCNumSet &trueSet,
+  bool isRecursiveProperty(const llvm::Function *fun, const SCCNumSet &trueSet,
                            const SCCNumSet &falseSet,
                            const StringSet &knownFunSet,
                            Property property) const;
@@ -116,5 +106,5 @@ public:
   virtual void *getAdjustedAnalysisPointer(llvm::AnalysisID PI);
 };
 
-}
+} // namespace liberty
 #endif /* PURE_FUN_AA_H */

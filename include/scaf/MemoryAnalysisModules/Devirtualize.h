@@ -24,9 +24,9 @@
 #ifndef LLVM_LIBERTY_ANALYSIS_DEVIRTUALIZE_H
 #define LLVM_LIBERTY_ANALYSIS_DEVIRTUALIZE_H
 
-#include "llvm/Pass.h"
-#include "llvm/IR/Value.h"
 #include "llvm/IR/DataLayout.h"
+#include "llvm/IR/Value.h"
+#include "llvm/Pass.h"
 
 #include "scaf/Utilities/CallSiteFactory.h"
 
@@ -34,36 +34,29 @@
 #include <set>
 #include <vector>
 
-namespace liberty
-{
+namespace liberty {
 using namespace llvm;
 
-struct DevirtualizationAnalysis : public ModulePass
-{
+struct DevirtualizationAnalysis : public ModulePass {
   static char ID;
   DevirtualizationAnalysis() : ModulePass(ID) {}
 
   void getAnalysisUsage(AnalysisUsage &au) const;
   bool runOnModule(Module &mod);
 
-  typedef std::vector<Function*> FcnList;
+  typedef std::vector<Function *> FcnList;
 
   // How are we going to devirtualize a particular
   // indirect call?
-  struct Strategy
-  {
+  struct Strategy {
     // What kind of dispatch condition
     // can we generate?
-    enum DispatchType
-    {
-      CompareAndBranch=0,
-      LoadFromConstantTableViaIndex
-    };
+    enum DispatchType { CompareAndBranch = 0, LoadFromConstantTableViaIndex };
     DispatchType dispatch;
 
     // Do we need to generate a default 'case'
     // which falls-back to an indirect call?
-    bool        requiresDefaultCase;
+    bool requiresDefaultCase;
 
     // List of possible targets.
     // If (!requiresDefaultCase): this list is exhaustive.
@@ -72,14 +65,14 @@ struct DevirtualizationAnalysis : public ModulePass
     //   this list is an ordered list, mapping
     //   the index (case value) to the target function.
     //   The list may contain null elements or duplicates.
-    FcnList     callees;
+    FcnList callees;
 
     // If (type==LoadFromConstantTableViaIndex):
     //   index holds the integer value that controls the switch.
-    Value      *index;
+    Value *index;
   };
 
-  typedef std::map<Instruction*,Strategy> Inst2Strategy;
+  typedef std::map<Instruction *, Strategy> Inst2Strategy;
   typedef Inst2Strategy::iterator iterator;
   typedef Inst2Strategy::const_iterator const_iterator;
 
@@ -95,9 +88,9 @@ struct DevirtualizationAnalysis : public ModulePass
   const_iterator find(Instruction *call) const { return candidates.find(call); }
 
 private:
-  typedef std::set<const Value*> ValueSet;
-  typedef std::pair<Type*,Type*> TyTy;
-  typedef std::map<TyTy,bool> TypeEquivalence;
+  typedef std::set<const Value *> ValueSet;
+  typedef std::pair<Type *, Type *> TyTy;
+  typedef std::map<TyTy, bool> TypeEquivalence;
 
   Inst2Strategy candidates;
   TypeEquivalence equivalentTypes;
@@ -134,5 +127,5 @@ private:
   bool recognizeLoadFromConstantTableIdiom(CallSite &cs, Strategy &output);
 };
 
-}
+} // namespace liberty
 #endif

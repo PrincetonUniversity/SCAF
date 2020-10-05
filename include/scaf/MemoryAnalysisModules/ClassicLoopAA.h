@@ -68,6 +68,6 @@ public:
                             unsigned Size2, const Loop *L, Remedies &remeds,
                             DesiredAliasResult dAliasRes = DNoOrMustAlias);
 };
-}
+} // namespace liberty
 
 #endif /* CLASSIC_LOOP_AA */

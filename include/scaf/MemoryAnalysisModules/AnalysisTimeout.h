@@ -3,12 +3,10 @@
 
 #include "llvm/Support/CommandLine.h"
 
-namespace liberty
-{
-  using namespace llvm;
-  extern llvm::cl::opt<unsigned> AnalysisTimeout;
-}
+namespace liberty {
+using namespace llvm;
+extern llvm::cl::opt<unsigned> AnalysisTimeout;
+} // namespace liberty
 
 #endif
-
 

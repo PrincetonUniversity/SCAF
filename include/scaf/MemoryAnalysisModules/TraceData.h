@@ -8,26 +8,24 @@
 #ifndef LLVM_LIBERTY_ANALYSIS_TRACE_DATA_H
 #define LLVM_LIBERTY_ANALYSIS_TRACE_DATA_H
 
-#include "llvm/IR/Value.h"
 #include "llvm/IR/DataLayout.h"
+#include "llvm/IR/Value.h"
 
 #include <map>
 #include <set>
 #include <vector>
 
-namespace liberty
-{
+namespace liberty {
 using namespace llvm;
 
 class NonCapturedFieldsAnalysis;
 class NoCaptureFcn;
 
-struct Tracer
-{
+struct Tracer {
   Tracer(const NoCaptureFcn &nocap, const NonCapturedFieldsAnalysis &noescape);
 
   typedef std::set<uint64_t> IntSet;
-  typedef std::vector<Function*> FcnList;
+  typedef std::vector<Function *> FcnList;
 
   /// Trace the possible values of an integer expression.
   bool traceConcreteIntegerValues(Value *int_expr, IntSet &output) const;
@@ -39,7 +37,7 @@ struct Tracer
   /// exhaustive.  Return false if there is any chance that we
   /// missed one.
   bool traceConcreteFunctionPointers(Value *fcn_ptr, FcnList &output,
-                                    const DataLayout &DL) const;
+                                     const DataLayout &DL) const;
 
   /// Compare two sets for disjointness
   static bool disjoint(const IntSet &a, const IntSet &b);
@@ -48,18 +46,19 @@ private:
   const NoCaptureFcn &nocap;
   const NonCapturedFieldsAnalysis &noescape;
 
-  typedef std::set<const Value*> ValueSet;
-  bool traceConcreteIntegerValues(Value *int_expr, IntSet &output, ValueSet &already) const;
+  typedef std::set<const Value *> ValueSet;
+  bool traceConcreteIntegerValues(Value *int_expr, IntSet &output,
+                                  ValueSet &already) const;
 
-  bool traceConcreteFunctionPointers(
-    Value *fcn_ptr, FcnList &output, ValueSet &already,
-                        const DataLayout &DL) const;
-  bool traceConcreteFunctionPointersLoadedFrom(
-    Value *ptr, FcnList &output, ValueSet &already,
-                        const DataLayout &DL) const;
+  bool traceConcreteFunctionPointers(Value *fcn_ptr, FcnList &output,
+                                     ValueSet &already,
+                                     const DataLayout &DL) const;
+  bool traceConcreteFunctionPointersLoadedFrom(Value *ptr, FcnList &output,
+                                               ValueSet &already,
+                                               const DataLayout &DL) const;
   bool extractConcreteFunctionPointersFromConstantInitializer(
-    Constant *constant, FcnList &output, ValueSet &already) const;
+      Constant *constant, FcnList &output, ValueSet &already) const;
 };
 
-}
+} // namespace liberty
 #endif

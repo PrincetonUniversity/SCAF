@@ -3,12 +3,12 @@
 #ifndef LLVM_LIBERTY_SVF_RESULTS_H
 #define LLVM_LIBERTY_SVF_RESULTS_H
 
-#include "llvm/Pass.h"
-#include "llvm/IR/Module.h"
-#include "llvm/IR/DataLayout.h"
 #include "llvm/Analysis/AliasAnalysis.h"
 #include "llvm/Analysis/BasicAliasAnalysis.h"
+#include "llvm/IR/DataLayout.h"
 #include "llvm/IR/Dominators.h"
+#include "llvm/IR/Module.h"
+#include "llvm/Pass.h"
 
 #include "scaf/MemoryAnalysisModules/LoopAA.h"
 

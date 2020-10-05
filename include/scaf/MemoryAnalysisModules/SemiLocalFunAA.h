@@ -9,32 +9,30 @@ struct Formal {
   llvm::StringRef funName;
   unsigned argNo;
 };
-}
+} // namespace liberty
 
 namespace llvm {
-  template<> struct DenseMapInfo<liberty::Formal> {
+template <> struct DenseMapInfo<liberty::Formal> {
 
-    static bool isEqual(const liberty::Formal &F1, const liberty::Formal &F2) {
-      return F1.argNo == F2.argNo && F1.funName == F2.funName;
-    }
+  static bool isEqual(const liberty::Formal &F1, const liberty::Formal &F2) {
+    return F1.argNo == F2.argNo && F1.funName == F2.funName;
+  }
 
-    static unsigned getHashValue(const liberty::Formal &F) {
-      return
-        djbHash(F.funName) ^
-        DenseMapInfo<unsigned>::getHashValue(F.argNo);
-    }
+  static unsigned getHashValue(const liberty::Formal &F) {
+    return djbHash(F.funName) ^ DenseMapInfo<unsigned>::getHashValue(F.argNo);
+  }
 
-    static liberty::Formal getEmptyKey() {
-      liberty::Formal F = { "", 0 };
-      return F;
-    }
+  static liberty::Formal getEmptyKey() {
+    liberty::Formal F = {"", 0};
+    return F;
+  }
 
-    static liberty::Formal getTombstoneKey() {
-      liberty::Formal F = { "", static_cast<unsigned int>(~0) };
-      return F;
-    }
-  };
-}
+  static liberty::Formal getTombstoneKey() {
+    liberty::Formal F = {"", static_cast<unsigned int>(~0)};
+    return F;
+  }
+};
+} // namespace llvm
 
 namespace liberty {
 class SemiLocalFunAA : public ModulePass, public liberty::ClassicLoopAA {
@@ -49,7 +47,7 @@ class SemiLocalFunAA : public ModulePass, public liberty::ClassicLoopAA {
   PureFunAA::SCCNumSet semiLocalSet;
   PureFunAA::SCCNumSet globalSet;
 
-  static StringRef  const semiLocalFunNames[];
+  static StringRef const semiLocalFunNames[];
   static PureFunAA::StringSet semiLocalFunSet;
 
   static const Formal readOnlyFormals[];
@@ -61,16 +59,13 @@ class SemiLocalFunAA : public ModulePass, public liberty::ClassicLoopAA {
 
   void runOnSCC(const PureFunAA::SCC &scc, PureFunAA &pureFun);
 
-  static void initGlobalMod(const Value *v,
-                            GlobalSet &mods,
-                            GlobalSet &refs,
+  static void initGlobalMod(const Value *v, GlobalSet &mods, GlobalSet &refs,
                             FuncSet &funcs);
-  static void initGlobalMod(const Function *fun,
-                            GlobalSet &mods,
-                            GlobalSet &refs,
-                            FuncSet &funcs);
+  static void initGlobalMod(const Function *fun, GlobalSet &mods,
+                            GlobalSet &refs, FuncSet &funcs);
 
-  static ModRefResult getModRefInfo(const ImmutableCallSite CS, const unsigned argNo);
+  static ModRefResult getModRefInfo(const ImmutableCallSite CS,
+                                    const unsigned argNo);
 
   ModRefResult aliasedArgumentsModRef(const ImmutableCallSite CS,
                                       const Value *P, const unsigned Size,
@@ -80,7 +75,6 @@ class SemiLocalFunAA : public ModulePass, public liberty::ClassicLoopAA {
                     const unsigned Size, Remedies &R) const;
 
 public:
-
   static char ID;
   SemiLocalFunAA();
   bool runOnModule(Module &M);
@@ -108,9 +102,7 @@ public:
   ModRefResult getModRefInfo(CallSite CS, TemporalRelation Rel,
                              const Pointer &P, const Loop *L, Remedies &R);
 
-  StringRef getLoopAAName() const {
-    return "semi-local-fun-aa";
-  }
+  StringRef getLoopAAName() const { return "semi-local-fun-aa"; }
 
   /// getAdjustedAnalysisPointer - This method is used when a pass implements an
   /// analysis interface through multiple inheritance.  If needed, it should
@@ -118,14 +110,12 @@ public:
   /// info.
   void *getAdjustedAnalysisPointer(AnalysisID PI) {
     if (PI == &LoopAA::ID)
-      return (LoopAA*)this;
+      return (LoopAA *)this;
     return this;
   }
 };
 
-
-}
-
+} // namespace liberty
 
 #endif
 

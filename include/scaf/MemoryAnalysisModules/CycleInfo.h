@@ -1,4 +1,5 @@
-//===- llvm/Analysis/CycleInfo.h - Natural Cycle Calculator -------*- C++ -*-===//
+//===- llvm/Analysis/CycleInfo.h - Natural Cycle Calculator -------*- C++
+//-*-===//
 //
 //                     The LLVM Compiler Infrastructure
 //
@@ -31,135 +32,134 @@
 #ifndef CYCLE_INFO_H
 #define CYCLE_INFO_H
 
-#include "llvm/Analysis/LoopInfo.h"
-#include "llvm/Pass.h"
 #include "llvm/ADT/DenseMap.h"
 #include "llvm/ADT/DepthFirstIterator.h"
 #include "llvm/ADT/GraphTraits.h"
-#include "llvm/ADT/SmallVector.h"
 #include "llvm/ADT/STLExtras.h"
-#include "llvm/IR/Dominators.h"
+#include "llvm/ADT/SmallVector.h"
+#include "llvm/Analysis/LoopInfo.h"
 #include "llvm/IR/CFG.h"
+#include "llvm/IR/Dominators.h"
+#include "llvm/Pass.h"
 #include "llvm/Support/raw_ostream.h"
 #include <algorithm>
 #include <map>
 
 namespace liberty {
 
-  using namespace llvm;
+using namespace llvm;
 
-  class Cycle : public LoopBase<BasicBlock, Cycle>
-  {
-    public:
-      Cycle() {}
-      /// isLoopInvariant - Return true if the specified value is loop invariant
-      ///
-      bool isLoopInvariant(Value *V) const;
+class Cycle : public LoopBase<BasicBlock, Cycle> {
+public:
+  Cycle() {}
+  /// isLoopInvariant - Return true if the specified value is loop invariant
+  ///
+  bool isLoopInvariant(Value *V) const;
 
-      /// hasLoopInvariantOperands - Return true if all the operands of the
-      /// specified instruction are loop invariant.
-      bool hasLoopInvariantOperands(Instruction *I) const;
+  /// hasLoopInvariantOperands - Return true if all the operands of the
+  /// specified instruction are loop invariant.
+  bool hasLoopInvariantOperands(Instruction *I) const;
 
-      /// makeLoopInvariant - If the given value is an instruction inside of the
-      /// loop and it can be hoisted, do so to make it trivially loop-invariant.
-      /// Return true if the value after any hoisting is loop invariant. This
-      /// function can be used as a slightly more aggressive replacement for
-      /// isLoopInvariant.
-      ///
-      /// If InsertPt is specified, it is the point to hoist instructions to.
-      /// If null, the terminator of the loop preheader is used.
-      ///
-      bool makeLoopInvariant(Value *V, bool &Changed,
-          Instruction *InsertPt = 0) const;
+  /// makeLoopInvariant - If the given value is an instruction inside of the
+  /// loop and it can be hoisted, do so to make it trivially loop-invariant.
+  /// Return true if the value after any hoisting is loop invariant. This
+  /// function can be used as a slightly more aggressive replacement for
+  /// isLoopInvariant.
+  ///
+  /// If InsertPt is specified, it is the point to hoist instructions to.
+  /// If null, the terminator of the loop preheader is used.
+  ///
+  bool makeLoopInvariant(Value *V, bool &Changed,
+                         Instruction *InsertPt = 0) const;
 
-      /// makeLoopInvariant - If the given instruction is inside of the
-      /// loop and it can be hoisted, do so to make it trivially loop-invariant.
-      /// Return true if the instruction after any hoisting is loop invariant. This
-      /// function can be used as a slightly more aggressive replacement for
-      /// isLoopInvariant.
-      ///
-      /// If InsertPt is specified, it is the point to hoist instructions to.
-      /// If null, the terminator of the loop preheader is used.
-      ///
-      bool makeLoopInvariant(Instruction *I, bool &Changed,
-          Instruction *InsertPt = 0) const;
+  /// makeLoopInvariant - If the given instruction is inside of the
+  /// loop and it can be hoisted, do so to make it trivially loop-invariant.
+  /// Return true if the instruction after any hoisting is loop invariant. This
+  /// function can be used as a slightly more aggressive replacement for
+  /// isLoopInvariant.
+  ///
+  /// If InsertPt is specified, it is the point to hoist instructions to.
+  /// If null, the terminator of the loop preheader is used.
+  ///
+  bool makeLoopInvariant(Instruction *I, bool &Changed,
+                         Instruction *InsertPt = 0) const;
 
-      /// getCanonicalInductionVariable - Check to see if the loop has a canonical
-      /// induction variable: an integer recurrence that starts at 0 and increments
-      /// by one each time through the loop.  If so, return the phi node that
-      /// corresponds to it.
-      ///
-      /// The IndVarSimplify pass transforms loops to have a canonical induction
-      /// variable.
-      ///
-      PHINode *getCanonicalInductionVariable() const;
+  /// getCanonicalInductionVariable - Check to see if the loop has a canonical
+  /// induction variable: an integer recurrence that starts at 0 and increments
+  /// by one each time through the loop.  If so, return the phi node that
+  /// corresponds to it.
+  ///
+  /// The IndVarSimplify pass transforms loops to have a canonical induction
+  /// variable.
+  ///
+  PHINode *getCanonicalInductionVariable() const;
 
-      /// getTripCount - Return a loop-invariant LLVM value indicating the number of
-      /// times the loop will be executed.  Note that this means that the backedge
-      /// of the loop executes N-1 times.  If the trip-count cannot be determined,
-      /// this returns null.
-      ///
-      /// The IndVarSimplify pass transforms loops to have a form that this
-      /// function easily understands.
-      ///
-      Value *getTripCount() const;
+  /// getTripCount - Return a loop-invariant LLVM value indicating the number of
+  /// times the loop will be executed.  Note that this means that the backedge
+  /// of the loop executes N-1 times.  If the trip-count cannot be determined,
+  /// this returns null.
+  ///
+  /// The IndVarSimplify pass transforms loops to have a form that this
+  /// function easily understands.
+  ///
+  Value *getTripCount() const;
 
-      /// getSmallConstantTripCount - Returns the trip count of this loop as a
-      /// normal unsigned value, if possible. Returns 0 if the trip count is unknown
-      /// of not constant. Will also return 0 if the trip count is very large
-      /// (>= 2^32)
-      ///
-      /// The IndVarSimplify pass transforms loops to have a form that this
-      /// function easily understands.
-      ///
-      unsigned getSmallConstantTripCount() const;
+  /// getSmallConstantTripCount - Returns the trip count of this loop as a
+  /// normal unsigned value, if possible. Returns 0 if the trip count is unknown
+  /// of not constant. Will also return 0 if the trip count is very large
+  /// (>= 2^32)
+  ///
+  /// The IndVarSimplify pass transforms loops to have a form that this
+  /// function easily understands.
+  ///
+  unsigned getSmallConstantTripCount() const;
 
-      /// getSmallConstantTripMultiple - Returns the largest constant divisor of the
-      /// trip count of this loop as a normal unsigned value, if possible. This
-      /// means that the actual trip count is always a multiple of the returned
-      /// value (don't forget the trip count could very well be zero as well!).
-      ///
-      /// Returns 1 if the trip count is unknown or not guaranteed to be the
-      /// multiple of a constant (which is also the case if the trip count is simply
-      /// constant, use getSmallConstantTripCount for that case), Will also return 1
-      /// if the trip count is very large (>= 2^32).
-      unsigned getSmallConstantTripMultiple() const;
+  /// getSmallConstantTripMultiple - Returns the largest constant divisor of the
+  /// trip count of this loop as a normal unsigned value, if possible. This
+  /// means that the actual trip count is always a multiple of the returned
+  /// value (don't forget the trip count could very well be zero as well!).
+  ///
+  /// Returns 1 if the trip count is unknown or not guaranteed to be the
+  /// multiple of a constant (which is also the case if the trip count is simply
+  /// constant, use getSmallConstantTripCount for that case), Will also return 1
+  /// if the trip count is very large (>= 2^32).
+  unsigned getSmallConstantTripMultiple() const;
 
-      /// isLCSSAForm - Return true if the Loop is in LCSSA form
-      bool isLCSSAForm(DominatorTree &DT) const;
+  /// isLCSSAForm - Return true if the Loop is in LCSSA form
+  bool isLCSSAForm(DominatorTree &DT) const;
 
-      /// isLoopSimplifyForm - Return true if the Loop is in the form that
-      /// the LoopSimplify form transforms loops to, which is sometimes called
-      /// normal form.
-      bool isLoopSimplifyForm() const;
+  /// isLoopSimplifyForm - Return true if the Loop is in the form that
+  /// the LoopSimplify form transforms loops to, which is sometimes called
+  /// normal form.
+  bool isLoopSimplifyForm() const;
 
-      /// hasDedicatedExits - Return true if no exit block for the loop
-      /// has a predecessor that is outside the loop.
-      bool hasDedicatedExits() const;
+  /// hasDedicatedExits - Return true if no exit block for the loop
+  /// has a predecessor that is outside the loop.
+  bool hasDedicatedExits() const;
 
-      /// getUniqueExitBlocks - Return all unique successor blocks of this loop.
-      /// These are the blocks _outside of the current loop_ which are branched to.
-      /// This assumes that loop exits are in canonical form.
-      ///
-      void getUniqueExitBlocks(SmallVectorImpl<BasicBlock *> &ExitBlocks) const;
+  /// getUniqueExitBlocks - Return all unique successor blocks of this loop.
+  /// These are the blocks _outside of the current loop_ which are branched to.
+  /// This assumes that loop exits are in canonical form.
+  ///
+  void getUniqueExitBlocks(SmallVectorImpl<BasicBlock *> &ExitBlocks) const;
 
-      /// getUniqueExitBlock - If getUniqueExitBlocks would return exactly one
-      /// block, return that block. Otherwise return null.
-      BasicBlock *getUniqueExitBlock() const;
+  /// getUniqueExitBlock - If getUniqueExitBlocks would return exactly one
+  /// block, return that block. Otherwise return null.
+  BasicBlock *getUniqueExitBlock() const;
 
-      void dump() const;
-    private:
-      friend class LoopInfoBase<BasicBlock, Cycle>;
-      explicit Cycle(BasicBlock *BB) : LoopBase<BasicBlock, Cycle>(BB) {}
+  void dump() const;
 
-  };
+private:
+  friend class LoopInfoBase<BasicBlock, Cycle>;
+  explicit Cycle(BasicBlock *BB) : LoopBase<BasicBlock, Cycle>(BB) {}
+};
 
 class CycleInfo : public FunctionPass {
   LoopInfoBase<BasicBlock, Cycle> LI;
   friend class LoopBase<BasicBlock, Cycle>;
 
   void operator=(const CycleInfo &); // do not implement
-  CycleInfo(const CycleInfo &);       // do not implement
+  CycleInfo(const CycleInfo &);      // do not implement
 public:
   static char ID; // Pass identification, replacement for typeid
 
@@ -167,7 +167,7 @@ public:
     initializeLoopInfoPass(*PassRegistry::getPassRegistry());
   }
 
-  LoopInfoBase<BasicBlock, Cycle>& getBase() { return LI; }
+  LoopInfoBase<BasicBlock, Cycle> &getBase() { return LI; }
 
   /// iterator/begin/end - The interface to the top-level loops in the current
   /// function.
@@ -198,9 +198,7 @@ public:
   }
 
   // isLoopHeader - True if the block is a loop header node
-  inline bool isLoopHeader(BasicBlock *BB) const {
-    return LI.isLoopHeader(BB);
-  }
+  inline bool isLoopHeader(BasicBlock *BB) const { return LI.isLoopHeader(BB); }
 
   /// runOnFunction - Calculate the natural loop information.
   ///
@@ -210,7 +208,7 @@ public:
 
   virtual void releaseMemory() { LI.releaseMemory(); }
 
-  virtual void print(raw_ostream &O, const Module* M = 0) const;
+  virtual void print(raw_ostream &O, const Module *M = 0) const;
 
   virtual void getAnalysisUsage(AnalysisUsage &AU) const;
 
@@ -234,16 +232,12 @@ public:
 
   /// addTopLevelLoop - This adds the specified loop to the collection of
   /// top-level loops.
-  inline void addTopLevelLoop(Cycle *New) {
-    LI.addTopLevelLoop(New);
-  }
+  inline void addTopLevelLoop(Cycle *New) { LI.addTopLevelLoop(New); }
 
   /// removeBlock - This method completely removes BB from all data structures,
   /// including all of the Loop objects it is nested in and our mapping from
   /// BasicBlocks to loops.
-  void removeBlock(BasicBlock *BB) {
-    LI.removeBlock(BB);
-  }
+  void removeBlock(BasicBlock *BB) { LI.removeBlock(BB); }
 
   /// replacementPreservesLCSSAForm - Returns true if replacing From with To
   /// everywhere is guaranteed to preserve LCSSA form.
@@ -251,7 +245,8 @@ public:
     // Preserving LCSSA form is only problematic if the replacing value is an
     // instruction.
     Instruction *I = dyn_cast<Instruction>(To);
-    if (!I) return true;
+    if (!I)
+      return true;
     // If both instructions are defined in the same basic block then replacement
     // cannot break LCSSA form.
     if (I->getParent() == From->getParent())
@@ -259,7 +254,8 @@ public:
     // If the instruction is not defined in a loop then it can safely replace
     // anything.
     Cycle *ToLoop = getLoopFor(I->getParent());
-    if (!ToLoop) return true;
+    if (!ToLoop)
+      return true;
     // If the replacing instruction is defined in the same loop as the original
     // instruction, or in a loop that contains it as an inner loop, then using
     // it as a replacement will not break LCSSA form.
@@ -267,8 +263,6 @@ public:
   }
 };
 
-
-
-} // End llvm namespace
+} // namespace liberty
 
 #endif
