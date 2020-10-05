@@ -1,9 +1,12 @@
-// This file declares four types of iterators, which operate on the SPECULATIVE CFG.
+// This file declares four types of iterators, which operate on the SPECULATIVE
+// CFG.
 //
 // - BBSuccIterator: iterate over the successors of a basic block.
 // - BBPredIterator: iterate over the predecessors of a basic block.
-// - LoopBBSuccIterator: iterate over the successors of a basic block within a single iteration of a loop.
-// - LoopBBPredIterator: iterate over the predecessors of a basic block within a single iteration of a loop.
+// - LoopBBSuccIterator: iterate over the successors of a basic block within a
+// single iteration of a loop.
+// - LoopBBPredIterator: iterate over the predecessors of a basic block within a
+// single iteration of a loop.
 //
 // Don't instantiate these directly; instead use
 // methods ControlSpeculation::pred_begin, ControlSpeculation::succ_begin, etc
@@ -20,15 +23,13 @@
 
 #include <set>
 
-namespace liberty
-{
+namespace liberty {
 using namespace llvm;
 
 struct ControlSpeculation;
 
 // An iterator over the successors of a block
-struct BBSuccIterator
-{
+struct BBSuccIterator {
   // Construct a begin iterator
   BBSuccIterator(Instruction *ti, ControlSpeculation &cs);
 
@@ -52,8 +53,7 @@ private:
 };
 
 // An iterator over the predecessors of a block.
-struct BBPredIterator
-{
+struct BBPredIterator {
   // Construct a begin iterator
   BBPredIterator(BasicBlock *bb, ControlSpeculation &cs);
 
@@ -76,12 +76,11 @@ private:
   void skipDead();
 };
 
-
 // An iterator over the successors of a block in LOOP CFG
-struct LoopBBSuccIterator
-{
+struct LoopBBSuccIterator {
   // Construct a begin iterator
-  LoopBBSuccIterator(Loop *l, ControlSpeculation::LoopBlock lb, ControlSpeculation &cs);
+  LoopBBSuccIterator(Loop *l, ControlSpeculation::LoopBlock lb,
+                     ControlSpeculation &cs);
 
   // Construnct an end iterator
   LoopBBSuccIterator(Loop *l, ControlSpeculation::LoopBlock lb);
@@ -104,10 +103,10 @@ private:
 };
 
 // An iterator over the predecessors of a block in LOOP CFG.
-struct LoopBBPredIterator
-{
+struct LoopBBPredIterator {
   // Construct a begin iterator
-  LoopBBPredIterator(Loop *l, ControlSpeculation::LoopBlock lb, ControlSpeculation &cs);
+  LoopBBPredIterator(Loop *l, ControlSpeculation::LoopBlock lb,
+                     ControlSpeculation &cs);
 
   // Construnct an end iterator
   LoopBBPredIterator(Loop *l, ControlSpeculation::LoopBlock lb);
@@ -131,8 +130,7 @@ private:
   bool isEndIterator() const;
 };
 
-
-}
+} // namespace liberty
 
 #endif
 

@@ -4,8 +4,8 @@
 #include "llvm/IR/CallSite.h"
 
 namespace liberty {
-  llvm::CallSite getCallSite(llvm::Value *value);
-  const llvm::CallSite getCallSite(const llvm::Value *value);
-}
+llvm::CallSite getCallSite(llvm::Value *value);
+const llvm::CallSite getCallSite(const llvm::Value *value);
+} // namespace liberty
 
 #endif /* CALL_SITE_FACTORY */

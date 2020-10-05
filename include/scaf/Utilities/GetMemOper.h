@@ -5,9 +5,9 @@
 #include "llvm/IR/IntrinsicInst.h"
 
 namespace liberty {
-  const llvm::Value *getMemOper(const llvm::Instruction *inst);
-  llvm::Value *getMemOper(llvm::Instruction *inst);
-  void setMemOper(llvm::Instruction *inst, llvm::Value *value);
-}
+const llvm::Value *getMemOper(const llvm::Instruction *inst);
+llvm::Value *getMemOper(llvm::Instruction *inst);
+void setMemOper(llvm::Instruction *inst, llvm::Value *value);
+} // namespace liberty
 
 #endif /* GET_MEM_OPER */
