@@ -1,17 +1,17 @@
 #ifndef LLVM_LIBERTY_ASSUMPTIONS_H
 #define LLVM_LIBERTY_ASSUMPTIONS_H
 
-#include "llvm/Pass.h"
-#include "llvm/IR/CallSite.h"
-#include "llvm/Support/CommandLine.h"
-#include "llvm/IR/DataLayout.h"
 #include "llvm/Analysis/AliasAnalysis.h"
 #include "llvm/Analysis/LoopInfo.h"
 #include "llvm/Analysis/LoopPass.h"
+#include "llvm/IR/CallSite.h"
+#include "llvm/IR/DataLayout.h"
+#include "llvm/Pass.h"
+#include "llvm/Support/CommandLine.h"
 
+#include <memory>
 #include <set>
 #include <unordered_set>
-#include <memory>
 
 using namespace llvm;
 
@@ -37,9 +37,9 @@ public:
   Criticisms resolvedC;
   unsigned long cost;
 
-  //Loop *loop;
+  // Loop *loop;
 
-  //virtual void apply(Task *task) = 0;
+  // virtual void apply(Task *task) = 0;
   virtual bool compare(const Remedy_ptr rhs) const = 0;
   virtual StringRef getRemedyName() const = 0;
 
@@ -106,6 +106,6 @@ struct RemediesCompare {
 typedef std::set<Remedies_ptr, RemediesCompare> SetOfRemedies;
 typedef std::unique_ptr<SetOfRemedies> SetOfRemedies_ptr;
 
-}
+} // namespace llvm
 
 #endif
