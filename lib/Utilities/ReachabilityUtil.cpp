@@ -114,9 +114,9 @@ bool liberty::noStoreInBetween(const Instruction *firstI,
                                ModuleLoops &mloops) {
 
   // more conservative check than it should be.
-  // even if there is a path from firstI to src, could check if there is at
-  // least one path that does not pass through secondI (e.g. using exclusionSet
-  // of LLVM 9.0 version of isPotentiallyReachable)
-  // TODO: make it less conservative using exclusionSet
+  // even if there are paths from firstI to one of the defs, maybe none of these
+  // paths pass through secondI. Using llvm::isPotentiallyReachable (with an
+  // exclusionSet) could give a more accurate answer but this llvm utility is
+  // only intra-procedural (at least for LLVM 9).
   return !isReachableInterProcedural(firstI, defs, mloops);
 }
