@@ -14,7 +14,7 @@ enum ExtensionKind { EK_NotExtended, EK_SignExt, EK_ZeroExt };
 struct VariableGEPIndex {
   const Value *V;
   ExtensionKind Extension;
-  int64_t Scale;
+  uint64_t Scale;
 
   bool operator==(const VariableGEPIndex &Other) const {
     return V == Other.V && Extension == Other.Extension && Scale == Other.Scale;
