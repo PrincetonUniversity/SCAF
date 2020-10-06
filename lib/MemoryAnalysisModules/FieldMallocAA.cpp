@@ -1,9 +1,9 @@
-#include "llvm/IR/Instruction.h"
-#include "llvm/IR/Module.h"
-#include "llvm/Pass.h"
 #include "llvm/Analysis/ValueTracking.h"
 #include "llvm/IR/GetElementPtrTypeIterator.h"
 #include "llvm/IR/InstIterator.h"
+#include "llvm/IR/Instruction.h"
+#include "llvm/IR/Module.h"
+#include "llvm/Pass.h"
 
 #include "scaf/Utilities/CaptureUtil.h"
 #include "scaf/Utilities/FindAllTransUses.h"
@@ -25,13 +25,16 @@ class FieldMallocAA : public ModulePass, public liberty::ClassicLoopAA {
 
   static bool isAllocSrc(const Value *v) {
 
-    if(isa<AllocaInst>(v)) return false;
+    if (isa<AllocaInst>(v))
+      return false;
 
     const CallInst *call = dyn_cast<CallInst>(v);
-    if(!call) return false;
+    if (!call)
+      return false;
 
     Function *fun = call->getCalledFunction();
-    if(!fun) return false;
+    if (!fun)
+      return false;
 
     return fun->returnDoesNotAlias();
   }
@@ -41,7 +44,8 @@ class FieldMallocAA : public ModulePass, public liberty::ClassicLoopAA {
     const Module *M = store->getParent()->getParent()->getParent();
     const DataLayout &td = M->getDataLayout();
     const Value *O = GetUnderlyingObject(store->getValueOperand(), td);
-    if(!isAllocSrc(O)) return false;
+    if (!isAllocSrc(O))
+      return false;
 
     liberty::CaptureSet captureSet;
     liberty::findAllCaptures(O, &captureSet);
@@ -52,9 +56,9 @@ class FieldMallocAA : public ModulePass, public liberty::ClassicLoopAA {
   static bool isSafelyUsed(ValueSet &uses) {
     const ValueSetIt B = uses.begin();
     const ValueSetIt E = uses.end();
-    for(ValueSetIt use = B; use != E; ++use) {
+    for (ValueSetIt use = B; use != E; ++use) {
       const StoreInst *store = dyn_cast<StoreInst>(*use);
-      if(store && !isUniqueAllocSrc(store))
+      if (store && !isUniqueAllocSrc(store))
         return false;
     }
 
@@ -74,8 +78,8 @@ public:
     typedef Module::iterator ModIt;
     const ModIt B = M.begin();
     const ModIt E = M.end();
-    for(ModIt fun = B; fun != E; ++fun) {
-      if(!fun->isDeclaration())
+    for (ModIt fun = B; fun != E; ++fun) {
+      if (!fun->isDeclaration())
         runOnFunction(*fun);
     }
 
@@ -86,7 +90,7 @@ public:
 
     const inst_iterator B = inst_begin(F);
     const inst_iterator E = inst_end(F);
-    for(inst_iterator inst = B; inst != E; ++inst) {
+    for (inst_iterator inst = B; inst != E; ++inst) {
       runOnGEP(&*inst);
     }
 
@@ -95,26 +99,29 @@ public:
 
   void runOnGEP(Instruction *inst) {
     GetElementPtrInst *gep = dyn_cast<GetElementPtrInst>(inst);
-    if(!gep) return;
+    if (!gep)
+      return;
 
-    if(!gep->getPointerOperandType()->isPointerTy()) return;
+    if (!gep->getPointerOperandType()->isPointerTy())
+      return;
 
     PointerType *ptrOpTy = cast<PointerType>(gep->getPointerOperandType());
-    if(!ptrOpTy->getElementType()->isPointerTy()) return;
+    if (!ptrOpTy->getElementType()->isPointerTy())
+      return;
 
     bool isSane = TAA->isSane(ptrOpTy);
-    if(!isSane) return;
+    if (!isSane)
+      return;
 
     ValueSet uses;
     liberty::findAllTransUses(gep, uses);
 
-    if(isSafelyUsed(uses)) return;
+    if (isSafelyUsed(uses))
+      return;
 
     const gep_type_iterator B = gep_type_begin(gep);
     const gep_type_iterator E = gep_type_end(gep);
-    //sot : operator* is no longer supported in LLVM 5.0 for gep_type_iterator
-    for(gep_type_iterator type = B; type != E; ++type)
-    {
+    for (gep_type_iterator type = B; type != E; ++type) {
       if (StructType *STy = type.getStructTypeOrNull())
         badFieldTypes.insert(STy);
       else
@@ -135,36 +142,39 @@ public:
     const LoadInst *L1 = dyn_cast<LoadInst>(O1);
     const LoadInst *L2 = dyn_cast<LoadInst>(O2);
 
-    if(!L1 || !L2) return MayAlias;
+    if (!L1 || !L2)
+      return MayAlias;
 
     const GetElementPtrInst *GEP1 =
-      dyn_cast<GetElementPtrInst>(L1->getPointerOperand());
+        dyn_cast<GetElementPtrInst>(L1->getPointerOperand());
 
     const GetElementPtrInst *GEP2 =
-      dyn_cast<GetElementPtrInst>(L2->getPointerOperand());
+        dyn_cast<GetElementPtrInst>(L2->getPointerOperand());
 
-    if(!GEP1 || !GEP2) return MayAlias;
+    if (!GEP1 || !GEP2)
+      return MayAlias;
 
     PointerType *Ty1 = dyn_cast<PointerType>(GEP1->getPointerOperandType());
     PointerType *Ty2 = dyn_cast<PointerType>(GEP2->getPointerOperandType());
 
-    if(!Ty1 || !isa<StructType>(Ty1->getElementType())) return MayAlias;
-    if(!Ty2 || !isa<StructType>(Ty2->getElementType())) return MayAlias;
+    if (!Ty1 || !isa<StructType>(Ty1->getElementType()))
+      return MayAlias;
+    if (!Ty2 || !isa<StructType>(Ty2->getElementType()))
+      return MayAlias;
 
-    if(badFieldTypes.count(Ty1) || badFieldTypes.count(Ty2)) return MayAlias;
+    if (badFieldTypes.count(Ty1) || badFieldTypes.count(Ty2))
+      return MayAlias;
 
     return getTopAA()->alias(GEP1->getPointerOperand(), 1, rel,
                              GEP2->getPointerOperand(), 1, L, R);
   }
 
-  StringRef getLoopAAName() const {
-    return "field-malloc-aa";
-  }
+  StringRef getLoopAAName() const { return "field-malloc-aa"; }
 
   void getAnalysisUsage(AnalysisUsage &AU) const {
     LoopAA::getAnalysisUsage(AU);
     AU.addRequired<liberty::TypeSanityAnalysis>();
-    AU.setPreservesAll();                         // Does not transform code
+    AU.setPreservesAll(); // Does not transform code
   }
 
   /// getAdjustedAnalysisPointer - This method is used when a pass implements
@@ -173,15 +183,14 @@ public:
   /// specified pass info.
   virtual void *getAdjustedAnalysisPointer(AnalysisID PI) {
     if (PI == &LoopAA::ID)
-      return (LoopAA*)this;
+      return (LoopAA *)this;
     return this;
   }
-
 };
 
 char FieldMallocAA::ID = 0;
 
 static RegisterPass<FieldMallocAA>
-X("field-malloc-aa", "Alias analysis for field pointers", false, true);
+    X("field-malloc-aa", "Alias analysis for field pointers", false, true);
 static RegisterAnalysisGroup<liberty::LoopAA> Y(X);
 

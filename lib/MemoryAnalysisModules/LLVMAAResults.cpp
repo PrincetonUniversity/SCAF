@@ -3,13 +3,12 @@
 #include "llvm/ADT/Statistic.h"
 
 #include "scaf/MemoryAnalysisModules/LLVMAAResults.h"
-#include "scaf/Utilities/GetMemOper.h"
 #include "scaf/Utilities/CallSiteFactory.h"
+#include "scaf/Utilities/GetMemOper.h"
 
 #include <vector>
 
-namespace liberty
-{
+namespace liberty {
 using namespace llvm;
 
 STATISTIC(numNoModRef, "Number of NoModRef from llvm-aa-results");
@@ -54,11 +53,10 @@ LoopAA::AliasResult LLVMAAResults::alias(const Value *ptrA, unsigned sizeA,
                                          DesiredAliasResult dAliasRes) {
 
   // ZY: LLVM AA seems only applicable for II deps
-  // sot: mustAlias from standard LLVM AA could be misleading for loop carried deps
+  // sot: mustAlias from standard LLVM AA could be misleading for loop carried
+  // deps
   if (rel != LoopAA::Same)
     return LoopAA::alias(ptrA, sizeA, rel, ptrB, sizeB, L, R, dAliasRes);
-
-  // only handles intra-iteration mem queries
 
   // avoid queries for must-alias, takes a long time (LLVM passes do not
   // understand that only must-alias responses are needed), and it is
@@ -66,6 +64,7 @@ LoopAA::AliasResult LLVMAAResults::alias(const Value *ptrA, unsigned sizeA,
   if (dAliasRes == DMustAlias)
     return LoopAA::alias(ptrA, sizeA, rel, ptrB, sizeB, L, R, dAliasRes);
 
+  // only handles intra-procedural mem queries
   auto *funA = getParent(ptrA);
   if (!funA || !notDifferentParent(ptrA, ptrB))
     return LoopAA::alias(ptrA, sizeA, rel, ptrB, sizeB, L, R, dAliasRes);
@@ -111,12 +110,13 @@ LoopAA::ModRefResult LLVMAAResults::modref(const Instruction *A,
   auto aaRes = aa->getModRefInfo(A, ptrB, sizeB);
 
   if (aaRes == llvm::ModRefInfo::NoModRef) {
-    // LLVM_DEBUG(errs()<<"NoModRef 1 by LLVM AA" << *A << " --> " << *B << "\n");
+    // LLVM_DEBUG(errs()<<"NoModRef 1 by LLVM AA" << *A << " --> " << *B <<
+    // "\n");
     ++numNoModRef;
     return LoopAA::NoModRef;
   }
 
-  //return LoopAA::ModRefResult(aaRes &
+  // return LoopAA::ModRefResult(aaRes &
   //                            LoopAA::modref(A, rel, ptrB, sizeB, L, R));
   return LoopAA::modref(A, rel, ptrB, sizeB, L, R);
 }
@@ -146,32 +146,33 @@ LoopAA::ModRefResult LLVMAAResults::modref(const Instruction *A,
   auto *callB = dyn_cast<CallInst>(nB);
 
   if (callA && callB)
-    aaRes =
-        aa->getModRefInfo(callA, callB);
+    aaRes = aa->getModRefInfo(callA, callB);
   else if (callB)
     aaRes = aa->getModRefInfo(nA, callB);
-  else{
+  else {
     aaRes = aa->getModRefInfo(A, MemoryLocation::get(B));
-    //switch (aa->alias(MemoryLocation::get(A), MemoryLocation::get(B))) {
+    // switch (aa->alias(MemoryLocation::get(A), MemoryLocation::get(B))) {
     //  case PartialAlias:
     //  case MayAlias:
     //  case MustAlias:
     //    break;
     //  case NoAlias:
-    //    LLVM_DEBUG(errs()<<"NoModRef 2 by LLVM AA" << *A << " --> " << *B << "\n");
+    //    LLVM_DEBUG(errs()<<"NoModRef 2 by LLVM AA" << *A << " --> " << *B <<
+    //    "\n");
     //    ++numNoModRef;
     //    return LoopAA::NoModRef;
     //}
   }
 
   if (aaRes == llvm::ModRefInfo::NoModRef) {
-    // LLVM_DEBUG(errs()<<"NoModRef 2 by LLVM AA" << *A << " --> " << *B << "\n");
+    // LLVM_DEBUG(errs()<<"NoModRef 2 by LLVM AA" << *A << " --> " << *B <<
+    // "\n");
     ++numNoModRef;
     return LoopAA::NoModRef;
   }
 
   return LoopAA::modref(A, rel, B, L, R);
-  //return LoopAA::ModRefResult(aaRes & LoopAA::modref(A, rel, B, L, R));
+  // return LoopAA::ModRefResult(aaRes & LoopAA::modref(A, rel, B, L, R));
 }
 
 static RegisterPass<LLVMAAResults>

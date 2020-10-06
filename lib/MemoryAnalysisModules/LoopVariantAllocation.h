@@ -7,17 +7,18 @@
 #include "scaf/MemoryAnalysisModules/ClassicLoopAA.h"
 #include "scaf/MemoryAnalysisModules/LoopAA.h"
 
-namespace liberty
-{
+namespace liberty {
 using namespace llvm;
 
 /// This is deadline-quality, not perfectly sound analysis
 /// which assumes that stdin, stdout, and stderr are only
 /// every accessed via their global variables; they are never
 /// captured, stored in data structures, etc.
-class LoopVariantAllocation : public llvm::ModulePass, public liberty::ClassicLoopAA {
+class LoopVariantAllocation : public llvm::ModulePass,
+                              public liberty::ClassicLoopAA {
   const DataLayout *DL;
   const TargetLibraryInfo *tli;
+
 public:
   static char ID;
 
@@ -25,16 +26,12 @@ public:
 
   virtual bool runOnModule(llvm::Module &M);
 
-  virtual ModRefResult getModRefInfo(llvm::CallSite CS1,
-                                     TemporalRelation Rel,
-                                     llvm::CallSite CS2,
-                                     const llvm::Loop *L,
+  virtual ModRefResult getModRefInfo(llvm::CallSite CS1, TemporalRelation Rel,
+                                     llvm::CallSite CS2, const llvm::Loop *L,
                                      Remedies &R);
 
-  virtual ModRefResult getModRefInfo(llvm::CallSite CS,
-                                     TemporalRelation Rel,
-                                     const Pointer &P,
-                                     const llvm::Loop *L,
+  virtual ModRefResult getModRefInfo(llvm::CallSite CS, TemporalRelation Rel,
+                                     const Pointer &P, const llvm::Loop *L,
                                      Remedies &R);
 
   virtual AliasResult aliasCheck(const Pointer &P1, TemporalRelation Rel,
@@ -48,6 +45,6 @@ public:
   virtual void *getAdjustedAnalysisPointer(llvm::AnalysisID PI);
 };
 
-}
+} // namespace liberty
 
-#endif /* PURE_FUN_AA_H */
+#endif

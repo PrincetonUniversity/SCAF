@@ -119,12 +119,10 @@ LoopAA::ModRefResult ClassicLoopAA::modrefSimple(const LoadInst *Load,
   const DataLayout *TD = getDataLayout();
   const Value *P1 = getMemOper(Load);
   unsigned Size1 = getSize(Load->getType(), TD);
-  const AliasResult AR =
-      aliasCheck(Pointer(Load, P1, Size1), Rel, P2, L, tmpR);
+  const AliasResult AR = aliasCheck(Pointer(Load, P1, Size1), Rel, P2, L, tmpR);
   if (AR == NoAlias) {
     DesiredAliasResult dAliasRes = DNoAlias;
-    chain(R, P1, Size1, Rel, P2.ptr, P2.size, L, AR, tmpR,
-          dAliasRes);
+    chain(R, P1, Size1, Rel, P2.ptr, P2.size, L, AR, tmpR, dAliasRes);
     return NoModRef;
   }
 
@@ -157,8 +155,7 @@ LoopAA::ModRefResult ClassicLoopAA::modrefSimple(const StoreInst *Store,
       aliasCheck(Pointer(Store, P1, Size1), Rel, P2, L, tmpR);
   if (AR == NoAlias) {
     DesiredAliasResult dAliasRes = DNoAlias;
-    chain(R, P1, Size1, Rel, P2.ptr, P2.size, L, AR, tmpR,
-          dAliasRes);
+    chain(R, P1, Size1, Rel, P2.ptr, P2.size, L, AR, tmpR, dAliasRes);
     return NoModRef;
   }
 
@@ -185,8 +182,7 @@ LoopAA::ModRefResult ClassicLoopAA::modrefSimple(const VAArgInst *VAArg,
       aliasCheck(Pointer(VAArg, P1, UnknownSize), Rel, P2, L, tmpR);
   if (AR == NoAlias) {
     DesiredAliasResult dAliasRes = DNoAlias;
-    chain(R, P1, UnknownSize, Rel, P2.ptr, P2.size, L, AR, tmpR,
-          dAliasRes);
+    chain(R, P1, UnknownSize, Rel, P2.ptr, P2.size, L, AR, tmpR, dAliasRes);
     return NoModRef;
   }
 

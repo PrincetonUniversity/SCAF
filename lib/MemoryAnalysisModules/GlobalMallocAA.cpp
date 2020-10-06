@@ -1,15 +1,15 @@
 #define DEBUG_TYPE "global-malloc-aa"
 
-#include "llvm/IR/Instructions.h"
-#include "llvm/IR/Module.h"
-#include "llvm/IR/Operator.h"
-#include "llvm/Pass.h"
 #include "llvm/ADT/DenseMap.h"
 #include "llvm/ADT/DenseSet.h"
 #include "llvm/ADT/SmallPtrSet.h"
 #include "llvm/Analysis/Passes.h"
-#include "llvm/Analysis/ValueTracking.h"
 #include "llvm/Analysis/TargetLibraryInfo.h"
+#include "llvm/Analysis/ValueTracking.h"
+#include "llvm/IR/Instructions.h"
+#include "llvm/IR/Module.h"
+#include "llvm/IR/Operator.h"
+#include "llvm/Pass.h"
 #include "llvm/Support/Debug.h"
 #include "llvm/Support/raw_ostream.h"
 
@@ -17,7 +17,6 @@
 #include "scaf/MemoryAnalysisModules/FindSource.h"
 #include "scaf/MemoryAnalysisModules/LoopAA.h"
 #include "scaf/Utilities/CaptureUtil.h"
-
 
 using namespace llvm;
 
@@ -40,31 +39,30 @@ private:
   const DataLayout *DL;
   const TargetLibraryInfo *tli;
 
-  static bool isExclusive(const GlobalValue *global,
-                          const ValueSet &nonMalloc,
+  static bool isExclusive(const GlobalValue *global, const ValueSet &nonMalloc,
                           const CISet &sources) {
 
-    if(nonMalloc.count(global))
+    if (nonMalloc.count(global))
       return false;
 
-    if(liberty::findAllCaptures(global))
+    if (liberty::findAllCaptures(global))
       return false;
 
     liberty::CaptureSet captureSet;
 
-    for(CISetIt src = sources.begin(); src != sources.end(); ++src) {
+    for (CISetIt src = sources.begin(); src != sources.end(); ++src) {
 
       liberty::findAllCaptures(*src, &captureSet);
       assert(captureSet.size() != 0 && "How can a source not be captured!?");
-      if(captureSet.size() > 1) {
+      if (captureSet.size() > 1) {
         return false;
       }
 
       captureSet.clear();
     }
 
-    for(UseIt use = global->user_begin(); use != global->user_end(); ++use) {
-      if(isa<LoadInst>(*use) && liberty::findAllCaptures(*use)) {
+    for (UseIt use = global->user_begin(); use != global->user_end(); ++use) {
+      if (isa<LoadInst>(*use) && liberty::findAllCaptures(*use)) {
         return false;
       }
     }
@@ -121,8 +119,7 @@ private:
             return false;
         }
       }
-    }
-    else
+    } else
       return false;
 
     return nocaptureF;
@@ -177,23 +174,26 @@ public:
                   nonMalloc.insert(&*global);
                   nonMallocSrcs[&*global].insert(bStore);
                 }
-              } else if (!isa<LoadInst>(*bUse) && !nonCaptureFunCall(*use, &*global)) {
+              } else if (!isa<LoadInst>(*bUse) &&
+                         !nonCaptureFunCall(*use, &*global)) {
                 nonMalloc.insert(&*global);
               }
             }
-          } else if (!isa<LoadInst>(*use) && !nonCaptureFunCall(*use, &*global)) {
+          } else if (!isa<LoadInst>(*use) &&
+                     !nonCaptureFunCall(*use, &*global)) {
             nonMalloc.insert(&*global);
           }
         }
       }
 
-      if(!global->hasLocalLinkage() && !liberty::FULL_UNIVERSAL) {
+      if (!global->hasLocalLinkage() && !liberty::FULL_UNIVERSAL) {
         nonMalloc.insert(&*global);
       }
     }
 
-    for(GlobalIt global = M.global_begin(); global != M.global_end(); ++global) {
-      if(!isExclusive(&*global, nonMalloc, mallocSrcs[&*global])) {
+    for (GlobalIt global = M.global_begin(); global != M.global_end();
+         ++global) {
+      if (!isExclusive(&*global, nonMalloc, mallocSrcs[&*global])) {
         nonExclusive.insert(&*global);
       }
     }
@@ -217,44 +217,39 @@ public:
     const bool V1Exclusive = !nonExclusive.count(V1GlobalSrc);
     const bool V2Exclusive = !nonExclusive.count(V2GlobalSrc);
 
-    if(V1GlobalSrc && V1Exclusive &&
-       V1GlobalSrc != V2GlobalSrc &&
-       !liberty::findLoadedNoCaptureArgument(V2, *DL))
+    if (V1GlobalSrc && V1Exclusive && V1GlobalSrc != V2GlobalSrc &&
+        !liberty::findLoadedNoCaptureArgument(V2, *DL))
       return NoAlias;
 
-    if(V2GlobalSrc && V2Exclusive &&
-       V2GlobalSrc != V1GlobalSrc &&
-       !liberty::findLoadedNoCaptureArgument(V1, *DL))
+    if (V2GlobalSrc && V2Exclusive && V2GlobalSrc != V1GlobalSrc &&
+        !liberty::findLoadedNoCaptureArgument(V1, *DL))
       return NoAlias;
 
-    if(V1GlobalSrc && V1Exclusive &&
-       V2GlobalSrc && V2Exclusive &&
-       V1GlobalSrc == V2GlobalSrc)
+    if (V1GlobalSrc && V1Exclusive && V2GlobalSrc && V2Exclusive &&
+        V1GlobalSrc == V2GlobalSrc)
       return MayAlias;
-
 
     const bool V1MallocOnly = !nonMalloc.count(V1GlobalSrc);
     const bool V2MallocOnly = !nonMalloc.count(V2GlobalSrc);
 
-    if(V1GlobalSrc && V1MallocOnly &&
-       V2GlobalSrc && V2MallocOnly) {
+    if (V1GlobalSrc && V1MallocOnly && V2GlobalSrc && V2MallocOnly) {
 
       const CISet V1set = mallocSrcs[V1GlobalSrc];
       const CISet V2set = mallocSrcs[V2GlobalSrc];
 
       SmallPtrSet<const Instruction *, 4> both;
-      for(CISetIt it = V1set.begin(); it != V1set.end(); ++it) {
+      for (CISetIt it = V1set.begin(); it != V1set.end(); ++it) {
         both.insert(*it);
       }
 
       bool noAlias = true;
-      for(CISetIt it = V2set.begin(); it != V2set.end(); ++it) {
-        if(!both.insert(*it).second) {
+      for (CISetIt it = V2set.begin(); it != V2set.end(); ++it) {
+        if (!both.insert(*it).second) {
           noAlias = false;
         }
       }
 
-      if(both.size() && noAlias) {
+      if (both.size() && noAlias) {
         return LoopAA::NoAlias;
       }
     }
@@ -262,25 +257,25 @@ public:
     const Instruction *V1Src = liberty::findNoAliasSource(V1, *tli);
     const Instruction *V2Src = liberty::findNoAliasSource(V2, *tli);
 
-    if(V1GlobalSrc && V2Src && V1MallocOnly &&
-       !mallocSrcs[V1GlobalSrc].count(V2Src)) {
+    if (V1GlobalSrc && V2Src && V1MallocOnly &&
+        !mallocSrcs[V1GlobalSrc].count(V2Src)) {
       return NoAlias;
     }
 
-    if(V2GlobalSrc && V1Src && V2MallocOnly &&
-       !mallocSrcs[V2GlobalSrc].count(V1Src)) {
+    if (V2GlobalSrc && V1Src && V2MallocOnly &&
+        !mallocSrcs[V2GlobalSrc].count(V1Src)) {
       return NoAlias;
     }
 
     const GlobalValue *V1Global =
-      dyn_cast<GlobalValue>(GetUnderlyingObject(V1, *DL));
+        dyn_cast<GlobalValue>(GetUnderlyingObject(V1, *DL));
     const GlobalValue *V2Global =
-      dyn_cast<GlobalValue>(GetUnderlyingObject(V2, *DL));
+        dyn_cast<GlobalValue>(GetUnderlyingObject(V2, *DL));
 
-    if(V1GlobalSrc && V2Global && V1MallocOnly)
+    if (V1GlobalSrc && V2Global && V1MallocOnly)
       return NoAlias;
 
-    if(V2GlobalSrc && V1Global && V2MallocOnly)
+    if (V2GlobalSrc && V1Global && V2MallocOnly)
       return NoAlias;
 
     // Addressing the following scenario:
@@ -336,13 +331,11 @@ public:
     return MayAlias;
   }
 
-  StringRef getLoopAAName() const {
-    return "global-malloc-aa";
-  }
+  StringRef getLoopAAName() const { return "global-malloc-aa"; }
 
   void getAnalysisUsage(AnalysisUsage &AU) const {
     LoopAA::getAnalysisUsage(AU);
-    AU.setPreservesAll();                         // Does not transform code
+    AU.setPreservesAll(); // Does not transform code
   }
 
   /// getAdjustedAnalysisPointer - This method is used when a pass implements
@@ -351,7 +344,7 @@ public:
   /// specified pass info.
   virtual void *getAdjustedAnalysisPointer(AnalysisID PI) {
     if (PI == &LoopAA::ID)
-      return (LoopAA*)this;
+      return (LoopAA *)this;
     return this;
   }
 };
@@ -359,6 +352,6 @@ public:
 char GlobalMallocAA::ID = 0;
 
 static RegisterPass<GlobalMallocAA>
-X("global-malloc-aa", "Alias analysis for globals pointers", false, true);
+    X("global-malloc-aa", "Alias analysis for globals pointers", false, true);
 static RegisterAnalysisGroup<liberty::LoopAA> Y(X);
 

@@ -13,30 +13,30 @@
 //
 //===----------------------------------------------------------------------===//
 
+#include "llvm/ADT/SmallPtrSet.h"
+#include "llvm/ADT/SmallVector.h"
 #include "llvm/Analysis/AliasAnalysis.h"
+#include "llvm/Analysis/CaptureTracking.h"
+#include "llvm/Analysis/MemoryBuiltins.h"
 #include "llvm/Analysis/Passes.h"
+#include "llvm/Analysis/ValueTracking.h"
 #include "llvm/IR/Constants.h"
+#include "llvm/IR/DataLayout.h"
 #include "llvm/IR/DerivedTypes.h"
 #include "llvm/IR/Function.h"
+#include "llvm/IR/GetElementPtrTypeIterator.h"
 #include "llvm/IR/GlobalAlias.h"
 #include "llvm/IR/GlobalVariable.h"
 #include "llvm/IR/Instructions.h"
 #include "llvm/IR/IntrinsicInst.h"
 #include "llvm/IR/Operator.h"
 #include "llvm/Pass.h"
-#include "llvm/Analysis/CaptureTracking.h"
-#include "llvm/Analysis/MemoryBuiltins.h"
-#include "llvm/Analysis/ValueTracking.h"
-#include "llvm/IR/DataLayout.h"
-#include "llvm/ADT/SmallPtrSet.h"
-#include "llvm/ADT/SmallVector.h"
 #include "llvm/Support/ErrorHandling.h"
-#include "llvm/IR/GetElementPtrTypeIterator.h"
 
-#include "scaf/Utilities/GetMemOper.h"
-#include "scaf/Utilities/GetSize.h"
 #include "scaf/MemoryAnalysisModules/ClassicLoopAA.h"
 #include "scaf/MemoryAnalysisModules/LoopAA.h"
+#include "scaf/Utilities/GetMemOper.h"
+#include "scaf/Utilities/GetSize.h"
 
 #include <algorithm>
 using namespace llvm;
@@ -85,7 +85,6 @@ static bool isEscapeSource(const Value *V) {
 
   return false;
 }
-
 
 /// Returns the size of the object specified by V or UnknownSize if unknown.
 static uint64_t getObjectSize(const Value *V, const DataLayout &DL,
@@ -145,19 +144,14 @@ static bool isObjectSmallerThan(const Value *V, uint64_t Size,
 //===----------------------------------------------------------------------===//
 
 namespace {
-  enum ExtensionKind {
-    EK_NotExtended,
-    EK_SignExt,
-    EK_ZeroExt
-  };
+enum ExtensionKind { EK_NotExtended, EK_SignExt, EK_ZeroExt };
 
-  struct VariableGEPIndex {
-    const Value *V;
-    ExtensionKind Extension;
-    int64_t Scale;
-  };
-}
-
+struct VariableGEPIndex {
+  const Value *V;
+  ExtensionKind Extension;
+  int64_t Scale;
+};
+} // namespace
 
 /// GetLinearExpression - Analyze the specified value as a linear expression:
 /// "A*V + B", where A and B are constant integers.  Return the scale and offset
@@ -182,7 +176,8 @@ static Value *GetLinearExpression(Value *V, APInt &Scale, APInt &Offset,
   if (BinaryOperator *BOp = dyn_cast<BinaryOperator>(V)) {
     if (ConstantInt *RHSC = dyn_cast<ConstantInt>(BOp->getOperand(1))) {
       switch (BOp->getOpcode()) {
-      default: break;
+      default:
+        break;
       case Instruction::Or:
         // X|C == X+C if all the bits in C are unset in X.  Otherwise we can't
         // analyze it.
@@ -191,18 +186,18 @@ static Value *GetLinearExpression(Value *V, APInt &Scale, APInt &Offset,
         // FALL THROUGH.
       case Instruction::Add:
         V = GetLinearExpression(BOp->getOperand(0), Scale, Offset, Extension,
-                                TD, Depth+1);
+                                TD, Depth + 1);
         Offset += RHSC->getValue();
         return V;
       case Instruction::Mul:
         V = GetLinearExpression(BOp->getOperand(0), Scale, Offset, Extension,
-                                TD, Depth+1);
+                                TD, Depth + 1);
         Offset *= RHSC->getValue();
         Scale *= RHSC->getValue();
         return V;
       case Instruction::Shl:
         V = GetLinearExpression(BOp->getOperand(0), Scale, Offset, Extension,
-                                TD, Depth+1);
+                                TD, Depth + 1);
         Offset <<= RHSC->getValue().getLimitedValue();
         Scale <<= RHSC->getValue().getLimitedValue();
         return V;
@@ -222,8 +217,8 @@ static Value *GetLinearExpression(Value *V, APInt &Scale, APInt &Offset,
     Offset = Offset.trunc(SmallWidth);
     Extension = isa<SExtInst>(V) ? EK_SignExt : EK_ZeroExt;
 
-    Value *Result = GetLinearExpression(CastOp, Scale, Offset, Extension,
-                                        TD, Depth+1);
+    Value *Result =
+        GetLinearExpression(CastOp, Scale, Offset, Extension, TD, Depth + 1);
     Scale = Scale.zext(OldWidth);
     Offset = Offset.zext(OldWidth);
 
@@ -295,8 +290,8 @@ DecomposeGEPExpression(const Value *V, int64_t &BaseOffs,
 
     // Don't attempt to analyze GEPs over unsized objects.
     if (!GEPOp->getSourceElementType()->isSized())
-    //if (!cast<PointerType>(GEPOp->getOperand(0)->getType())
-    //    ->getElementType()->isSized())
+      // if (!cast<PointerType>(GEPOp->getOperand(0)->getType())
+      //    ->getElementType()->isSized())
       return V;
 
     // If we are lacking DataLayout information, we can't compute the offets of
@@ -311,14 +306,15 @@ DecomposeGEPExpression(const Value *V, int64_t &BaseOffs,
 
     // Walk the indices of the GEP, accumulating them into BaseOff/VarIndices.
     gep_type_iterator GTI = gep_type_begin(GEPOp);
-    for (User::const_op_iterator I = GEPOp->op_begin()+1,
-           E = GEPOp->op_end(); I != E; ++I, ++GTI) {
+    for (User::const_op_iterator I = GEPOp->op_begin() + 1, E = GEPOp->op_end();
+         I != E; ++I, ++GTI) {
       Value *Index = *I;
       // Compute the (potentially symbolic) offset in bytes for this index.
       if (StructType *STy = GTI.getStructTypeOrNull()) {
         // For a struct, add the member offset.
         unsigned FieldNo = cast<ConstantInt>(Index)->getZExtValue();
-        if (FieldNo == 0) continue;
+        if (FieldNo == 0)
+          continue;
 
         BaseOffs += TD->getStructLayout(STy)->getElementOffset(FieldNo);
         continue;
@@ -326,8 +322,10 @@ DecomposeGEPExpression(const Value *V, int64_t &BaseOffs,
 
       // For an array/pointer, add the element offset, explicitly scaled.
       if (ConstantInt *CIdx = dyn_cast<ConstantInt>(Index)) {
-        if (CIdx->isZero()) continue;
-        BaseOffs += TD->getTypeAllocSize(GTI.getIndexedType())*CIdx->getSExtValue();
+        if (CIdx->isZero())
+          continue;
+        BaseOffs +=
+            TD->getTypeAllocSize(GTI.getIndexedType()) * CIdx->getSExtValue();
         continue;
       }
 
@@ -347,32 +345,31 @@ DecomposeGEPExpression(const Value *V, int64_t &BaseOffs,
 
       // The GEP index scale ("Scale") scales C1*V+C2, yielding (C1*V+C2)*Scale.
       // This gives us an aggregate computation of (C1*Scale)*V + C2*Scale.
-      BaseOffs += IndexOffset.getZExtValue()*Scale;
+      BaseOffs += IndexOffset.getZExtValue() * Scale;
       Scale *= IndexScale.getZExtValue();
-
 
       // If we already had an occurrance of this index variable, merge this
       // scale into it.  For example, we want to handle:
       //   A[x][x] -> x*16 + x*4 -> x*20
       // This also ensures that 'x' only appears in the index list once.
       for (unsigned i = 0, e = VarIndices.size(); i != e; ++i) {
-        if (VarIndices[i].V == Index &&
-            VarIndices[i].Extension == Extension) {
+        if (VarIndices[i].V == Index && VarIndices[i].Extension == Extension) {
           Scale += VarIndices[i].Scale;
-          VarIndices.erase(VarIndices.begin()+i);
+          VarIndices.erase(VarIndices.begin() + i);
           break;
         }
       }
 
       // Make sure that we have a scale that makes sense for this target's
       // pointer size.
-      if (unsigned ShiftBits = 64-TD->getPointerSizeInBits()) {
+      if (unsigned ShiftBits = 64 - TD->getPointerSizeInBits()) {
         Scale <<= ShiftBits;
         Scale >>= ShiftBits;
       }
 
       if (Scale) {
-        VariableGEPIndex Entry = {Index, Extension, static_cast<int64_t>(Scale)};
+        VariableGEPIndex Entry = {Index, Extension,
+                                  static_cast<int64_t>(Scale)};
         VarIndices.push_back(Entry);
       }
     }
@@ -391,7 +388,8 @@ DecomposeGEPExpression(const Value *V, int64_t &BaseOffs,
 /// difference between the two pointers.
 static void GetIndexDifference(SmallVectorImpl<VariableGEPIndex> &Dest,
                                const SmallVectorImpl<VariableGEPIndex> &Src) {
-  if (Src.empty()) return;
+  if (Src.empty())
+    return;
 
   for (unsigned i = 0, e = Src.size(); i != e; ++i) {
     const Value *V = Src[i].V;
@@ -401,21 +399,22 @@ static void GetIndexDifference(SmallVectorImpl<VariableGEPIndex> &Dest,
     // Find V in Dest.  This is N^2, but pointer indices almost never have more
     // than a few variable indexes.
     for (unsigned j = 0, e = Dest.size(); j != e; ++j) {
-      if (Dest[j].V != V || Dest[j].Extension != Extension) continue;
+      if (Dest[j].V != V || Dest[j].Extension != Extension)
+        continue;
 
       // If we found it, subtract off Scale V's from the entry in Dest.  If it
       // goes to zero, remove the entry.
       if (Dest[j].Scale != Scale)
         Dest[j].Scale -= Scale;
       else
-        Dest.erase(Dest.begin()+j);
+        Dest.erase(Dest.begin() + j);
       Scale = 0;
       break;
     }
 
     // If we didn't consume this entry, add it to the end of the Dest list.
     if (Scale) {
-      VariableGEPIndex Entry = { V, Extension, -Scale };
+      VariableGEPIndex Entry = {V, Extension, -Scale};
       Dest.push_back(Entry);
     }
   }
@@ -426,108 +425,103 @@ static void GetIndexDifference(SmallVectorImpl<VariableGEPIndex> &Dest,
 //===----------------------------------------------------------------------===//
 
 namespace {
-  /// BasicLoopAA - This is the default alias analysis implementation.
-  /// Because it doesn't chain to a previous alias analysis (like -no-aa), it
-  /// derives from the LoopAA class.
-  struct BasicLoopAA : public liberty::ClassicLoopAA, public ModulePass {
-    static char ID; // Class identification, replacement for typeinfo
-    BasicLoopAA() : ModulePass(ID) {}
+/// BasicLoopAA - This is the default alias analysis implementation.
+/// Because it doesn't chain to a previous alias analysis (like -no-aa), it
+/// derives from the LoopAA class.
+struct BasicLoopAA : public liberty::ClassicLoopAA, public ModulePass {
+  static char ID; // Class identification, replacement for typeinfo
+  BasicLoopAA() : ModulePass(ID) {}
 
-    Module *currentMod;
+  Module *currentMod;
 
-    bool runOnModule(Module &M) {
-      currentMod = &M;
-      InitializeLoopAA(this, M.getDataLayout());
-      return false;
-    }
+  bool runOnModule(Module &M) {
+    currentMod = &M;
+    InitializeLoopAA(this, M.getDataLayout());
+    return false;
+  }
 
-    virtual ModRefResult getModRefInfo(CallSite CS1, TemporalRelation Rel,
-                                       CallSite CS2, const Loop *L,
-                                       Remedies &R) {
-      return ModRef;
-    }
+  virtual ModRefResult getModRefInfo(CallSite CS1, TemporalRelation Rel,
+                                     CallSite CS2, const Loop *L, Remedies &R) {
+    return ModRef;
+  }
 
-    virtual ModRefResult getModRefInfo(CallSite CS, TemporalRelation Rel,
-                                       const Pointer &P2, const Loop *L,
-                                       Remedies &R);
+  virtual ModRefResult getModRefInfo(CallSite CS, TemporalRelation Rel,
+                                     const Pointer &P2, const Loop *L,
+                                     Remedies &R);
 
-    virtual AliasResult
-    aliasCheck(const Pointer &P1, TemporalRelation Rel, const Pointer &P2,
-               const Loop *L, Remedies &R,
-               DesiredAliasResult dAliasRes = DNoOrMustAlias);
+  virtual AliasResult aliasCheck(const Pointer &P1, TemporalRelation Rel,
+                                 const Pointer &P2, const Loop *L, Remedies &R,
+                                 DesiredAliasResult dAliasRes = DNoOrMustAlias);
 
-    AliasResult aliasCommon(const Value *V1, unsigned V1Size,
-                            TemporalRelation Rel, const Value *V2,
-                            unsigned V2Size, const Loop *L, Remedies &R);
+  AliasResult aliasCommon(const Value *V1, unsigned V1Size,
+                          TemporalRelation Rel, const Value *V2,
+                          unsigned V2Size, const Loop *L, Remedies &R);
 
-    /// pointsToConstantMemory - Chase pointers until we find a (constant
-    /// global) or not.
-    virtual bool pointsToConstantMemory(const Value *P, const Loop *L);
+  /// pointsToConstantMemory - Chase pointers until we find a (constant
+  /// global) or not.
+  virtual bool pointsToConstantMemory(const Value *P, const Loop *L);
 
-    StringRef getLoopAAName() const {
-      return "basic-loop-aa";
-    }
+  StringRef getLoopAAName() const { return "basic-loop-aa"; }
 
-    virtual SchedulingPreference getSchedulingPreference() const {
-      return Top;
-    }
+  virtual SchedulingPreference getSchedulingPreference() const { return Top; }
 
-    /// getAdjustedAnalysisPointer - This method is used when a pass implements
-    /// an analysis interface through multiple inheritance.  If needed, it
-    /// should override this to adjust the this pointer as needed for the
-    /// specified pass info.
-    virtual void *getAdjustedAnalysisPointer(const void *ID) {
-      if (ID == &LoopAA::ID)
-        return (AliasAnalysis*)this;
-      return this;
-    }
+  /// getAdjustedAnalysisPointer - This method is used when a pass implements
+  /// an analysis interface through multiple inheritance.  If needed, it
+  /// should override this to adjust the this pointer as needed for the
+  /// specified pass info.
+  virtual void *getAdjustedAnalysisPointer(const void *ID) {
+    if (ID == &LoopAA::ID)
+      return (AliasAnalysis *)this;
+    return this;
+  }
 
-    virtual void getAnalysisUsage(AnalysisUsage &AU) const {
-      LoopAA::getAnalysisUsage(AU);
-      AU.setPreservesAll();
-    }
+  virtual void getAnalysisUsage(AnalysisUsage &AU) const {
+    LoopAA::getAnalysisUsage(AU);
+    AU.setPreservesAll();
+  }
 
-  private:
-    // Visited - Track instructions visited by a aliasPHI, aliasSelect(), and aliasGEP().
-    SmallPtrSet<const Value*, 16> Visited;
+private:
+  // Visited - Track instructions visited by a aliasPHI, aliasSelect(), and
+  // aliasGEP().
+  SmallPtrSet<const Value *, 16> Visited;
 
-    // aliasGEP - Provide a bunch of ad-hoc rules to disambiguate a GEP
-    // instruction against another.
-    AliasResult aliasGEP(const GEPOperator *V1, unsigned V1Size,
-                         TemporalRelation Rel, const Value *V2, unsigned V2Size,
-                         const Loop *L, const Value *UnderlyingV1,
-                         const Value *UnderlyingV2, Remedies &R);
+  // aliasGEP - Provide a bunch of ad-hoc rules to disambiguate a GEP
+  // instruction against another.
+  AliasResult aliasGEP(const GEPOperator *V1, unsigned V1Size,
+                       TemporalRelation Rel, const Value *V2, unsigned V2Size,
+                       const Loop *L, const Value *UnderlyingV1,
+                       const Value *UnderlyingV2, Remedies &R);
 
-    // aliasPHI - Provide a bunch of ad-hoc rules to disambiguate a PHI
-    // instruction against another.
-    AliasResult aliasPHI(const PHINode *PN, unsigned PNSize,
-                         TemporalRelation Rel, const Value *V2, unsigned V2Size,
-                         const Loop *L, Remedies &R);
+  // aliasPHI - Provide a bunch of ad-hoc rules to disambiguate a PHI
+  // instruction against another.
+  AliasResult aliasPHI(const PHINode *PN, unsigned PNSize, TemporalRelation Rel,
+                       const Value *V2, unsigned V2Size, const Loop *L,
+                       Remedies &R);
 
-    /// aliasSelect - Disambiguate a Select instruction against another value.
-    AliasResult aliasSelect(const SelectInst *SI, unsigned SISize,
-                            TemporalRelation Rel, const Value *V2,
-                            unsigned V2Size, const Loop *L, Remedies &R);
-  };
-}  // End of anonymous namespace
+  /// aliasSelect - Disambiguate a Select instruction against another value.
+  AliasResult aliasSelect(const SelectInst *SI, unsigned SISize,
+                          TemporalRelation Rel, const Value *V2,
+                          unsigned V2Size, const Loop *L, Remedies &R);
+};
+} // End of anonymous namespace
 
 // Register this pass...
 char BasicLoopAA::ID = 0;
-static RegisterPass<BasicLoopAA>
-X("basic-loop-aa", "Basic Loop Alias Analysis", false, true);
+static RegisterPass<BasicLoopAA> X("basic-loop-aa", "Basic Loop Alias Analysis",
+                                   false, true);
 static RegisterAnalysisGroup<liberty::LoopAA> Y(X);
 
 /// pointsToConstantMemory - Chase pointers until we find a (constant
 /// global) or not.
 bool BasicLoopAA::pointsToConstantMemory(const Value *P, const Loop *L) {
-  if (const GlobalVariable *GV =
-      dyn_cast<GlobalVariable>(GetUnderlyingObject(P, currentMod->getDataLayout())))
+  if (const GlobalVariable *GV = dyn_cast<GlobalVariable>(
+          GetUnderlyingObject(P, currentMod->getDataLayout())))
     // Note: this doesn't require GV to be "ODR" because it isn't legal for a
     // global to be marked constant in some modules and non-constant in others.
     // GV may even be a declaration, not a definition.
     return GV->isConstant();
 
-  if(isa<Function>(P))
+  if (isa<Function>(P))
     return true;
 
   return LoopAA::pointsToConstantMemory(P, L);
@@ -544,12 +538,12 @@ BasicLoopAA::getModRefInfo(CallSite CS, TemporalRelation Rel, const Pointer &P2,
   const Value *V = P2.ptr;
   const unsigned Size = P2.size;
 
-  if(isInterprocedural(CS.getInstruction(), V))
+  if (isInterprocedural(CS.getInstruction(), V))
     return ModRef;
 
   // If P points to a constant memory location, the call definitely could not
   // modify the memory location.
-  if(pointsToConstantMemory(V,L))
+  if (pointsToConstantMemory(V, L))
     return Ref;
 
   const Value *Object = GetUnderlyingObject(V, currentMod->getDataLayout());
@@ -576,7 +570,7 @@ BasicLoopAA::getModRefInfo(CallSite CS, TemporalRelation Rel, const Pointer &P2,
       // Only look at the no-capture pointer arguments.
       if (!(*CI)->getType()->isPointerTy() ||
           (!CS.doesNotCapture(ArgNo) && !CS.isByValArgument(ArgNo)))
-          //!CS.paramHasAttr(ArgNo+1, Attribute::NoCapture))
+        //! CS.paramHasAttr(ArgNo+1, Attribute::NoCapture))
         continue;
 
       // If this is a no-capture pointer argument, see if we can tell that it is
@@ -601,7 +595,8 @@ BasicLoopAA::getModRefInfo(CallSite CS, TemporalRelation Rel, const Pointer &P2,
   const IntrinsicInst *II = dyn_cast<IntrinsicInst>(CS.getInstruction());
   if (II != 0)
     switch (II->getIntrinsicID()) {
-    default: break;
+    default:
+      break;
     case Intrinsic::memcpy:
     case Intrinsic::memmove: {
       unsigned Len = UnknownSize;
@@ -642,7 +637,7 @@ BasicLoopAA::getModRefInfo(CallSite CS, TemporalRelation Rel, const Pointer &P2,
     case Intrinsic::lifetime_end:
     case Intrinsic::invariant_start: {
       unsigned PtrSize =
-        cast<ConstantInt>(II->getArgOperand(0))->getZExtValue();
+          cast<ConstantInt>(II->getArgOperand(0))->getZExtValue();
       Remedies tmpR;
       if (isNoAlias(II->getArgOperand(1), PtrSize, Rel, V, Size, L, tmpR)) {
         for (auto remed : tmpR)
@@ -653,7 +648,7 @@ BasicLoopAA::getModRefInfo(CallSite CS, TemporalRelation Rel, const Pointer &P2,
     }
     case Intrinsic::invariant_end: {
       unsigned PtrSize =
-        cast<ConstantInt>(II->getArgOperand(1))->getZExtValue();
+          cast<ConstantInt>(II->getArgOperand(1))->getZExtValue();
       Remedies tmpR;
       if (isNoAlias(II->getArgOperand(2), PtrSize, Rel, V, Size, L, tmpR)) {
         for (auto remed : tmpR)
@@ -666,7 +661,6 @@ BasicLoopAA::getModRefInfo(CallSite CS, TemporalRelation Rel, const Pointer &P2,
 
   return ModRef;
 }
-
 
 /// aliasGEP - Provide a bunch of ad-hoc rules to disambiguate a GEP instruction
 /// against another pointer.  We know that V1 is a GEP, but we don't know
@@ -693,20 +687,16 @@ BasicLoopAA::aliasGEP(const GEPOperator *GEP1, unsigned V1Size,
   // out if the indexes to the GEP tell us anything about the derived pointer.
   if (const GEPOperator *GEP2 = dyn_cast<GEPOperator>(V2)) {
     // Do the base pointers alias?
-    AliasResult BaseAlias = aliasCommon(UnderlyingV1, UnknownSize,
-                                        Rel,
-                                        UnderlyingV2, UnknownSize,
-                                        L, R);
+    AliasResult BaseAlias = aliasCommon(UnderlyingV1, UnknownSize, Rel,
+                                        UnderlyingV2, UnknownSize, L, R);
 
     // If we get a No or May, then return it immediately, no amount of analysis
     // will improve this situation.
-    if (BaseAlias != MustAlias )
-    {
+    if (BaseAlias != MustAlias) {
       return BaseAlias;
     }
-    if( Rel != Same || !L )
-    {
-      if( BaseAlias == MustAlias )
+    if (Rel != Same || !L) {
+      if (BaseAlias == MustAlias)
         return MayAlias;
       else
         return BaseAlias;
@@ -717,12 +707,12 @@ BasicLoopAA::aliasGEP(const GEPOperator *GEP1, unsigned V1Size,
     // about the relation of the resulting pointer.
     const DataLayout *TD = getDataLayout();
     const Value *GEP1BasePtr =
-      DecomposeGEPExpression(GEP1, GEP1BaseOffset, GEP1VariableIndices, TD);
+        DecomposeGEPExpression(GEP1, GEP1BaseOffset, GEP1VariableIndices, TD);
 
     int64_t GEP2BaseOffset;
     SmallVector<VariableGEPIndex, 4> GEP2VariableIndices;
     const Value *GEP2BasePtr =
-      DecomposeGEPExpression(GEP2, GEP2BaseOffset, GEP2VariableIndices, TD);
+        DecomposeGEPExpression(GEP2, GEP2BaseOffset, GEP2VariableIndices, TD);
 
     // If DecomposeGEPExpression isn't able to look all the way through the
     // addressing operation, we must not have TD and this is too complex for us
@@ -747,7 +737,8 @@ BasicLoopAA::aliasGEP(const GEPOperator *GEP1, unsigned V1Size,
     if (V1Size == UnknownSize && V2Size == UnknownSize)
       return MayAlias;
 
-    AliasResult Res = aliasCommon(UnderlyingV1, UnknownSize, Rel, V2, V2Size, L, R);
+    AliasResult Res =
+        aliasCommon(UnderlyingV1, UnknownSize, Rel, V2, V2Size, L, R);
     if (Res != MustAlias)
       // If V2 may alias GEP base pointer, conservatively returns MayAlias.  If
       // V2 is known not to alias GEP base pointer, then the two values cannot
@@ -758,7 +749,7 @@ BasicLoopAA::aliasGEP(const GEPOperator *GEP1, unsigned V1Size,
 
     const DataLayout *TD = getDataLayout();
     const Value *GEP1BasePtr =
-      DecomposeGEPExpression(GEP1, GEP1BaseOffset, GEP1VariableIndices, TD);
+        DecomposeGEPExpression(GEP1, GEP1BaseOffset, GEP1VariableIndices, TD);
 
     // If DecomposeGEPExpression isn't able to look all the way through the
     // addressing operation, we must not have TD and this is too complex for us
@@ -790,16 +781,15 @@ BasicLoopAA::aliasGEP(const GEPOperator *GEP1, unsigned V1Size,
   // multiple of any of our variable indices.  This allows us to transform
   // things like &A[i][1] because i has a stride of (e.g.) 8 bytes but the 1
   // provides an offset of 4 bytes (assuming a <= 4 byte access).
-  for (unsigned i = 0, e = GEP1VariableIndices.size();
-       i != e && GEP1BaseOffset;++i)
-    if (int64_t RemovedOffset = GEP1BaseOffset/GEP1VariableIndices[i].Scale)
-      GEP1BaseOffset -= RemovedOffset*GEP1VariableIndices[i].Scale;
+  for (unsigned i = 0, e = GEP1VariableIndices.size(); i != e && GEP1BaseOffset;
+       ++i)
+    if (int64_t RemovedOffset = GEP1BaseOffset / GEP1VariableIndices[i].Scale)
+      GEP1BaseOffset -= RemovedOffset * GEP1VariableIndices[i].Scale;
 
   // If our known offset is bigger than the access size, we know we don't have
   // an alias.
   if (GEP1BaseOffset) {
-    if (GEP1BaseOffset >= (int64_t)V2Size ||
-        GEP1BaseOffset <= -(int64_t)V1Size)
+    if (GEP1BaseOffset >= (int64_t)V2Size || GEP1BaseOffset <= -(int64_t)V1Size)
       return NoAlias;
   }
 
@@ -821,21 +811,15 @@ BasicLoopAA::aliasSelect(const SelectInst *SI, unsigned SISize,
 
   // If the values are Selects with the same condition, we can do a more precise
   // check: just check for aliases between the values on corresponding arms.
-  if(Rel == Same && L) {
+  if (Rel == Same && L) {
     if (const SelectInst *SI2 = dyn_cast<SelectInst>(V2)) {
       if (SI->getCondition() == SI2->getCondition()) {
-        AliasResult Alias =
-          aliasCommon(SI->getTrueValue(), SISize,
-                      Rel,
-                      SI2->getTrueValue(), V2Size,
-                      L, R);
+        AliasResult Alias = aliasCommon(SI->getTrueValue(), SISize, Rel,
+                                        SI2->getTrueValue(), V2Size, L, R);
         if (Alias == MayAlias)
           return MayAlias;
-        AliasResult ThisAlias =
-          aliasCommon(SI->getFalseValue(), SISize,
-                      Rel,
-                      SI2->getFalseValue(), V2Size,
-                      L, R);
+        AliasResult ThisAlias = aliasCommon(SI->getFalseValue(), SISize, Rel,
+                                            SI2->getFalseValue(), V2Size, L, R);
         if (ThisAlias != Alias)
           return MayAlias;
         return Alias;
@@ -846,7 +830,7 @@ BasicLoopAA::aliasSelect(const SelectInst *SI, unsigned SISize,
   // If both arms of the Select node NoAlias or MustAlias V2, then returns
   // NoAlias / MustAlias. Otherwise, returns MayAlias.
   AliasResult Alias =
-    aliasCommon(V2, V2Size, Rel, SI->getTrueValue(), SISize, L, R);
+      aliasCommon(V2, V2Size, Rel, SI->getTrueValue(), SISize, L, R);
   if (Alias == MayAlias)
     return MayAlias;
 
@@ -856,7 +840,7 @@ BasicLoopAA::aliasSelect(const SelectInst *SI, unsigned SISize,
   Visited.erase(V2);
 
   AliasResult ThisAlias =
-    aliasCommon(V2, V2Size, Rel, SI->getFalseValue(), SISize, L, R);
+      aliasCommon(V2, V2Size, Rel, SI->getFalseValue(), SISize, L, R);
   if (ThisAlias != Alias)
     return MayAlias;
   return Alias;
@@ -879,20 +863,16 @@ BasicLoopAA::aliasPHI(const PHINode *PN, unsigned PNSize, TemporalRelation Rel,
     if (const PHINode *PN2 = dyn_cast<PHINode>(V2)) {
       if (PN2->getParent() == PN->getParent()) {
         AliasResult Alias =
-          aliasCommon(PN->getIncomingValue(0), PNSize,
-                      Rel,
-                      PN2->getIncomingValueForBlock(PN->getIncomingBlock(0)),
-                      V2Size,
-                      L, R);
+            aliasCommon(PN->getIncomingValue(0), PNSize, Rel,
+                        PN2->getIncomingValueForBlock(PN->getIncomingBlock(0)),
+                        V2Size, L, R);
         if (Alias == MayAlias)
           return MayAlias;
         for (unsigned i = 1, e = PN->getNumIncomingValues(); i != e; ++i) {
-          AliasResult ThisAlias =
-            aliasCommon(PN->getIncomingValue(i), PNSize,
-                        Rel,
-                        PN2->getIncomingValueForBlock(PN->getIncomingBlock(i)),
-                        V2Size,
-                        L, R);
+          AliasResult ThisAlias = aliasCommon(
+              PN->getIncomingValue(i), PNSize, Rel,
+              PN2->getIncomingValueForBlock(PN->getIncomingBlock(i)), V2Size, L,
+              R);
           if (ThisAlias != Alias)
             return MayAlias;
         }
@@ -901,8 +881,8 @@ BasicLoopAA::aliasPHI(const PHINode *PN, unsigned PNSize, TemporalRelation Rel,
     }
   }
 
-  SmallPtrSet<Value*, 4> UniqueSrc;
-  SmallVector<Value*, 4> V1Srcs;
+  SmallPtrSet<Value *, 4> UniqueSrc;
+  SmallVector<Value *, 4> V1Srcs;
   for (unsigned i = 0, e = PN->getNumIncomingValues(); i != e; ++i) {
     Value *PV1 = PN->getIncomingValue(i);
     if (isa<PHINode>(PV1))
@@ -939,8 +919,8 @@ BasicLoopAA::aliasPHI(const PHINode *PN, unsigned PNSize, TemporalRelation Rel,
   return Alias;
 }
 
-// aliasCommon - Provide a bunch of ad-hoc rules to disambiguate in common cases,
-// such as array references.
+// aliasCommon - Provide a bunch of ad-hoc rules to disambiguate in common
+// cases, such as array references.
 //
 liberty::LoopAA::AliasResult
 BasicLoopAA::aliasCheck(const Pointer &P1, TemporalRelation Rel,
@@ -956,16 +936,14 @@ BasicLoopAA::aliasCheck(const Pointer &P1, TemporalRelation Rel,
   return AR;
 }
 
-
 liberty::LoopAA::AliasResult
-BasicLoopAA::aliasCommon(const Value *V1, unsigned V1Size,
-                         TemporalRelation Rel,
-                         const Value *V2, unsigned V2Size,
-                         const Loop *L, Remedies &R) {
+BasicLoopAA::aliasCommon(const Value *V1, unsigned V1Size, TemporalRelation Rel,
+                         const Value *V2, unsigned V2Size, const Loop *L,
+                         Remedies &R) {
 
   // This file is setup for intra-procedural analysis, if these two values
   // are from different functions we just give up right away
-  if(isInterprocedural(V1, V2))
+  if (isInterprocedural(V1, V2))
     return MayAlias;
 
   // If either of the memory references is empty, it doesn't matter what the
@@ -978,10 +956,11 @@ BasicLoopAA::aliasCommon(const Value *V1, unsigned V1Size,
   V2 = V2->stripPointerCasts();
 
   // Are we checking for alias of the same value?
-  if (V1 == V2 && Rel == Same) return MustAlias;
+  if (V1 == V2 && Rel == Same)
+    return MustAlias;
 
   if (!V1->getType()->isPointerTy() || !V2->getType()->isPointerTy())
-    return NoAlias;  // Scalars cannot alias each other
+    return NoAlias; // Scalars cannot alias each other
 
   // Figure out what objects these things are pointing to if we can.
   const Value *O1 = GetUnderlyingObject(V1, currentMod->getDataLayout());

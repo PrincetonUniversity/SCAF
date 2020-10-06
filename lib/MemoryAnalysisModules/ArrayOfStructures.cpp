@@ -1,14 +1,14 @@
 #define DEBUG_TYPE "array-of-structures-aa"
 
-#include "llvm/Pass.h"
+#include "llvm/ADT/Statistic.h"
+#include "llvm/Analysis/ScalarEvolutionExpressions.h"
+#include "llvm/IR/Constants.h"
+#include "llvm/IR/GetElementPtrTypeIterator.h"
 #include "llvm/IR/LLVMContext.h"
 #include "llvm/IR/Module.h"
 #include "llvm/IR/Operator.h"
-#include "llvm/ADT/Statistic.h"
-#include "llvm/Analysis/ScalarEvolutionExpressions.h"
-#include "llvm/IR/GetElementPtrTypeIterator.h"
+#include "llvm/Pass.h"
 #include "llvm/Support/Debug.h"
-#include "llvm/IR/Constants.h"
 
 #include "scaf/MemoryAnalysisModules/ClassicLoopAA.h"
 #include "scaf/MemoryAnalysisModules/NoCaptureFcn.h"
@@ -17,12 +17,11 @@
 
 #include "NoEscapeFieldsAA.h"
 
-namespace liberty
-{
+namespace liberty {
 using namespace llvm;
 
 STATISTIC(numEligible, "Num eligible");
-STATISTIC(numNoAlias,  "Num no-alias/no-modref");
+STATISTIC(numNoAlias, "Num no-alias/no-modref");
 
 class ArrayOfStructures : public ModulePass, public liberty::ClassicLoopAA {
 
@@ -40,56 +39,55 @@ public:
   // Said another way, that means that any two observations
   // of 'v' within the same iteration of L must have the
   // same value.
-  bool notDefinedWithinSubloop(const Value *v, const Loop *L) const
-  {
-    const Instruction *inst = dyn_cast< Instruction >(v);
-    if( !inst )
+  bool notDefinedWithinSubloop(const Value *v, const Loop *L) const {
+    const Instruction *inst = dyn_cast<Instruction>(v);
+    if (!inst)
       return true;
 
-    if( inst->getParent()->getParent() != L->getHeader()->getParent() )
+    if (inst->getParent()->getParent() != L->getHeader()->getParent())
       return false; // cannot tell if L may invoke inst's parent
 
-    if( !L->contains(inst) )
-      return true;  // loop live-in
+    if (!L->contains(inst))
+      return true; // loop live-in
 
-    for(Loop::iterator i=L->begin(), e=L->end(); i!=e; ++i)
-    {
+    for (Loop::iterator i = L->begin(), e = L->end(); i != e; ++i) {
       const Loop *subloop = *i;
-      if( subloop->contains(inst) )
+      if (subloop->contains(inst))
         return false;
     }
 
     return true;
   }
 
-  bool areStaticallyIdentical(Value *a, Value *b, const LoopAA::TemporalRelation Rel, const Loop *L, Tracer &tracer) const
-  {
-    // When same iteration of a loop, statically identical may also mean that they are
-    // the same register temporary, and that register temporary is not
+  bool areStaticallyIdentical(Value *a, Value *b,
+                              const LoopAA::TemporalRelation Rel, const Loop *L,
+                              Tracer &tracer) const {
+    // When same iteration of a loop, statically identical may also mean that
+    // they are the same register temporary, and that register temporary is not
     // defined within a subloop of L.
-    if( Rel == Same && L && a == b && notDefinedWithinSubloop(a,L) )
+    if (Rel == Same && L && a == b && notDefinedWithinSubloop(a, L))
       return true;
 
     // Try to trace the values to find a unique integer value.
     Tracer::IntSet vals_a;
-    if( tracer.traceConcreteIntegerValues(a, vals_a) && vals_a.size() == 1 )
-    {
+    if (tracer.traceConcreteIntegerValues(a, vals_a) && vals_a.size() == 1) {
       Tracer::IntSet vals_b;
-      if( tracer.traceConcreteIntegerValues(b, vals_b) )
-        if( vals_a == vals_b )
+      if (tracer.traceConcreteIntegerValues(b, vals_b))
+        if (vals_a == vals_b)
           return true;
     }
 
     return false;
   }
 
-  bool areStaticallyDifferent(Value *a, Value *b, const LoopAA::TemporalRelation Rel, const Loop *L, Tracer &tracer)
-  {
-    // When different iterations of the loop, statically different also means induction variable.
-    if( Rel != LoopAA::Same && L && a == b )
-    {
+  bool areStaticallyDifferent(Value *a, Value *b,
+                              const LoopAA::TemporalRelation Rel, const Loop *L,
+                              Tracer &tracer) {
+    // When different iterations of the loop, statically different also means
+    // induction variable.
+    if (Rel != LoopAA::Same && L && a == b) {
       const PHINode *civ = L->getCanonicalInductionVariable();
-      if( civ && a == civ )
+      if (civ && a == civ)
         return true;
 
       // Maybe it's not a /canonical/ induction variable, but it's
@@ -97,27 +95,26 @@ public:
       BasicBlock *header = L->getHeader();
       Function *fcn = header->getParent();
 
-      ModuleLoops &mloops = getAnalysis< ModuleLoops >();
+      ModuleLoops &mloops = getAnalysis<ModuleLoops>();
       ScalarEvolution &scev = mloops.getAnalysis_ScalarEvolution(fcn);
-      //ScalarEvolution &scev = getAnalysis< ScalarEvolutionWrapperPass>(*fcn).getSE();
-      if( scev.isSCEVable( a->getType() ) )
-        if( const SCEV *ss = scev.getSCEVAtScope(a,L) )
-          if( const SCEVAddRecExpr *induc = dyn_cast< SCEVAddRecExpr >(ss) )
-            if( induc->getLoop() == L )
-            {
+      // ScalarEvolution &scev = getAnalysis<
+      // ScalarEvolutionWrapperPass>(*fcn).getSE();
+      if (scev.isSCEVable(a->getType()))
+        if (const SCEV *ss = scev.getSCEVAtScope(a, L))
+          if (const SCEVAddRecExpr *induc = dyn_cast<SCEVAddRecExpr>(ss))
+            if (induc->getLoop() == L) {
               const SCEV *step = induc->getStepRecurrence(scev);
-              if( scev.isKnownNonZero(step) )
+              if (scev.isKnownNonZero(step))
                 return true;
             }
     }
 
     // Try to trace the values
     Tracer::IntSet vals_a;
-    if( tracer.traceConcreteIntegerValues(a, vals_a) )
-    {
+    if (tracer.traceConcreteIntegerValues(a, vals_a)) {
       Tracer::IntSet vals_b;
-      if( tracer.traceConcreteIntegerValues(b, vals_b) )
-        if( Tracer::disjoint(vals_a, vals_b) )
+      if (tracer.traceConcreteIntegerValues(b, vals_b))
+        if (Tracer::disjoint(vals_a, vals_b))
           return true;
     }
 
@@ -139,14 +136,13 @@ public:
     //      (b) The indices may be different, but only at a GEP-array level.
     //  2.  One (statically) different index, at a GEP level which is a struct.
 
-    // We will check 0 last, since it is a TOP operation, and could take a lot of time.
-    // DO IT LAST.
+    // We will check 0 last, since it is a TOP operation, and could take a lot
+    // of time. DO IT LAST.
 
-    const Value *v1 = P1.ptr,
-                *v2 = P2.ptr;
+    const Value *v1 = P1.ptr, *v2 = P2.ptr;
 
-    const GEPOperator *gep1 = dyn_cast< GEPOperator >( v1 ),
-                      *gep2 = dyn_cast< GEPOperator >( v2 );
+    const GEPOperator *gep1 = dyn_cast<GEPOperator>(v1),
+                      *gep2 = dyn_cast<GEPOperator>(v2);
 
     // handle cases where the gep is bitcasted before the mem operation
     auto bitcast1 = dyn_cast<BitCastInst>(v1);
@@ -169,17 +165,18 @@ public:
       return MayAlias;
     }
 
-    if( !gep1 || !gep2 )
+    if (!gep1 || !gep2)
       return MayAlias;
 
-    if( gep1->getPointerOperandType() != gep2->getPointerOperandType() )
+    if (gep1->getPointerOperandType() != gep2->getPointerOperandType())
       return MayAlias;
 
     ++numEligible;
 
-    NoCaptureFcn &nocap = getAnalysis< NoCaptureFcn >();
-    NonCapturedFieldsAnalysis &noescape = getAnalysis< NonCapturedFieldsAnalysis >();
-    Tracer tracer(nocap,noescape);
+    NoCaptureFcn &nocap = getAnalysis<NoCaptureFcn>();
+    NonCapturedFieldsAnalysis &noescape =
+        getAnalysis<NonCapturedFieldsAnalysis>();
+    Tracer tracer(nocap, noescape);
 
     LLVMContext &ctx = gep1->getType()->getContext();
 
@@ -220,39 +217,22 @@ public:
       }
     }
 
-    gep_type_iterator gi1 = gep_type_begin(gep1),
-                      gi2 = gep_type_begin(gep2);
+    gep_type_iterator gi1 = gep_type_begin(gep1), gi2 = gep_type_begin(gep2);
 
     // 1. Zero or more indices, which are either
     //  - statically identical indices, or
     //  - different elements at an array level.
-    User::const_op_iterator ix1 = gep1->op_begin() + 1,
-                             e1 = gep1->op_end(),
-                            ix2 = gep2->op_begin() + 1,
-                             e2 = gep2->op_end();
-    while( ix1 != e1 && ix2 != e2 )
-    {
-      Value *cv1 = *ix1,
-            *cv2 = *ix2;
+    User::const_op_iterator ix1 = gep1->op_begin() + 1, e1 = gep1->op_end(),
+                            ix2 = gep2->op_begin() + 1, e2 = gep2->op_end();
+    while (ix1 != e1 && ix2 != e2) {
+      Value *cv1 = *ix1, *cv2 = *ix2;
 
-      //sot : operator* is no longer supported in LLVM 5.0 for gep_type_iterator
-      // replaced with getIndexedType for Sequential Type and getStructTypeOrNull for Structs
       StructType *ST1 = gi1.getStructTypeOrNull();
       StructType *ST2 = gi2.getStructTypeOrNull();
       if (ST1 != ST2)
         return MayAlias;
 
-      /*
-      Type *t1 = gi1.getIndexedType();
-      if( t1 != gi2.getIndexedType())
-        return MayAlias;
-      */
-
-      // Heejin's fix in 3.5 seems incomplete
-      //if( isa< SequentialType >(t1) || isa< PointerType >(t1)
-      //||  areStaticallyIdentical(cv1, cv2, Rel, L, tracer) )
-      if (areStaticallyIdentical(cv1, cv2, Rel, L, tracer))
-      {
+      if (areStaticallyIdentical(cv1, cv2, Rel, L, tracer)) {
         ++ix1;
         ++ix2;
         ++gi1;
@@ -264,8 +244,9 @@ public:
         break;
     }
 
-    // 2. One statically different index, at a GEP level which is a struct/array/pointer
-    // i.e. we can prove that we're talking about two different fields/elements.
+    // 2. One statically different index, at a GEP level which is a
+    // struct/array/pointer i.e. we can prove that we're talking about two
+    // different fields/elements.
 
     // Iterators point to the first differing index.
 
@@ -273,42 +254,29 @@ public:
     Value *cv1 = 0, *cv2 = 0;
 
     // If there are more indices
-    if( ix1 != e1 )
+    if (ix1 != e1)
       cv1 = *ix1;
-    if( ix2 != e2 )
+    if (ix2 != e2)
       cv2 = *ix2;
 
     // Implicit zero rule
-    ConstantInt *zero = ConstantInt::get( Type::getInt64Ty(ctx) ,0);
-    if( !cv1 && ix2 != e2 && ++ix2 == e2 ) // if second gep index at penultimate value
-      cv1 = zero; // then first gets an implicit zero
-    if( !cv2 && ix1 != e1 && ++ix1 == e1 ) // first first gep index at penultimate value
-      cv2 = zero; // the second gets an implicit zero
+    ConstantInt *zero = ConstantInt::get(Type::getInt64Ty(ctx), 0);
+    if (!cv1 && ix2 != e2 &&
+        ++ix2 == e2) // if second gep index at penultimate value
+      cv1 = zero;    // then first gets an implicit zero
+    if (!cv2 && ix1 != e1 &&
+        ++ix1 == e1) // first first gep index at penultimate value
+      cv2 = zero;    // the second gets an implicit zero
 
-    if( !cv1 || !cv2 )
+    if (!cv1 || !cv2)
       return MayAlias;
 
-    //sot : operator* is no longer supported in LLVM 5.0 for gep_type_iterator
-    // replaced with getIndexedType for Sequential Type and getStructTypeOrNull for Structs
     StructType *ST1 = gi1.getStructTypeOrNull();
     StructType *ST2 = gi2.getStructTypeOrNull();
     if (ST1 != ST2)
       return MayAlias;
 
-    // sot: getIndexedType seems not to return the same result as *operator in
-    // LLVM 3.5 (e.g., instead of getting a PointerType, it seeems that
-    // PointeeTy is returned)
-    /*
-    Type *ty1 = gi1.getIndexedType();
-    if( ty1 != gi2.getIndexedType() )
-      return MayAlias;
-
-    //if( !isa< CompositeType >(ty1) )
-    if( !isa< CompositeType >(ty1) && !isa< PointerType > (ty1))
-      return MayAlias;
-    */
-
-    if( ! areStaticallyDifferent(cv1,cv2,Rel,L,tracer) )
+    if (!areStaticallyDifferent(cv1, cv2, Rel, L, tracer))
       return MayAlias;
 
     // 0. Check if the base pointers must alias.
@@ -321,21 +289,19 @@ public:
       return NoAlias;
     }
 
-    LLVM_DEBUG(errs() << "Last minute failure " << *v1 << " vs " << *v2 << "\n");
+    LLVM_DEBUG(errs() << "Last minute failure " << *v1 << " vs " << *v2
+                      << "\n");
     return MayAlias;
   }
 
-  StringRef getLoopAAName() const {
-    return "array-of-structures-aa";
-  }
+  StringRef getLoopAAName() const { return "array-of-structures-aa"; }
 
   void getAnalysisUsage(AnalysisUsage &AU) const {
     LoopAA::getAnalysisUsage(AU);
-    AU.addRequired< ModuleLoops >();
-    //AU.addRequired< ScalarEvolutionWrapperPass >();
-    AU.addRequired< NoCaptureFcn >();
-    AU.addRequired< NonCapturedFieldsAnalysis >();
-    AU.setPreservesAll();                         // Does not transform code
+    AU.addRequired<ModuleLoops>();
+    AU.addRequired<NoCaptureFcn>();
+    AU.addRequired<NonCapturedFieldsAnalysis>();
+    AU.setPreservesAll(); // Does not transform code
   }
 
   /// getAdjustedAnalysisPointer - This method is used when a pass implements
@@ -344,14 +310,14 @@ public:
   /// specified pass info.
   virtual void *getAdjustedAnalysisPointer(AnalysisID PI) {
     if (PI == &LoopAA::ID)
-      return (LoopAA*)this;
+      return (LoopAA *)this;
     return this;
   }
 };
 
-static RegisterPass<ArrayOfStructures>
-X("array-of-structures-aa", "Reasons about arrays of structures");
+static RegisterPass<ArrayOfStructures> X("array-of-structures-aa",
+                                         "Reasons about arrays of structures");
 static RegisterAnalysisGroup<liberty::LoopAA> Y(X);
 
 char ArrayOfStructures::ID = 0;
-}
+} // namespace liberty
