@@ -12,7 +12,7 @@
 
 #include "scaf/MemoryAnalysisModules/LoopAA.h"
 
-#include "WPA/WPAPass.h"
+#include "svf/WPA/WPAPass.h"
 
 namespace liberty {
 class SVFResults : public ModulePass, public LoopAA {
