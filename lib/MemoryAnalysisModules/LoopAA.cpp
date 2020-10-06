@@ -106,12 +106,7 @@ LoopAA *LoopAA::getRealTopAA() const {
   return top;
 }
 
-LoopAA *LoopAA::getTopAA() const {
-  if (EvilDisableTopHack)
-    return nextAA;
-  else
-    return getRealTopAA();
-}
+LoopAA *LoopAA::getTopAA() const { return getRealTopAA(); }
 
 void LoopAA::getAnalysisUsage(AnalysisUsage &au) const {
   au.addRequired<TargetLibraryInfoWrapperPass>();
