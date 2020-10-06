@@ -40,12 +40,13 @@ CallsiteContext::~CallsiteContext() { DECREF(parent); }
 bool CallsiteContext::operator==(const CallsiteContext &other) const {
   if (this == &other)
     return true;
-  if (0 == this)
-    return false;
-  if (0 == &other)
-    return false;
 
   if (this->cs.getInstruction() != other.cs.getInstruction())
+    return false;
+
+  if (!this->parent && !other.parent)
+    return true;
+  if (!this->parent || !other.parent)
     return false;
 
   return *(this->parent) == *(other.parent);
@@ -54,14 +55,15 @@ bool CallsiteContext::operator==(const CallsiteContext &other) const {
 bool CallsiteContext::operator<(const CallsiteContext &other) const {
   if (this == &other)
     return false;
-  if (0 == this && &other != 0)
-    return true;
-  if (0 == &other && this != 0)
-    return false;
 
   if (this->cs.getInstruction() < other.cs.getInstruction())
     return true;
   if (this->cs.getInstruction() > other.cs.getInstruction())
+    return false;
+
+  if (!this->parent && other.parent)
+    return true;
+  if (!this->parent || !other.parent)
     return false;
 
   return *(this->parent) < *(other.parent);
