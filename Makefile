@@ -2,8 +2,8 @@ SCAF_INSTALL_DEBUG?=$(shell pwd)/scaf-install-debug
 SCAF_INSTALL_RELEASE?=$(shell pwd)/scaf-install-release
 JOBS?=16
 
-CC= gcc
-CXX= g++
+CC=clang
+CXX=clang++
 
 all: scaf-debug
 
