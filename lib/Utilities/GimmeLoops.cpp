@@ -1,81 +1,76 @@
-#include "llvm/IR/Dominators.h"
+#include "llvm/Analysis/AssumptionCache.h"
 #include "llvm/Analysis/LoopInfo.h"
 #include "llvm/Analysis/PostDominators.h"
 #include "llvm/Analysis/ScalarEvolution.h"
-#include "llvm/Analysis/AssumptionCache.h"
-#include "llvm/IR/Module.h"
-#include "llvm/Support/raw_ostream.h"
-#include "llvm/Support/PrettyStackTrace.h"
-#include "llvm/IR/DataLayout.h"
 #include "llvm/Analysis/TargetLibraryInfo.h"
+#include "llvm/IR/DataLayout.h"
+#include "llvm/IR/Dominators.h"
 #include "llvm/IR/LegacyPassManagers.h"
+#include "llvm/IR/Module.h"
+#include "llvm/Support/PrettyStackTrace.h"
+#include "llvm/Support/raw_ostream.h"
 
 #include "scaf/Utilities/GimmeLoops.h"
 
-namespace liberty
-{
+namespace liberty {
 
-class  MyPMDataManager : public PMDataManager
-{
-  public:
-    MyPMDataManager() : PMDataManager() {AvailableAnalysis.clear();}
+class MyPMDataManager : public PMDataManager {
+public:
+  MyPMDataManager() : PMDataManager() { AvailableAnalysis.clear(); }
 
-    virtual Pass *getAsPass() { return 0; }
+  virtual Pass *getAsPass() { return 0; }
 
-    mutable DenseMap<AnalysisID, const PassInfo *> AnalysisPassInfos;
+  mutable DenseMap<AnalysisID, const PassInfo *> AnalysisPassInfos;
 
-    DenseMap<AnalysisID, Pass*> AvailableAnalysis;
+  DenseMap<AnalysisID, Pass *> AvailableAnalysis;
 
-    void recordAvailableAnalysis(Pass *P)  {
-      AnalysisID PI = P->getPassID();
+  void recordAvailableAnalysis(Pass *P) {
+    AnalysisID PI = P->getPassID();
 
-      AvailableAnalysis[PI] = P;
+    AvailableAnalysis[PI] = P;
 
-      assert(!AvailableAnalysis.empty());
+    assert(!AvailableAnalysis.empty());
 
-      const PassInfo *PInf = PassRegistry::getPassRegistry()->getPassInfo(PI);
-      if (PInf == 0) return;
-      const std::vector<const PassInfo*> &II = PInf->getInterfacesImplemented();
-      for (unsigned i = 0, e = II.size(); i != e; ++i)
-        AvailableAnalysis[II[i]->getTypeInfo()] = P;
-    }
+    const PassInfo *PInf = PassRegistry::getPassRegistry()->getPassInfo(PI);
+    if (PInf == 0)
+      return;
+    const std::vector<const PassInfo *> &II = PInf->getInterfacesImplemented();
+    for (unsigned i = 0, e = II.size(); i != e; ++i)
+      AvailableAnalysis[II[i]->getTypeInfo()] = P;
+  }
 };
 
-
-
-GimmeLoops::~GimmeLoops()
-{
-  if( sep )
-  {
+GimmeLoops::~GimmeLoops() {
+  if (sep) {
     sep->releaseMemory();
     sep->doFinalization(*mod);
     delete sep;
   }
-  if( lip )
-  {
+  if (lip) {
     lip->releaseMemory();
     lip->doFinalization(*mod);
     delete lip;
   }
-  if( pdtp )
-  {
+  if (pdtp) {
     pdtp->releaseMemory();
     pdtp->doFinalization(*mod);
     delete pdtp;
   }
-  if( dtp )
-  {
+  if (dtp) {
     dtp->releaseMemory();
     dtp->doFinalization(*mod);
     delete dtp;
   }
-  if( tlip ) delete tlip;
-  if (act) delete act;
-  if( ppp ) delete ppp;
+  if (tlip)
+    delete tlip;
+  if (act)
+    delete act;
+  if (ppp)
+    delete ppp;
 }
 
-void GimmeLoops::init(const DataLayout *target, TargetLibraryInfo *lib, Function *fcn, bool computeScalarEvolution)
-{
+void GimmeLoops::init(const DataLayout *target, TargetLibraryInfo *lib,
+                      Function *fcn, bool computeScalarEvolution) {
   assert(fcn && "Null function argument in GimmeLoops init");
   mod = fcn->getParent();
 
@@ -92,7 +87,7 @@ void GimmeLoops::init(const DataLayout *target, TargetLibraryInfo *lib, Function
 
   ppp = new MyPMDataManager();
 
-  AnalysisResolver *ar= 0;
+  AnalysisResolver *ar = 0;
 
   ar = new AnalysisResolver(*ppp);
 
@@ -155,11 +150,11 @@ void GimmeLoops::init(const DataLayout *target, TargetLibraryInfo *lib, Function
   sep->runOnFunction(*fcn);
   ppp->recordAvailableAnalysis(sep);
 
-  //tli = &tlip->getTLI();
+  // tli = &tlip->getTLI();
   dt = &dtp->getDomTree();
   pdt = &pdtp->getPostDomTree();
   li = &lip->getLoopInfo();
   se = &sep->getSE();
 }
 
-}
+} // namespace liberty

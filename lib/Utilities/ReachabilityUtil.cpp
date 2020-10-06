@@ -1,6 +1,6 @@
+#include "llvm/Analysis/CFG.h"
 #include "llvm/Analysis/LoopInfo.h"
 #include "llvm/IR/BasicBlock.h"
-#include "llvm/Analysis/CFG.h"
 #include "llvm/IR/Dominators.h"
 #include "llvm/IR/Instructions.h"
 
@@ -40,8 +40,8 @@ bool liberty::isReachableIntraprocedural(RelInstsV &srcInsts,
 Fun2RelInsts liberty::populateFun2RelInsts(const Instruction *I) {
   Fun2RelInsts fun2RelInsts;
   fun2RelInsts[I->getFunction()].push_back(I);
-  std::unordered_set<const Function*> visited;
-  std::queue<const Function*> worklist;
+  std::unordered_set<const Function *> visited;
+  std::queue<const Function *> worklist;
   worklist.push(I->getFunction());
   while (!worklist.empty()) {
     const Function *F = worklist.front();
@@ -50,7 +50,7 @@ Fun2RelInsts liberty::populateFun2RelInsts(const Instruction *I) {
       continue;
     visited.insert(F);
     if (F->getName() == "main")
-     continue;
+      continue;
     for (auto j = F->user_begin(), z = F->user_end(); j != z; ++j) {
       if (const Instruction *inst = dyn_cast<Instruction>(&**j)) {
         fun2RelInsts[inst->getFunction()].push_back(inst);

@@ -17,8 +17,8 @@
 #include "scaf/Utilities/CaptureUtil.h"
 #include "scaf/Utilities/GlobalMalloc.h"
 
-#include <vector>
 #include <cmath>
+#include <vector>
 
 using namespace llvm;
 using namespace liberty;
@@ -121,7 +121,7 @@ void liberty::findAllocSizeInfo(const Instruction *alloc,
           sizeOfElem = sizeOfElemInMalloc->getZExtValue();
           *numOfElem = N;
         }
-        
+
       } else if (auto constAllocSize = dyn_cast<ConstantInt>(mallocSizeI)) {
         *numOfElem = nullptr;
         sizeOfElem = constAllocSize->getZExtValue();
