@@ -45,6 +45,8 @@ autoconf/autom4te.cache
 
 # ignore install and build directories
 /install
+/scaf-install-debug
+/scaf-install-release
+/build
 /scaf-build-debug
 /scaf-build-release
-/build
