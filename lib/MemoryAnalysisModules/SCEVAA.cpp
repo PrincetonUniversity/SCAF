@@ -344,7 +344,9 @@ public:
         case scAddExpr:
         case scMulExpr:
         case scUMaxExpr:
+        case scUMinExpr:
         case scSMaxExpr:
+        case scSMinExpr:
         case scUDivExpr:
           return true;
         case scUnknown:
