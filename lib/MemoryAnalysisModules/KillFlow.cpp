@@ -114,7 +114,6 @@ bool KillFlow::instMustKill(const Instruction *inst, const Value *ptr,
         intrinsic->getIntrinsicID() == Intrinsic::lifetime_end) {
       Value *lifeptr = intrinsic->getArgOperand(1);
 
-      // sot
       const Module *M = inst->getModule();
       const DataLayout &DL = M->getDataLayout();
 

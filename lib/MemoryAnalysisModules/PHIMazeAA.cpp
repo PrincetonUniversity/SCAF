@@ -1,9 +1,9 @@
 #define DEBUG_TYPE "phi-maze-aa"
 
-#include "llvm/Pass.h"
-#include "llvm/IR/Module.h"
 #include "llvm/ADT/DenseSet.h"
 #include "llvm/Analysis/ValueTracking.h"
+#include "llvm/IR/Module.h"
+#include "llvm/Pass.h"
 
 #include "scaf/MemoryAnalysisModules/ClassicLoopAA.h"
 #include "scaf/MemoryAnalysisModules/LoopAA.h"
@@ -12,38 +12,39 @@ using namespace llvm;
 
 class PHIMazeAA : public ModulePass, public liberty::ClassicLoopAA {
 
-  const DataLayout* DL;
+  const DataLayout *DL;
   typedef DenseSet<const Instruction *> InstSet;
 
   bool getDefs(const Value *V, InstSet &defSet) {
 
     const Instruction *I = dyn_cast<Instruction>(V);
-    if(!I) return false;
+    if (!I)
+      return false;
 
-    if(defSet.count(I))
+    if (defSet.count(I))
       return true;
 
     defSet.insert(I);
 
-    if(isNoAliasCall(I))
+    if (isNoAliasCall(I))
       return true;
 
-    if(const PHINode *phi = dyn_cast<PHINode>(I)) {
+    if (const PHINode *phi = dyn_cast<PHINode>(I)) {
 
-      for(unsigned i = 0; i < phi->getNumIncomingValues(); ++i) {
-        if(!getDefs(phi->getIncomingValue(i), defSet))
+      for (unsigned i = 0; i < phi->getNumIncomingValues(); ++i) {
+        if (!getDefs(phi->getIncomingValue(i), defSet))
           return false;
       }
       return true;
     }
 
-    if(const CastInst *cast = dyn_cast<CastInst>(I))
+    if (const CastInst *cast = dyn_cast<CastInst>(I))
       return getDefs(cast->getOperand(0), defSet);
 
-    if(const GetElementPtrInst *gep = dyn_cast<GetElementPtrInst>(I))
+    if (const GetElementPtrInst *gep = dyn_cast<GetElementPtrInst>(I))
       return getDefs(gep->getPointerOperand(), defSet);
 
-    if(isa<AllocaInst>(I))
+    if (isa<AllocaInst>(I))
       return true;
 
     return false;
@@ -75,16 +76,16 @@ public:
     InstSet defSet2;
     bool isValid2 = getDefs(V2, defSet2);
 
-    if(isValid1 && isValid2) {
+    if (isValid1 && isValid2) {
       const Instruction *I1 = cast<Instruction>(V1);
       const Instruction *I2 = cast<Instruction>(V2);
 
-      if(I1->getParent()->getParent() != I2->getParent()->getParent())
+      if (I1->getParent()->getParent() != I2->getParent()->getParent())
         return MayAlias;
 
       typedef InstSet::iterator InstSetIt;
-      for(InstSetIt inst = defSet1.begin(); inst != defSet1.end(); ++inst) {
-        if(defSet2.count(*inst))
+      for (InstSetIt inst = defSet1.begin(); inst != defSet1.end(); ++inst) {
+        if (defSet2.count(*inst))
           return MayAlias;
       }
 
@@ -92,33 +93,31 @@ public:
     }
 
     const bool sameFun =
-      P1.inst && P2.inst && P1.inst->getParent() == P2.inst->getParent();
+        P1.inst && P2.inst && P1.inst->getParent() == P2.inst->getParent();
 
     const Value *UO1 = GetUnderlyingObject(V1, *DL);
     const Value *UO2 = GetUnderlyingObject(V2, *DL);
 
-    if(isValid1 && isa<GlobalVariable>(UO2))
+    if (isValid1 && isa<GlobalVariable>(UO2))
       return NoAlias;
 
-    if(isValid1 && isa<Argument>(UO2) && sameFun)
+    if (isValid1 && isa<Argument>(UO2) && sameFun)
       return NoAlias;
 
-    if(isa<GlobalVariable>(UO1) && isValid2)
+    if (isa<GlobalVariable>(UO1) && isValid2)
       return NoAlias;
 
-    if(isa<Argument>(UO1) && isValid2 && sameFun)
+    if (isa<Argument>(UO1) && isValid2 && sameFun)
       return NoAlias;
 
     return MayAlias;
   }
 
-  StringRef getLoopAAName() const {
-    return "phi-maze-aa";
-  }
+  StringRef getLoopAAName() const { return "phi-maze-aa"; }
 
   void getAnalysisUsage(AnalysisUsage &AU) const {
     LoopAA::getAnalysisUsage(AU);
-    AU.setPreservesAll();                         // Does not transform code
+    AU.setPreservesAll(); // Does not transform code
   }
 
   /// getAdjustedAnalysisPointer - This method is used when a pass implements
@@ -127,13 +126,13 @@ public:
   /// specified pass info.
   virtual void *getAdjustedAnalysisPointer(AnalysisID PI) {
     if (PI == &LoopAA::ID)
-      return (LoopAA*)this;
+      return (LoopAA *)this;
     return this;
   }
 };
 
 static RegisterPass<PHIMazeAA>
-X("phi-maze-aa", "Search through a maze of local defs", false, true);
+    X("phi-maze-aa", "Search through a maze of local defs", false, true);
 static RegisterAnalysisGroup<liberty::LoopAA> Y(X);
 
 char PHIMazeAA::ID = 0;

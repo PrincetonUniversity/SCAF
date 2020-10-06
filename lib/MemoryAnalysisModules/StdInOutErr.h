@@ -7,8 +7,7 @@
 #include "scaf/MemoryAnalysisModules/ClassicLoopAA.h"
 #include "scaf/MemoryAnalysisModules/LoopAA.h"
 
-namespace liberty
-{
+namespace liberty {
 using namespace llvm;
 
 /// This is deadline-quality, not perfectly sound analysis
@@ -48,6 +47,6 @@ public:
   virtual void *getAdjustedAnalysisPointer(llvm::AnalysisID PI);
 };
 
-}
+} // namespace liberty
 
 #endif /* PURE_FUN_AA_H */

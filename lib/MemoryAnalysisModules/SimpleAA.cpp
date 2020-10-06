@@ -1,7 +1,6 @@
 #include "scaf/MemoryAnalysisModules/SimpleAA.h"
 
-namespace liberty
-{
+namespace liberty {
 using namespace llvm;
 
 LoopAA::AliasResult SimpleAA::alias(const Value *ptrA, unsigned sizeA,
@@ -45,9 +44,10 @@ LoopAA::ModRefResult SimpleAA::modref(const Instruction *A,
   return result;
 }
 
-LoopAA::ModRefResult SimpleAA::modref(const Instruction *A, TemporalRelation rel,
-                                    const Instruction *B, const Loop *L,
-                                    Remedies &R) {
+LoopAA::ModRefResult SimpleAA::modref(const Instruction *A,
+                                      TemporalRelation rel,
+                                      const Instruction *B, const Loop *L,
+                                      Remedies &R) {
 
   if (!A->mayReadOrWriteMemory() || !B->mayReadOrWriteMemory())
     return NoModRef;
@@ -76,6 +76,5 @@ LoopAA::ModRefResult SimpleAA::modref(const Instruction *A, TemporalRelation rel
   }
 
   return result;
-
 }
-}
+} // namespace liberty

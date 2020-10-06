@@ -1,15 +1,14 @@
 #ifndef REFINE_CFG_H
 #define REFINE_CFG_H
 
-#include "llvm/IR/Module.h"
-#include "llvm/Pass.h"
 #include "llvm/Analysis/CallGraph.h"
 #include "llvm/IR/CallSite.h"
+#include "llvm/IR/Module.h"
+#include "llvm/Pass.h"
 
 class RefineCFG : public llvm::ModulePass {
 
 private:
-
   llvm::CallGraph *CG;
 
   bool runOnFunction(const llvm::Function &F);

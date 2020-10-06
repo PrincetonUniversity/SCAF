@@ -371,7 +371,7 @@ void AcyclicAA::accumulateRecursiveTypes(Function &fcn, TypeSet &visited,
     Type *result = gep->getType();
     PointerType *ptr = cast<PointerType>(result);
 
-    // sot: handle case with bitcast after gep insted of the inverse
+    // handle case with bitcast after gep insted of the inverse
     // e.g.  %call2 = tail call noalias i8* @malloc(i64 24)
     //      %next = getelementptr inbounds i8, i8* %call2, i64 16
     //      %2 = bitcast i8* %next to %struct._node_t**

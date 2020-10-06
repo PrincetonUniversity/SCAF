@@ -14,138 +14,121 @@
 //  of L', or if A-modref-B across iterations of L'.
 #define DEBUG_TYPE "subloop-combinator-aa"
 
-#include "llvm/ADT/Statistic.h"
 #include "scaf/MemoryAnalysisModules/LoopAA.h"
+#include "llvm/ADT/Statistic.h"
 
-namespace liberty
-{
+namespace liberty {
 using namespace llvm;
 
-STATISTIC(numQueries,  "Num queries");
+STATISTIC(numQueries, "Num queries");
 STATISTIC(numEligible, "Num eligible");
-STATISTIC(numTops,     "Num tops");
-STATISTIC(numBenefit,  "Num queries which benefit");
-STATISTIC(maybeBenefit,"Num queries which possibly benefit");
+STATISTIC(numTops, "Num tops");
+STATISTIC(numBenefit, "Num queries which benefit");
+STATISTIC(maybeBenefit, "Num queries which possibly benefit");
 
-struct SubloopCombinatorAA : public ModulePass, public LoopAA
-{
+struct SubloopCombinatorAA : public ModulePass, public LoopAA {
   static char ID;
   SubloopCombinatorAA() : ModulePass(ID) {}
 
-  virtual void *getAdjustedAnalysisPointer(AnalysisID PI)
-  {
-    if( PI == &LoopAA::ID )
-      return (LoopAA*)this;
+  virtual void *getAdjustedAnalysisPointer(AnalysisID PI) {
+    if (PI == &LoopAA::ID)
+      return (LoopAA *)this;
     return this;
   }
 
-  virtual void getAnalysisUsage(AnalysisUsage &AU) const
-  {
+  virtual void getAnalysisUsage(AnalysisUsage &AU) const {
     LoopAA::getAnalysisUsage(AU);
     AU.setPreservesAll();
   }
 
   virtual StringRef getLoopAAName() const { return "subloop-combinator-aa"; }
-  virtual StringRef getPassName() const { return "Analysis that reasons about subloops"; }
-  virtual SchedulingPreference getSchedulingPreference() const { return SchedulingPreference(Normal-1); }
+  virtual StringRef getPassName() const {
+    return "Analysis that reasons about subloops";
+  }
+  virtual SchedulingPreference getSchedulingPreference() const {
+    return SchedulingPreference(Normal - 1);
+  }
 
-  virtual bool runOnModule(Module &M)
-  {
+  virtual bool runOnModule(Module &M) {
     const DataLayout &DL = M.getDataLayout();
     InitializeLoopAA(this, DL);
     return false;
   }
 
-  virtual ModRefResult modref(
-    const Instruction *A,
-    TemporalRelation T,
-    const Value *P2, unsigned S2,
-    const Loop *L, Remedies &R)
-  {
-    return LoopAA::modref(A,T,P2,S2,L,R); //chain
+  virtual ModRefResult modref(const Instruction *A, TemporalRelation T,
+                              const Value *P2, unsigned S2, const Loop *L,
+                              Remedies &R) {
+    return LoopAA::modref(A, T, P2, S2, L, R); // chain
   }
 
-  virtual ModRefResult modref(
-    const Instruction *A,
-    TemporalRelation T,
-    const Instruction *B,
-    const Loop *L, Remedies &R)
-  {
+  virtual ModRefResult modref(const Instruction *A, TemporalRelation T,
+                              const Instruction *B, const Loop *L,
+                              Remedies &R) {
     ++numQueries;
 
-    if( !L || T != Same)
-      return LoopAA::modref(A,T,B,L,R); //chain
+    if (!L || T != Same)
+      return LoopAA::modref(A, T, B, L, R); // chain
 
     // Only care about queries where both
     // instructions are located within an
     // immediate subloop of L
-    for(Loop::iterator i=L->begin(), e=L->end(); i!=e; ++i)
-    {
+    for (Loop::iterator i = L->begin(), e = L->end(); i != e; ++i) {
       Loop *subloop = *i;
-      if( subloop->contains(A) && subloop->contains(B) )
-        return subloop_modref(A,T,B,L,subloop,R);
+      if (subloop->contains(A) && subloop->contains(B))
+        return subloop_modref(A, T, B, L, subloop, R);
     }
 
-    return LoopAA::modref(A,T,B,L,R); //chain
+    return LoopAA::modref(A, T, B, L, R); // chain
   }
 
 private:
-  ModRefResult subloop_modref(
-    const Instruction *A,
-    TemporalRelation T,
-    const Instruction *B,
-    const Loop *L,
-    const Loop *subloop,
-    Remedies &R)
-  {
+  ModRefResult subloop_modref(const Instruction *A, TemporalRelation T,
+                              const Instruction *B, const Loop *L,
+                              const Loop *subloop, Remedies &R) {
     ++numEligible;
 
     // Detect when more queries won't help.
     ModRefResult worst_case = ModRef;
-    if( !A->mayWriteToMemory() )
+    if (!A->mayWriteToMemory())
       worst_case = Ref;
-    else if( !A->mayReadFromMemory() )
+    else if (!A->mayReadFromMemory())
       worst_case = Mod;
 
-    const ModRefResult before = top(A,Before,B,subloop,R);
-    if( before == worst_case ) // bail-out
-      return ModRefResult( worst_case & LoopAA::modref(A,T,B,L,R) );
+    const ModRefResult before = top(A, Before, B, subloop, R);
+    if (before == worst_case) // bail-out
+      return ModRefResult(worst_case & LoopAA::modref(A, T, B, L, R));
 
-    const ModRefResult after = top(A,After,B,subloop,R);
-    ModRefResult join = ModRefResult( before | after );
-    if( join == worst_case ) // bail-out
-      return ModRefResult( worst_case & LoopAA::modref(A,T,B,L,R) );
+    const ModRefResult after = top(A, After, B, subloop, R);
+    ModRefResult join = ModRefResult(before | after);
+    if (join == worst_case) // bail-out
+      return ModRefResult(worst_case & LoopAA::modref(A, T, B, L, R));
 
-    const ModRefResult same = top(A,Same,B,subloop,R);
-    join = ModRefResult( before | same | after );
+    const ModRefResult same = top(A, Same, B, subloop, R);
+    join = ModRefResult(before | same | after);
 
-    if( join == NoModRef )
-    {
+    if (join == NoModRef) {
       // we don't know if chain would have returned NoModRef.
       ++maybeBenefit;
       return NoModRef;
     }
 
-    const ModRefResult chain = LoopAA::modref(A,T,B,L,R);
-    const ModRefResult meet = ModRefResult( join & chain );
-    if( meet != chain )
+    const ModRefResult chain = LoopAA::modref(A, T, B, L, R);
+    const ModRefResult meet = ModRefResult(join & chain);
+    if (meet != chain)
       ++numBenefit;
 
     return meet;
   }
 
-  ModRefResult top(
-    const Instruction *A,
-    TemporalRelation T,
-    const Instruction *B,
-    const Loop *L,Remedies &R)
-  {
+  ModRefResult top(const Instruction *A, TemporalRelation T,
+                   const Instruction *B, const Loop *L, Remedies &R) {
     ++numTops;
-    return getTopAA()->modref(A,T,B,L,R);
+    return getTopAA()->modref(A, T, B, L, R);
   }
 };
 
-static RegisterPass<SubloopCombinatorAA> X("subloop-combinator-aa", "Reason about subloops of loops");
+static RegisterPass<SubloopCombinatorAA> X("subloop-combinator-aa",
+                                           "Reason about subloops of loops");
 static RegisterAnalysisGroup<liberty::LoopAA> Y(X);
 char SubloopCombinatorAA::ID = 0;
-}
+} // namespace liberty

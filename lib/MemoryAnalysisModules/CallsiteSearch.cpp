@@ -200,7 +200,6 @@ void Context::getUnderlyingObjects(KillFlow &kill, const Value *ptr,
                                    CallsiteContext *ctx, UO &objects,
                                    bool Before) const {
 
-  // sot
   const Module *M = locInCtx->getModule();
   const DataLayout &DL = M->getDataLayout();
 

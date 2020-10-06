@@ -152,7 +152,6 @@ public:
       Type *type =
           GetElementPtrInst::getIndexedType(baseType, ArrayRef<Value *>(ops));
 
-      // sot
       if (!type)
         continue; // to prevent a seg fault when a null pointer is passed to
                   // dyn_cast

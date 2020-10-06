@@ -66,7 +66,7 @@ LoopAA::ModRefResult SVFResults::modref(const Instruction *A,
   auto wpaRes = llvm::MayAlias;
 
   // skip if call since MemoryLocation::get() fails on CallInst's
-  if ( !isa<CallInst>(A) && !isa<CallInst>(B) )
+  if (!isa<CallInst>(A) && !isa<CallInst>(B))
     wpaRes = wpa->alias(MemoryLocation::get(A), MemoryLocation::get(B));
 
   if (wpaRes == llvm::NoAlias) {
