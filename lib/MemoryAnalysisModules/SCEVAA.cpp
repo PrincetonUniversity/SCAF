@@ -221,35 +221,6 @@ public:
     return true;
   }
 
-  // getURemExpr not available in LLVM 5.0 as opposed to LLVM 9.0, so it is
-  // added here for now to avoid adding extra patch to LLVM
-  const SCEV *getURemExpr(ScalarEvolution *SE, const SCEV *LHS,
-                          const SCEV *RHS) {
-    assert(SE->getEffectiveSCEVType(LHS->getType()) ==
-               SE->getEffectiveSCEVType(RHS->getType()) &&
-           "SCEVURemExpr operand types don't match!");
-
-    // Short-circuit easy cases
-    if (const SCEVConstant *RHSC = dyn_cast<SCEVConstant>(RHS)) {
-      // If constant is one, the result is trivial
-      if (RHSC->getValue()->isOne())
-        return SE->getZero(LHS->getType()); // X urem 1 --> 0
-
-      // If constant is a power of two, fold into a zext(trunc(LHS)).
-      if (RHSC->getAPInt().isPowerOf2()) {
-        Type *FullTy = LHS->getType();
-        Type *TruncTy =
-            IntegerType::get(SE->getContext(), RHSC->getAPInt().logBase2());
-        return SE->getZeroExtendExpr(SE->getTruncateExpr(LHS, TruncTy), FullTy);
-      }
-    }
-
-    // Fallback to %a == %x urem %y == %x -<nuw> ((%x udiv %y) *<nuw> %y)
-    const SCEV *UDiv = SE->getUDivExpr(LHS, RHS);
-    const SCEV *Mult = SE->getMulExpr(UDiv, RHS, SCEV::FlagNUW);
-    return SE->getMinusSCEV(LHS, Mult, SCEV::FlagNUW);
-  }
-
   bool notOverlappingStrides(ScalarEvolution *SE, const Loop *L,
                              const SCEV *ptr1,
                              const APInt &size1, // (from earlier iteration)
@@ -314,7 +285,7 @@ public:
     const SCEV *diffBases = SE->getMinusSCEV(base1, base2);
     const ConstantRange diffBasesRange = SE->getSignedRange(diffBases);
 
-    const SCEV *rem = getURemExpr(SE, diffBases, step);
+    const SCEV *rem = SE->getURemExpr(diffBases, step);
     const ConstantRange remRange = SE->getSignedRange(rem);
 
     const SCEV *tmpS = SE->getMinusSCEV(step, rem);
