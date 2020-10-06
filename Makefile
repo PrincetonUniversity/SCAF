@@ -5,7 +5,7 @@ JOBS?=16
 CC= gcc
 CXX= g++
 
-all: scaf-debug scaf-release
+all: scaf-debug
 
 clean:
 		rm -rf scaf-build-debug scaf-build-release
