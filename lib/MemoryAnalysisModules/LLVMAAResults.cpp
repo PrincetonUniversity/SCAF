@@ -22,7 +22,7 @@ void LLVMAAResults::computeAAResults(const Function *cf) {
   }
 }
 
-LLVMAAResults::LLVMAAResults() : ModulePass(ID) {}
+LLVMAAResults::LLVMAAResults() : ModulePass(ID), curF(nullptr), aa(nullptr) {}
 LLVMAAResults::~LLVMAAResults() {}
 
 static const Function *getParent(const Value *V) {
