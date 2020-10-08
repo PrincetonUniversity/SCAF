@@ -27,6 +27,7 @@ using namespace llvm;
 struct ModuleLoops : public ModulePass {
   static char ID;
   ModuleLoops() : ModulePass(ID) {}
+  ~ModuleLoops() { reset(); }
 
   void getAnalysisUsage(AnalysisUsage &au) const {
     au.addRequired<TargetLibraryInfoWrapperPass>();
@@ -41,7 +42,12 @@ struct ModuleLoops : public ModulePass {
     return false;
   }
 
-  void reset() { results.clear(); }
+  void reset() {
+    for (auto r : results)
+      delete r;
+    results.clear();
+  }
+
   void forget(Function *fcn) {
     if (results.count(fcn)) {
       GimmeLoops *gl = results[fcn];
