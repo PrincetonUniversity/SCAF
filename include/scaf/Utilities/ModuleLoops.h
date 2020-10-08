@@ -44,7 +44,7 @@ struct ModuleLoops : public ModulePass {
 
   void reset() {
     for (auto r : results)
-      delete r;
+      delete r.second;
     results.clear();
   }
 
