@@ -407,7 +407,7 @@ void *PureFunAA::getAdjustedAnalysisPointer(AnalysisID PI) {
 char PureFunAA::ID = 0;
 
 StringRef const PureFunAA::pureFunNames[] = {
-#include "MultiTypePureFun.h"
+#include "scaf/MemoryAnalysisModules/MultiTypePureFun.h"
 #include "scaf/MemoryAnalysisModules/PureFun.h"
     ""};
 
