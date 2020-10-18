@@ -15,7 +15,7 @@
 #include "scaf/MemoryAnalysisModules/TraceData.h"
 #include "scaf/Utilities/ModuleLoops.h"
 
-#include "NoEscapeFieldsAA.h"
+#include "scaf/MemoryAnalysisModules/NoEscapeFieldsAA.h"
 
 namespace liberty {
 using namespace llvm;

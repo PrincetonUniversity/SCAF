@@ -14,7 +14,7 @@
 #include "llvm/Support/MathExtras.h"
 #include "llvm/Support/raw_ostream.h"
 
-#include "NoEscapeFieldsAA.h"
+#include "scaf/MemoryAnalysisModules/NoEscapeFieldsAA.h"
 #include "scaf/MemoryAnalysisModules/LoopAA.h"
 #include "scaf/MemoryAnalysisModules/TypeSanity.h"
 #include "scaf/Utilities/CallSiteFactory.h"

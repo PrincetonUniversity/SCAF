@@ -11,7 +11,7 @@
 #include "scaf/Utilities/CallSiteFactory.h"
 #include "scaf/Utilities/FindUnderlyingObjects.h"
 
-#include "NoEscapeFieldsAA.h"
+#include "scaf/MemoryAnalysisModules/NoEscapeFieldsAA.h"
 
 namespace liberty {
 using namespace llvm;

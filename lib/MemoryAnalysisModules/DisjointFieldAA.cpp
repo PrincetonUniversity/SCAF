@@ -17,7 +17,7 @@
 #include "scaf/Utilities/CallSiteFactory.h"
 #include "scaf/Utilities/CaptureUtil.h"
 
-#include "NoEscapeFieldsAA.h"
+#include "scaf/MemoryAnalysisModules/NoEscapeFieldsAA.h"
 
 using namespace llvm;
 
