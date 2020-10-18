@@ -408,7 +408,7 @@ char PureFunAA::ID = 0;
 
 StringRef const PureFunAA::pureFunNames[] = {
 #include "MultiTypePureFun.h"
-#include "PureFun.h"
+#include "scaf/MemoryAnalysisModules/PureFun.h"
     ""};
 
 StringRef const PureFunAA::localFunNames[] = {
