@@ -115,6 +115,84 @@ static BasicBlock *fixLandingPad(BasicBlock *from, BasicBlock *to,
   return split(new_from, 0u, prefix, updateLoopInfo);
 }
 
+BasicBlock *split(BasicBlock *from, BasicBlock *to, DominatorTree &dt,
+                  DominanceFrontier &df, StringRef prefix) {
+  BasicBlock *sync = split(from, to, prefix);
+
+  dt.addNewBlock(sync, from);
+  if (dt[to]->getIDom() == dt[from]) {
+    dt.changeImmediateDominator(to, sync);
+
+    //  new dom old
+    DominanceFrontier::iterator i = df.find(to);
+    if (i != df.end()) {
+      df.addBasicBlock(sync, i->second);
+      if (i->second.count(to))
+        df.removeFromFrontier(df.find(sync), to);
+    } else {
+      df.addBasicBlock(sync, DominanceFrontier::DomSetType());
+    }
+  } else {
+    // new !dom old
+    DominanceFrontier::DomSetType singleton;
+    singleton.insert(to);
+    df.addBasicBlock(sync, singleton);
+  }
+
+  return sync;
+}
+
+BasicBlock *split(BasicBlock *from, BasicBlock *to, DominatorTree &dt,
+                  StringRef prefix) {
+  BasicBlock *sync = split(from, to, prefix);
+
+  dt.addNewBlock(sync, from);
+  if (dt[to]->getIDom() == dt[from]) {
+    dt.changeImmediateDominator(to, sync);
+    dt.changeImmediateDominator(sync, from);
+  }
+
+  return sync;
+}
+
+BasicBlock *split(BasicBlock *from, BasicBlock *to, StringRef prefix) {
+  if (prefix.empty())
+    prefix = "split.";
+
+  // If this is an exceptional return from an invoke instruction,
+  // then the destination's first non-phi must be a landing pad instruction.
+  // Splitting the edge will break that invariant.
+  Instruction *term = from->getTerminator();
+  if (InvokeInst *invoke = dyn_cast<InvokeInst>(term))
+    if (invoke->getUnwindDest() == to)
+      return fixLandingPad(from, to, prefix, invoke);
+
+  LLVMContext &Context = from->getContext();
+  BasicBlock *sync = BasicBlock::Create(
+      Context, Twine(prefix) + from->getName(), from->getParent());
+
+  // Put this split after the source block.
+  sync->moveAfter(from);
+
+  term->replaceUsesOfWith(to, sync);
+  BranchInst::Create(to, sync);
+
+  for (BasicBlock::iterator i = to->begin(), e = to->end(); i != e; ++i)
+    if (PHINode *phi = dyn_cast<PHINode>(&*i)) {
+      unsigned numEdges = 0;
+      for (int pn = phi->getNumIncomingValues() - 1; pn >= 0; --pn)
+        if (from == phi->getIncomingBlock(pn)) {
+          if (numEdges == 0)
+            phi->setIncomingBlock(pn, sync);
+          else
+            phi->removeIncomingValue(pn, false);
+          ++numEdges;
+        }
+    }
+
+  return sync;
+}
+
 BasicBlock *split(BasicBlock *from, unsigned succno, StringRef prefix,
                   LoopInfo *updateLoopInfo) {
   if (prefix.empty())
