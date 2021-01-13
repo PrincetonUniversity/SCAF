@@ -17,7 +17,10 @@ using namespace llvm;
 
 namespace llvm {
 
-template <class T> class DGEdge;
+  namespace noelle{
+    template <class T> class DGEdge;
+  }
+using namespace noelle;
 
 // Criticism is a PDG edge with a boolean value to differentiate loop-carried
 // from intra-iteration edges. Also specify type of dep (mem/reg/ctrl)
