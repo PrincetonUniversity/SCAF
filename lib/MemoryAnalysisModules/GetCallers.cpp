@@ -14,16 +14,18 @@ bool getCallers(const Function *fcn, CallSiteList &callsitesOut) {
     // The user might node be the function call; but an argument of a callsite
     // Found in 526.blender
     // Remedy: double check called function before adding to callsitesOut
-    // FIXME: However, if function pointers are used as arguments, how to
-    //        guarantee fcn is not called through a virtual pointer?
+    //         However, if function pointers are used as arguments, how to
+    //         guarantee fcn is not called through a virtual pointer?
+    //         We can't unless we keep looking into another layer; this
+    //         case seems rare, so we assume it's captured conservatively.
 
     CallSite cs = getCallSite(v);
 
     if (cs.getInstruction()) {
       if (cs.getCalledFunction() == fcn) {
         callsitesOut.push_back(cs);
+        continue;
       }
-      continue;
     }
 
     if (const ConstantExpr *cexp = dyn_cast<ConstantExpr>(v))
@@ -32,8 +34,8 @@ bool getCallers(const Function *fcn, CallSiteList &callsitesOut) {
         if (cs.getInstruction()) {
           if (cs.getCalledFunction() == fcn) {
             callsitesOut.push_back(cs);
+            continue;
           }
-          continue;
         }
       }
 
