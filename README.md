@@ -3,7 +3,7 @@
 SCAF is an innovative dependence analysis framework that combines in a modular fashion memory analyses and (optionally) speculative assertions.
 
 ### Notice
-The full implementation of SCAF is not yet integrated in this repository. The speculation modules along with a few other components are missing. All the currectly available memory analysis modules are included though.
+The full implementation of SCAF is not yet integrated in this repository. All the currectly available memory analysis modules are included, but the speculation modules along with a few other components (e.g., profilers) are currently part of another repository (https://github.com/PrincetonUniversity/cpf).
 
 ### Publications
 The novelty, design, implementation, and evaluation of this work is described in the PLDI '20 paper by Apostolakis et al. titled "SCAF: A Speculation-Aware Dependence Analysis Framework" ([ACM DL](https://dl.acm.org/doi/10.1145/3385412.3386028), [PDF](https://liberty.princeton.edu/Publications/pldi20_scaf.pdf), [Talk](https://youtu.be/kDaJaYB09p4), [Abstract](https://youtu.be/-fU0zDbpJWc)).
@@ -47,7 +47,7 @@ Run `make uninstall` from the root directory to uninstall SCAF.
 SCAF is customizable and can be used as a conservative memory analysis if the speculation modules are disabled.
 
 ### Users
-If you have any trouble using this framework feel free to reach out to us for help (contact sapostolakis@princeton.edu).
+If you have any trouble using this framework feel free to reach out to us for help (contact liberators@liberty-research.org).
 
 ### Contributions
 We welcome contributions from the community to improve this framework and evolve it to cater for more users.
