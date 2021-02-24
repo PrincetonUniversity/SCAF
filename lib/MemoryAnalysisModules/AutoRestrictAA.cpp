@@ -17,6 +17,7 @@
 #include "scaf/Utilities/CallSiteFactory.h"
 
 using namespace llvm;
+using namespace llvm::noelle;
 using namespace liberty;
 
 static const Function *getParentFunction(const Value *v) {

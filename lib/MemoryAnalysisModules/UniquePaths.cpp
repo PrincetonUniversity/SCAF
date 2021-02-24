@@ -29,6 +29,7 @@
 #include <set>
 
 using namespace llvm;
+using namespace llvm::noelle;
 using namespace liberty;
 
 STATISTIC(traceSteps, "Num steps performed by trace()");

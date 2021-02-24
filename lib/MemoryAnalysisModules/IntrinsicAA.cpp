@@ -7,6 +7,7 @@
 #include "scaf/MemoryAnalysisModules/ClassicLoopAA.h"
 
 using namespace llvm;
+using namespace llvm::noelle;
 
 class IntrinsicAA : public ModulePass, public liberty::ClassicLoopAA {
 

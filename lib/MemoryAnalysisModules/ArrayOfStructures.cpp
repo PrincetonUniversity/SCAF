@@ -19,6 +19,7 @@
 
 namespace liberty {
 using namespace llvm;
+using namespace llvm::noelle;
 
 STATISTIC(numEligible, "Num eligible");
 STATISTIC(numNoAlias, "Num no-alias/no-modref");

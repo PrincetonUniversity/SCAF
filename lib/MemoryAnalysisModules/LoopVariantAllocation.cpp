@@ -16,6 +16,7 @@
 namespace liberty {
 
 using namespace llvm;
+using namespace llvm::noelle;
 
 LoopVariantAllocation::LoopVariantAllocation() : ModulePass(ID) {}
 

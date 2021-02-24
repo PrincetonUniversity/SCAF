@@ -13,6 +13,7 @@
 
 namespace liberty {
 using namespace llvm;
+using namespace llvm::noelle;
 
 void NoCaptureFcn::getAnalysisUsage(AnalysisUsage &au) const {
   au.setPreservesAll();

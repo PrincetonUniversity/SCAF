@@ -4,6 +4,7 @@
 #include "llvm/IR/Constants.h"
 
 namespace liberty {
+using namespace llvm::noelle;
 bool getCallers(const Function *fcn, CallSiteList &callsitesOut) {
   bool addressCaptured = false;
   for (Value::const_user_iterator i = fcn->user_begin(), e = fcn->user_end();
