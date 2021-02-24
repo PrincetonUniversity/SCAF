@@ -13,6 +13,7 @@
 
 namespace liberty {
 using namespace llvm;
+using namespace llvm::noelle;
 
 char LoopAA::ID = 0;
 char NoLoopAA::ID = 0;

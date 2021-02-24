@@ -25,6 +25,7 @@
 
 namespace liberty {
 using namespace llvm;
+using namespace llvm::noelle;
 
 /* Adaptor between TypeSanityAnalysis and LoopAA.
  */

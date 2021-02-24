@@ -40,6 +40,7 @@
 
 #include <algorithm>
 using namespace llvm;
+using namespace llvm::noelle;
 using namespace liberty;
 
 //===----------------------------------------------------------------------===//

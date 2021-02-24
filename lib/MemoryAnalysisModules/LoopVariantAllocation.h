@@ -9,6 +9,7 @@
 
 namespace liberty {
 using namespace llvm;
+using namespace llvm::noelle;
 
 /// This is deadline-quality, not perfectly sound analysis
 /// which assumes that stdin, stdout, and stderr are only

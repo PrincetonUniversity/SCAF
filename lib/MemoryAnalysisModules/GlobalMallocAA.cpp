@@ -19,6 +19,7 @@
 #include "scaf/Utilities/CaptureUtil.h"
 
 using namespace llvm;
+using namespace llvm::noelle;
 
 class GlobalMallocAA : public ModulePass, public liberty::ClassicLoopAA {
 

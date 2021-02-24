@@ -25,6 +25,7 @@
 
 namespace liberty {
 using namespace llvm;
+using namespace llvm::noelle;
 
 char AcyclicAA::ID = 0;
 namespace {

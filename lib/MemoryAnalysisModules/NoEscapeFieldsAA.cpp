@@ -23,6 +23,7 @@
 
 namespace liberty {
 using namespace llvm;
+using namespace llvm::noelle;
 
 char NoEscapeFieldsAA::ID = 0;
 char NonCapturedFieldsAnalysis::ID = 0;

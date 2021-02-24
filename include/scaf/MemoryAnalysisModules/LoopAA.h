@@ -105,6 +105,7 @@
 
 namespace liberty {
 using namespace llvm;
+using namespace llvm::noelle;
 
 extern cl::opt<bool> FULL_UNIVERSAL;
 

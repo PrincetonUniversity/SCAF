@@ -15,6 +15,7 @@
 #include "svf/WPA/WPAPass.h"
 
 namespace liberty {
+using namespace llvm::noelle;
 class SVFResults : public ModulePass, public LoopAA {
   const DataLayout *DL;
   WPAPass *wpa;

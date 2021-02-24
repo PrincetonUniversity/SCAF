@@ -18,6 +18,7 @@
 #include "RefineCFG.h"
 
 using namespace llvm;
+using namespace llvm::noelle;
 
 namespace liberty {
 

@@ -14,6 +14,7 @@
 namespace liberty {
 
 using namespace llvm;
+using namespace llvm::noelle;
 
 StdInOutErr::StdInOutErr() : ModulePass(ID) {}
 

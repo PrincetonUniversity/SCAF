@@ -12,6 +12,7 @@
 
 namespace liberty {
 using namespace llvm;
+using namespace llvm::noelle;
 
 /* A pass which tries to identify acyclic recursive types.
  */

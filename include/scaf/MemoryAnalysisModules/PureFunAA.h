@@ -13,6 +13,7 @@
 #include <vector>
 
 namespace liberty {
+using namespace llvm::noelle;
 
 class PureFunAA : public llvm::ModulePass, public liberty::ClassicLoopAA {
 
