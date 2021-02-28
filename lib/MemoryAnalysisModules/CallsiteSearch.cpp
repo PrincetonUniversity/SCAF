@@ -449,9 +449,9 @@ bool InstSearch::mayWriteToMemory(const Instruction *inst) const {
     return false;
 
   if (const IntrinsicInst *intrinsic = dyn_cast<IntrinsicInst>(inst)) {
-    if (intrinsic->getIntrinsicID() == Intrinsic::lifetime_start ||
-        intrinsic->getIntrinsicID() == Intrinsic::lifetime_end ||
-        intrinsic->getIntrinsicID() == Intrinsic::invariant_start ||
+       //  intrinsic->getIntrinsicID() == Intrinsic::lifetime_start ||
+       //  intrinsic->getIntrinsicID() == Intrinsic::lifetime_end |
+    if ( intrinsic->getIntrinsicID() == Intrinsic::invariant_start ||
         intrinsic->getIntrinsicID() == Intrinsic::invariant_end)
       return false;
   }
@@ -468,8 +468,9 @@ bool InstSearch::mayWriteToMemory(const Instruction *inst) const {
         return false;
 
       const StringRef name = callee->getName();
-      if (name == "llvm.lifetime.start" || name == "llvm.lifetime.end" ||
-          name == "llvm.invariant.start" || name == "llvm.invariant.end" ||
+      // name == "llvm.lifetime.start" || name == "llvm.lifetime.end" ||
+      // name == "llvm.invariant.start" || name == "llvm.invariant.end" ||
+      if (
           name == "llvm.var.annotation" || name == "llvm.annotation.i8" ||
           name == "llvm.annotation.i16" || name == "llvm.annotation.i32" ||
           name == "llvm.annotation.i64" || name == "llvm.objectsize.i32" ||
