@@ -55,19 +55,29 @@ LoopAA::ModRefResult ClassicLoopAA::modref(const Instruction *I1,
 
   if (!CS2.getInstruction() && !liberty::isVolatile(I2)) {
     const Value *V = liberty::getMemOper(I2);
-    unsigned Size = liberty::getTargetSize(V, getDataLayout());
-    const Pointer P(I2, V, Size);
-    if (CS1.getInstruction())
-      MR = ModRefResult(MR & getModRefInfo(CS1, Rel, P, L, tmpR));
-    else
-      MR = ModRefResult(MR & modrefSimple(I1, Rel, P, L, tmpR));
+    // corner case: be conservative
+    if (!V) {
+      MR = ModRef;
+    } else {
+      unsigned Size = liberty::getTargetSize(V, getDataLayout());
+      const Pointer P(I2, V, Size);
+      if (CS1.getInstruction())
+        MR = ModRefResult(MR & getModRefInfo(CS1, Rel, P, L, tmpR));
+      else
+        MR = ModRefResult(MR & modrefSimple(I1, Rel, P, L, tmpR));
+    }
   } else if (!CS1.getInstruction() && CS2.getInstruction()) {
+    // corner case: be conservative
     const Value *V = liberty::getMemOper(I1);
-    unsigned Size = liberty::getTargetSize(V, getDataLayout());
-    const Pointer P(I1, V, Size);
-    ModRefResult inverse = getModRefInfo(CS2, Rev(Rel), P, L, tmpR);
-    if (inverse == NoModRef)
-      MR = NoModRef;
+    if (!V) {
+      MR = ModRef;
+    } else {
+      unsigned Size = liberty::getTargetSize(V, getDataLayout());
+      const Pointer P(I1, V, Size);
+      ModRefResult inverse = getModRefInfo(CS2, Rev(Rel), P, L, tmpR);
+      if (inverse == NoModRef)
+        MR = NoModRef;
+    }
   } else if (CS1.getInstruction() && CS2.getInstruction()) {
     MR = ModRefResult(MR & getModRefInfo(CS1, Rel, CS2, L, tmpR));
   }

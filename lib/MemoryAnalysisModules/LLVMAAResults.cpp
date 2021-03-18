@@ -73,7 +73,16 @@ LoopAA::AliasResult LLVMAAResults::alias(const Value *ptrA, unsigned sizeA,
   if (funA != curF)
     computeAAResults(funA);
 
-  auto aaRes = aa->alias(ptrA, sizeA, ptrB, sizeB);
+  LocationSize sA = sizeA, sB = sizeB;
+  if (sizeA == UnknownSize) {
+    sA = LocationSize::unknown();
+  }
+
+  if (sizeB == UnknownSize) {
+    sB = LocationSize::unknown();
+  }
+
+  auto aaRes = aa->alias(ptrA, sA, ptrB, sB);
 
   if (aaRes == llvm::NoAlias) {
     ++numNoAlias;
@@ -81,8 +90,10 @@ LoopAA::AliasResult LLVMAAResults::alias(const Value *ptrA, unsigned sizeA,
   }
 
   LoopAA::AliasResult aaLoopAARes;
+  // Ziyang: the definition of MustAlias is not the same
+  //         Be really conservative here
   if (aaRes == llvm::MustAlias)
-    aaLoopAARes = LoopAA::MustAlias;
+    aaLoopAARes = LoopAA::MayAlias;
   else // aaRes == llvm::PartialAlias || aaRes == llvm::MayAlias
     aaLoopAARes = LoopAA::MayAlias;
 
@@ -108,7 +119,11 @@ LoopAA::ModRefResult LLVMAAResults::modref(const Instruction *A,
   if (funA != curF)
     computeAAResults(funA);
 
-  auto aaRes = aa->getModRefInfo(A, ptrB, sizeB);
+  LocationSize sB = sizeB;
+  if (sizeB == UnknownSize) {
+    sB = LocationSize::unknown();
+  }
+  auto aaRes = aa->getModRefInfo(A, ptrB, sB);
 
   if (aaRes == llvm::ModRefInfo::NoModRef) {
     // LLVM_DEBUG(errs()<<"NoModRef 1 by LLVM AA" << *A << " --> " << *B <<
