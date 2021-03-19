@@ -614,14 +614,16 @@ bool KillFlow::blockMustKill(const BasicBlock *bb, const Value *ptr,
   for (BasicBlock::const_iterator j = bb->begin(), z = bb->end(); j != z; ++j) {
     const Instruction *inst = &*j;
 
+    // Ziyang: if after(begin) is "AFTER" before(end)
+    //         we might have bogus results
+    if (inst == before)
+      break;
+
     if (!start) {
       if (inst == after)
         start = true;
       continue;
     }
-
-    if (inst == before)
-      break;
 
     if (!inst->mayWriteToMemory())
       continue;
@@ -1115,14 +1117,16 @@ bool KillFlow::blockMustKillAggregate(const BasicBlock *bb,
   for (BasicBlock::const_iterator j = bb->begin(), z = bb->end(); j != z; ++j) {
     const Instruction *inst = &*j;
 
+    // Ziyang: if after(begin) is "AFTER" before(end)
+    //         we might have bogus results
+    if (inst == before)
+      break;
+
     if (!start) {
       if (inst == after)
         start = true;
       continue;
     }
-
-    if (inst == before)
-      break;
 
     if (!inst->mayWriteToMemory())
       continue;
