@@ -22,6 +22,12 @@
   "getchar",
   "_IO_getc",
 
+// intrinsics
+  "llvm.lifetime.start",
+  "llvm.lifetime.start.p0i8",
+  "llvm.lifetime.end",
+  "llvm.lifetime.end.p0i8",
+
 // stdlib.h
   "abort",
   "exit",

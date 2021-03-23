@@ -614,14 +614,16 @@ bool KillFlow::blockMustKill(const BasicBlock *bb, const Value *ptr,
   for (BasicBlock::const_iterator j = bb->begin(), z = bb->end(); j != z; ++j) {
     const Instruction *inst = &*j;
 
+    // Ziyang: if after(begin) is "AFTER" before(end)
+    //         we might have bogus results
+    if (inst == before)
+      break;
+
     if (!start) {
       if (inst == after)
         start = true;
       continue;
     }
-
-    if (inst == before)
-      break;
 
     if (!inst->mayWriteToMemory())
       continue;
@@ -859,13 +861,19 @@ LoopAA::ModRefResult KillFlow::modref(const Instruction *i1,
       else
       */
       {
+        // i1 -> killed -> i2 meaning i1 cannot mod i2;
+        // do not mean i2 cannot mod i1; so only Ref instead of NoModRef
+        //
+        // In original scenario: this pattern i2 -> i1 -> killed is problematic
+        // Due to the implementation, the II dep i2->i1 will also be removed
+        // if NoModRef is set. Now we only set Ref, i2 can still mod i1.
         if (isa<StoreInst>(i1)) {
           ++numEligibleForwardStoreQueries;
           // if( pointerKilledBetween(L,store->getPointerOperand(),i1,i2) )
           if (pointerKilledBetween(L, ptr1, i1, i2)) {
             ++numKilledForwardStoreFlows;
             // res = ModRefResult(res & ~Mod);
-            res = NoModRef;
+            res = Ref;
           }
         }
 
@@ -875,7 +883,7 @@ LoopAA::ModRefResult KillFlow::modref(const Instruction *i1,
           if (pointerKilledBetween(L, ptr2, i1, i2)) {
             ++numKilledBackwardLoadFlows;
             // res = ModRefResult(res & ~Mod);
-            res = NoModRef;
+            res = Ref;
           }
         }
 
@@ -885,7 +893,7 @@ LoopAA::ModRefResult KillFlow::modref(const Instruction *i1,
           // if( pointerKilledBetween(L,load->getPointerOperand(),i1,i2) )
           if (pointerKilledBetween(L, ptr1, i1, i2)) {
             ++numKilledForwardLoad;
-            res = NoModRef;
+            res = Ref;
           }
         }
 
@@ -895,7 +903,7 @@ LoopAA::ModRefResult KillFlow::modref(const Instruction *i1,
           // if( pointerKilledBetween(L,store->getPointerOperand(),i1,i2) )
           if (pointerKilledBetween(L, ptr2, i1, i2)) {
             ++numKilledBackwardStore;
-            res = NoModRef;
+            res = Ref;
           }
         }
       }
@@ -1033,11 +1041,14 @@ LoopAA::ModRefResult KillFlow::modref(const Instruction *i1,
 bool KillFlow::instMustKillAggregate(const Instruction *inst,
                                      const Value *aggregate, time_t queryStart,
                                      unsigned Timeout) {
+  if (!aggregate)
+    return false;
   // llvm.lifetime.start, llvm.lifetime.end are intended to limit
   // the lifetime of memory objects.  They are especially powerful
   // for alloca's that were inlined, since the alloca's can be moved
   // to the caller's header.  We model them as storing an undef
   // value to the memory location.
+
   if (const IntrinsicInst *intrinsic = dyn_cast<IntrinsicInst>(inst)) {
     if (intrinsic->getIntrinsicID() == Intrinsic::lifetime_start ||
         intrinsic->getIntrinsicID() == Intrinsic::lifetime_end) {
@@ -1098,20 +1109,24 @@ bool KillFlow::blockMustKillAggregate(const BasicBlock *bb,
                                       const Instruction *after,
                                       const Instruction *before,
                                       time_t queryStart, unsigned Timeout) {
+  if (!aggregate)
+    return false;
   const BasicBlock *afterbb = after ? after->getParent() : 0;
 
   bool start = (afterbb != bb);
   for (BasicBlock::const_iterator j = bb->begin(), z = bb->end(); j != z; ++j) {
     const Instruction *inst = &*j;
 
+    // Ziyang: if after(begin) is "AFTER" before(end)
+    //         we might have bogus results
+    if (inst == before)
+      break;
+
     if (!start) {
       if (inst == after)
         start = true;
       continue;
     }
-
-    if (inst == before)
-      break;
 
     if (!inst->mayWriteToMemory())
       continue;
@@ -1129,6 +1144,8 @@ bool KillFlow::pointerKilledBefore(const Loop *L, const Value *ptr,
                                    const Instruction *before,
                                    bool alsoCheckAggregate, time_t queryStart,
                                    unsigned Timeout) {
+  if (!ptr)
+    return false;
   //    INTROSPECT(errs() << "KillFlow: pointerKilledBefore(" << *before <<
   //    "):\n");
 
@@ -1189,6 +1206,9 @@ bool KillFlow::pointerKilledBetween(const Loop *L, const Value *ptr,
                                     const Instruction *before,
                                     bool alsoCheckAggregate, time_t queryStart,
                                     unsigned Timeout) {
+  if (!ptr)
+    return false;
+
   // Find those blocks which dominate the load and which
   // are contained within the loop.
   const BasicBlock *beforebb = before->getParent();
@@ -1247,6 +1267,8 @@ bool KillFlow::pointerKilledBetween(const Loop *L, const Value *ptr,
 bool KillFlow::aggregateKilledBefore(const Loop *L, const Value *obj,
                                      const Instruction *before,
                                      time_t queryStart, unsigned Timeout) {
+  if (!obj)
+    return false;
   // Find those blocks which dominate the load and which
   // are contained within the loop.
   const BasicBlock *beforebb = before->getParent();
@@ -1291,6 +1313,8 @@ bool KillFlow::pointerKilledAfter(const Loop *L, const Value *ptr,
                                   const Instruction *after,
                                   bool alsoCheckAggregate, time_t queryStart,
                                   unsigned Timeout) {
+  if (!ptr)
+    return false;
   // Find those blocks which post-dominate the store and which
   // are contained within the loop.
   const BasicBlock *afterbb = after->getParent();
@@ -1344,6 +1368,8 @@ bool KillFlow::pointerKilledAfter(const Loop *L, const Value *ptr,
 bool KillFlow::aggregateKilledAfter(const Loop *L, const Value *obj,
                                     const Instruction *after, time_t queryStart,
                                     unsigned Timeout) {
+  if (!obj)
+    return false;
   // Find those blocks which post-dominate the store and which
   // are contained within the loop.
   const BasicBlock *afterbb = after->getParent();
@@ -1389,6 +1415,9 @@ bool KillFlow::aggregateKilledBetween(const Loop *L, const Value *obj,
                                       const Instruction *after,
                                       const Instruction *before,
                                       time_t queryStart, unsigned Timeout) {
+  if (!obj)
+    return false;
+
   // Find those blocks which post-dominate the store and which
   // are contained within the loop.
   const BasicBlock *afterbb = after->getParent();
