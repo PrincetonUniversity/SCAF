@@ -61,7 +61,7 @@ Run `make uninstall` from the root directory to uninstall SCAF.
 SCAF is customizable and can be used as a conservative memory analysis if the speculation modules are disabled.
 
 ### Users
-If you have any trouble using this framework feel free to reach out to us for help (contact liberators@liberty-research.org).
+If you have any trouble using this framework feel free to create an issue! We will try our best to help.
 
 ### Contributions
 We welcome contributions from the community to improve this framework and evolve it to cater for more users.
