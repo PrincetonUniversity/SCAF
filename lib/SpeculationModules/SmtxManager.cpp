@@ -254,77 +254,83 @@ void SmtxSpeculationManager::contextRenamedViaClone(
   map_assumptions(lcNoFlow, vmap);
 }
 
-void filter_anti_pipeline(const SmtxSpeculationManager::Assumptions &in, SmtxSpeculationManager::Assumptions &out, const PipelineStrategy &pipeline)
-{
-  for(unsigned i=0, N=in.size(); i<N; ++i)
-  {
-    const SmtxSpeculationManager::Assumption &ass = in[i];
+/*
+ *void filter_anti_pipeline(const SmtxSpeculationManager::Assumptions &in, SmtxSpeculationManager::Assumptions &out, const PipelineStrategy &pipeline)
+ *{
+ *  for(unsigned i=0, N=in.size(); i<N; ++i)
+ *  {
+ *    const SmtxSpeculationManager::Assumption &ass = in[i];
+ *
+ *    // Is this an anti-pipeline dep?
+ *    if( pipeline.maybeAntiPipelineDependence(ass.src, ass.dst) )
+ *      out.push_back(ass); // visiting assumptions in correct order, no need to insert-sort.
+ *    else
+ *      LLVM_DEBUG(
+ *        errs() << "Not anti-pipeline dep:\n"
+ *               << "  from: " << *ass.src << '\n'
+ *               << "    to: " << *ass.dst << '\n');
+ *  }
+ *}
+ */
 
-    // Is this an anti-pipeline dep?
-    if( pipeline.maybeAntiPipelineDependence(ass.src, ass.dst) )
-      out.push_back(ass); // visiting assumptions in correct order, no need to insert-sort.
-    else
-      LLVM_DEBUG(
-        errs() << "Not anti-pipeline dep:\n"
-               << "  from: " << *ass.src << '\n'
-               << "    to: " << *ass.dst << '\n');
-  }
-}
+/*
+ *static void filter_anti_parallel_stage(const SmtxSpeculationManager::Assumptions &in, SmtxSpeculationManager::Assumptions &out, const PipelineStrategy &pipeline)
+ *{
+ *  for(unsigned i=0, N=in.size(); i<N; ++i)
+ *  {
+ *    const SmtxSpeculationManager::Assumption &ass = in[i];
+ *
+ *    if( pipeline.maybeAntiParallelStageDependence(ass.src, ass.dst) )
+ *      out.push_back(ass); // visit assumptions in correct order, no need to insert-sort
+ *    else
+ *      LLVM_DEBUG(
+ *        errs() << "Not anti-parallel stage dep:\n"
+ *               << "  from: " << *ass.src << '\n'
+ *               << "    to: " << *ass.dst << '\n');
+ *
+ *  }
+ *}
+ */
 
-static void filter_anti_parallel_stage(const SmtxSpeculationManager::Assumptions &in, SmtxSpeculationManager::Assumptions &out, const PipelineStrategy &pipeline)
-{
-  for(unsigned i=0, N=in.size(); i<N; ++i)
-  {
-    const SmtxSpeculationManager::Assumption &ass = in[i];
-
-    if( pipeline.maybeAntiParallelStageDependence(ass.src, ass.dst) )
-      out.push_back(ass); // visit assumptions in correct order, no need to insert-sort
-    else
-      LLVM_DEBUG(
-        errs() << "Not anti-parallel stage dep:\n"
-               << "  from: " << *ass.src << '\n'
-               << "    to: " << *ass.dst << '\n');
-
-  }
-}
-
-
-void SmtxSpeculationManager::unspeculate(const Loop *loop, const PipelineStrategy &pipeline)
-{
-  Assumptions &lc = getLC(loop);
-  Assumptions &ii = getII(loop);
-
-  const unsigned before_lc = lc.size(),
-                 before_ii = ii.size();
-
-  LLVM_DEBUG(
-    const BasicBlock *header = loop->getHeader();
-    const Function *fcn = header->getParent();
-    errs() << "+++ Unspeculate "
-           << "w.r.t. loop " << fcn->getName() << " :: " << header->getName()
-           << ", starting with " << before_lc << " LC and " << before_ii << " II assumtions."
-           << '\n';
-  );
-
-  Assumptions new_lc, new_ii;
-
-  filter_anti_pipeline(lc, new_lc, pipeline);
-  filter_anti_pipeline(ii, new_ii, pipeline);
-  filter_anti_parallel_stage(lc, new_lc, pipeline);
-
-  lc.swap( new_lc );
-  ii.swap( new_ii );
-
-  const unsigned after_lc = lc.size(),
-                 after_ii = ii.size();
-
-  LLVM_DEBUG(
-    errs() << "--- Unspeculate: finish with " << after_lc << " LC and " << after_ii << " II assumptions.";
-  );
-
-  numUnspeculatedLC += (before_lc-after_lc);
-  numUnspeculatedII += (before_ii-after_ii);
-}
+/*
+ *
+ *void SmtxSpeculationManager::unspeculate(const Loop *loop, const PipelineStrategy &pipeline)
+ *{
+ *  Assumptions &lc = getLC(loop);
+ *  Assumptions &ii = getII(loop);
+ *
+ *  const unsigned before_lc = lc.size(),
+ *                 before_ii = ii.size();
+ *
+ *  LLVM_DEBUG(
+ *    const BasicBlock *header = loop->getHeader();
+ *    const Function *fcn = header->getParent();
+ *    errs() << "+++ Unspeculate "
+ *           << "w.r.t. loop " << fcn->getName() << " :: " << header->getName()
+ *           << ", starting with " << before_lc << " LC and " << before_ii << " II assumtions."
+ *           << '\n';
+ *  );
+ *
+ *  Assumptions new_lc, new_ii;
+ *
+ *  filter_anti_pipeline(lc, new_lc, pipeline);
+ *  filter_anti_pipeline(ii, new_ii, pipeline);
+ *  filter_anti_parallel_stage(lc, new_lc, pipeline);
+ *
+ *  lc.swap( new_lc );
+ *  ii.swap( new_ii );
+ *
+ *  const unsigned after_lc = lc.size(),
+ *                 after_ii = ii.size();
+ *
+ *  LLVM_DEBUG(
+ *    errs() << "--- Unspeculate: finish with " << after_lc << " LC and " << after_ii << " II assumptions.";
+ *  );
+ *
+ *  numUnspeculatedLC += (before_lc-after_lc);
+ *  numUnspeculatedII += (before_ii-after_ii);
+ *}
+ */
 
 void SmtxSpeculationManager::reset()
 {

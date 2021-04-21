@@ -3,7 +3,7 @@
 
 #include "llvm/IR/Instructions.h"
 
-#include "Assumptions.h"
+#include "PDG.hpp"
 #include "scaf/MemoryAnalysisModules/LoopAA.h"
 #include "scaf/SpeculationModules/Remediator.h"
 #include "scaf/Utilities/ModuleLoops.h"

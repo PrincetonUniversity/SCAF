@@ -11,15 +11,15 @@
 #include "scaf/MemoryAnalysisModules/SimpleAA.h"
 //#include "scaf/SpeculationModules/LAMPLoadProfile.h"
 //#include "scaf/SpeculationModules/LampOracleAA.h"
-#include "scaf/SpeculationModules/Targets.h"
-#include "scaf/SpeculationModules/CommutativeLibsAA.h"
+#include "scaf/SpeculationModules/LoopProf/Targets.h"
+//#include "scaf/SpeculationModules/CommutativeLibsAA.h"
 #include "scaf/SpeculationModules/EdgeCountOracleAA.h"
 #include "scaf/SpeculationModules/PointsToAA.h"
 #include "scaf/SpeculationModules/PtrResidueAA.h"
 #include "scaf/SpeculationModules/ReadOnlyAA.h"
 #include "scaf/SpeculationModules/ShortLivedAA.h"
 #include "scaf/SpeculationModules/SmtxAA.h"
-#include "scaf/SpeculationModules/TXIOAA.h"
+//#include "scaf/SpeculationModules/TXIOAA.h"
 #include "scaf/SpeculationModules/CallsiteDepthCombinator_CtrlSpecAware.h"
 #include "scaf/SpeculationModules/Classify.h"
 #include "scaf/SpeculationModules/ControlSpeculator.h"
@@ -135,8 +135,8 @@ bool Classify::runOnModule(Module &mod)
     //TXIOAA txioaa;
     //txioaa.InitializeLoopAA(this, mod.getDataLayout());
 
-    CommutativeLibsAA commlibsaa;
-    commlibsaa.InitializeLoopAA(this, mod.getDataLayout());
+    //CommutativeLibsAA commlibsaa;
+    //commlibsaa.InitializeLoopAA(this, mod.getDataLayout());
 
     SimpleAA simpleaa;
     simpleaa.InitializeLoopAA(this, mod.getDataLayout());

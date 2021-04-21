@@ -5,7 +5,7 @@
 #include "llvm/Support/raw_ostream.h"
 
 #include "scaf/SpeculationModules/PredictionSpeculator.h"
-#include "scaf/SpeculationModules/Remat.h"
+#include "scaf/SpeculationModules/PointsToProfiler/Remat.h"
 
 namespace liberty
 {

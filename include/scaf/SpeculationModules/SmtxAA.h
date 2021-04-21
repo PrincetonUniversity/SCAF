@@ -2,7 +2,7 @@
 #define LLVM_LIBERTY_SMTX_AA_H
 
 #include "scaf/MemoryAnalysisModules/LoopAA.h"
-#include "scaf/SpeculationModules/LAMPLoadProfile.h"
+#include "scaf/SpeculationModules/LAMP/LAMPLoadProfile.h"
 #include "scaf/SpeculationModules/Remediator.h"
 #include "scaf/SpeculationModules/SmtxManager.h"
 

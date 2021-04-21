@@ -7,7 +7,7 @@
 #include "scaf/MemoryAnalysisModules/ClassicLoopAA.h"
 #include "scaf/SpeculationModules/Read.h"
 
-#include "Assumptions.h"
+#include "PDG.hpp"
 
 namespace liberty {
 namespace SpecPriv {

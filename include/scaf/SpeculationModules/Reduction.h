@@ -4,7 +4,7 @@
 #include "llvm/IR/Instructions.h"
 #include "llvm/Analysis/LoopInfo.h"
 #include "llvm/Analysis/ScalarEvolution.h"
-#include "Assumptions.h"
+#include "PDG.hpp"
 #include <set>
 
 namespace liberty
@@ -15,7 +15,6 @@ class LoopAA;
 namespace SpecPriv
 {
 
-//class PDG;
 using namespace llvm;
 
 
