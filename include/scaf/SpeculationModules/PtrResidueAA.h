@@ -10,10 +10,10 @@
 #include "llvm/Support/raw_ostream.h"
 
 #include "scaf/MemoryAnalysisModules/LoopAA.h"
-#include "liberty/Orchestration/Remediator.h"
-#include "liberty/Speculation/Classify.h"
-#include "liberty/Speculation/PtrResidueManager.h"
-#include "liberty/Strategy/PerformanceEstimator.h"
+#include "scaf/SpeculationModules/Remediator.h"
+#include "scaf/SpeculationModules/Classify.h"
+#include "scaf/SpeculationModules/PtrResidueManager.h"
+#include "scaf/SpeculationModules/PerformanceEstimator.h"
 
 namespace liberty {
 namespace SpecPriv {

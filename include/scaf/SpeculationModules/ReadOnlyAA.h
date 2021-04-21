@@ -7,10 +7,10 @@
 #define LIBERTY_SPEC_PRIV_READ_ONLY_AA_H
 
 #include "scaf/MemoryAnalysisModules/LoopAA.h"
-#include "liberty/Orchestration/Remediator.h"
-#include "liberty/Speculation/Classify.h"
-#include "liberty/Speculation/Read.h"
-#include "liberty/Strategy/PerformanceEstimator.h"
+#include "scaf/SpeculationModules/Remediator.h"
+#include "scaf/SpeculationModules/Classify.h"
+#include "scaf/SpeculationModules/Read.h"
+#include "scaf/SpeculationModules/PerformanceEstimator.h"
 
 namespace liberty {
 using namespace llvm;

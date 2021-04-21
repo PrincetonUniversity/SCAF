@@ -6,8 +6,8 @@
 #include "scaf/MemoryAnalysisModules/Introspection.h"
 #include "scaf/MemoryAnalysisModules/PureFunAA.h"
 #include "scaf/MemoryAnalysisModules/SemiLocalFunAA.h"
-#include "liberty/Speculation/CallsiteSearch_CtrlSpecAware.h"
-#include "liberty/Speculation/KillFlow_CtrlSpecAware.h"
+#include "scaf/SpeculationModules/CallsiteSearch_CtrlSpecAware.h"
+#include "scaf/SpeculationModules/KillFlow_CtrlSpecAware.h"
 #include "scaf/Utilities/CallSiteFactory.h"
 
 namespace liberty

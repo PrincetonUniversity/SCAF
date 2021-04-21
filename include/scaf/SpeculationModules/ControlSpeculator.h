@@ -10,7 +10,7 @@
 #include "llvm/ADT/SmallBitVector.h"
 
 #include "scaf/Utilities/ModuleLoops.h"
-#include "liberty/Speculation/UpdateOnClone.h"
+#include "scaf/SpeculationModules/UpdateOnClone.h"
 #include "scaf/Utilities/ControlSpeculation.h"
 
 #include <set>

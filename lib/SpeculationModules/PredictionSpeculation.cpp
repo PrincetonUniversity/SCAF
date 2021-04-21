@@ -1,7 +1,7 @@
 #define DEBUG_TYPE "prediction-aa"
 
 #include "llvm/ADT/Statistic.h"
-#include "liberty/Orchestration/PredictionSpeculation.h"
+#include "scaf/SpeculationModules/PredictionSpeculation.h"
 #include "scaf/Utilities/GetMemOper.h"
 #include "llvm/Analysis/ValueTracking.h"
 

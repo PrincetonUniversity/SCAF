@@ -2,9 +2,9 @@
 #define LLVM_LIBERTY_SMTX_AA_H
 
 #include "scaf/MemoryAnalysisModules/LoopAA.h"
-#include "liberty/LAMP/LAMPLoadProfile.h"
-#include "liberty/Orchestration/Remediator.h"
-#include "liberty/Speculation/SmtxManager.h"
+#include "scaf/SpeculationModules/LAMPLoadProfile.h"
+#include "scaf/SpeculationModules/Remediator.h"
+#include "scaf/SpeculationModules/SmtxManager.h"
 
 namespace liberty {
 namespace SpecPriv {

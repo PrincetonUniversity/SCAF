@@ -21,8 +21,8 @@
 
 #include "scaf/Utilities/ControlSpeculation.h"
 #include "scaf/MemoryAnalysisModules/QueryCacheing.h"
-#include "liberty/Speculation/CallsiteSearch_CtrlSpecAware.h"
-#include "liberty/Speculation/KillFlow_CtrlSpecAware.h"
+#include "scaf/SpeculationModules/CallsiteSearch_CtrlSpecAware.h"
+#include "scaf/SpeculationModules/KillFlow_CtrlSpecAware.h"
 
 namespace liberty
 {

@@ -1,6 +1,6 @@
 #define DEBUG_TYPE "spec-priv-smtx-manager"
 
-#include "liberty/Speculation/SmtxManager.h"
+#include "scaf/SpeculationModules/SmtxManager.h"
 #include "llvm/ADT/Statistic.h"
 
 namespace liberty

@@ -4,9 +4,9 @@
 #include "scaf/MemoryAnalysisModules/LoopAA.h"
 #include "scaf/Utilities/ControlSpeculation.h"
 #include "scaf/Utilities/ControlSpecIterators.h"
-#include "liberty/Orchestration/EdgeCountOracleAA.h"
+#include "scaf/SpeculationModules/EdgeCountOracleAA.h"
 #include "scaf/Utilities/Timer.h"
-#include "liberty/Orchestration/ControlSpecRemed.h"
+#include "scaf/SpeculationModules/ControlSpecRemed.h"
 
 #include "llvm/IR/IntrinsicInst.h"
 #include "llvm/ADT/Statistic.h"
