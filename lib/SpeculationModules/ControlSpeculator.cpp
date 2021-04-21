@@ -4,8 +4,8 @@
 #include "scaf/Utilities/ControlSpeculation.h"
 #include "scaf/Utilities/ControlSpecIterators.h"
 #include "scaf/MemoryAnalysisModules/Introspection.h"
-#include "liberty/LoopProf/Targets.h"
-#include "liberty/Speculation/ControlSpeculator.h"
+#include "scaf/SpeculationModules/Targets.h"
+#include "scaf/SpeculationModules/ControlSpeculator.h"
 #include "scaf/Utilities/ModuleLoops.h"
 #include "scaf/Utilities/Timer.h"
 

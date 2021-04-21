@@ -3,8 +3,8 @@
 #include "llvm/ADT/SmallBitVector.h"
 #include "llvm/ADT/Statistic.h"
 
-#include "liberty/Orchestration/LocalityAA.h"
-#include "liberty/Orchestration/ShortLivedAA.h"
+#include "scaf/SpeculationModules/LocalityAA.h"
+#include "scaf/SpeculationModules/ShortLivedAA.h"
 
 #ifndef DEFAULT_LOCALITY_REMED_COST
 #define DEFAULT_LOCALITY_REMED_COST 50

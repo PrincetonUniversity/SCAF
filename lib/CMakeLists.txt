@@ -1,2 +1,3 @@
 add_subdirectory(Utilities)
 add_subdirectory(MemoryAnalysisModules)
+add_subdirectory(SpeculationModules)

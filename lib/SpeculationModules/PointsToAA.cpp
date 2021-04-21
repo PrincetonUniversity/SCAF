@@ -2,7 +2,7 @@
 
 #include "llvm/ADT/Statistic.h"
 
-#include "liberty/Orchestration/PointsToAA.h"
+#include "scaf/SpeculationModules/PointsToAA.h"
 #include "scaf/Utilities/FindUnderlyingObjects.h"
 
 #define DEFAULT_POINTS_TO_REMED_COST 10001

@@ -8,8 +8,8 @@
 
 #include "scaf/MemoryAnalysisModules/AnalysisTimeout.h"
 #include "scaf/MemoryAnalysisModules/Introspection.h"
-#include "liberty/Orchestration/ControlSpecRemed.h"
-#include "liberty/Speculation/KillFlow_CtrlSpecAware.h"
+#include "scaf/SpeculationModules/ControlSpecRemed.h"
+#include "scaf/SpeculationModules/KillFlow_CtrlSpecAware.h"
 #include "scaf/Utilities/CallSiteFactory.h"
 #include "scaf/Utilities/FindUnderlyingObjects.h"
 #include "scaf/Utilities/GepRange.h"

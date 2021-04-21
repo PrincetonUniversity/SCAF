@@ -3,7 +3,7 @@
 #include "llvm/ADT/Statistic.h"
 #include "llvm/IR/GetElementPtrTypeIterator.h"
 
-#include "liberty/Orchestration/PtrResidueAA.h"
+#include "scaf/SpeculationModules/PtrResidueAA.h"
 
 #ifndef DEFAULT_PTR_RESIDUE_REMED_COST
 #define DEFAULT_PTR_RESIDUE_REMED_COST 60

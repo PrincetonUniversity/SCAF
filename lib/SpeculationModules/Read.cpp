@@ -9,7 +9,7 @@
 
 #include "scaf/MemoryAnalysisModules/PureFunAA.h"
 #include "scaf/MemoryAnalysisModules/SemiLocalFunAA.h"
-#include "liberty/Speculation/Read.h"
+#include "scaf/SpeculationModules/Read.h"
 #include "scaf/Utilities/CallSiteFactory.h"
 #include "scaf/Utilities/FindUnderlyingObjects.h"
 #include "scaf/Utilities/GetMemOper.h"

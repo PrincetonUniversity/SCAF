@@ -2,7 +2,7 @@
 
 #include "llvm/ADT/Statistic.h"
 
-#include "liberty/Speculation/PtrResidueManager.h"
+#include "scaf/SpeculationModules/PtrResidueManager.h"
 
 namespace liberty
 {

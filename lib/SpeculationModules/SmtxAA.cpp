@@ -2,7 +2,7 @@
 
 #define LAMP_COLLECTS_OUTPUT_DEPENDENCES  (0)
 
-#include "liberty/Orchestration/SmtxAA.h"
+#include "scaf/SpeculationModules/SmtxAA.h"
 
 #include "llvm/ADT/Statistic.h"
 #include "llvm/IR/IntrinsicInst.h"

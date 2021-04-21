@@ -2,8 +2,8 @@
 #define LIBERTY_SPEC_PRIV_PTR_RESIDUE_SPECULATION_MANAGER_H
 
 #include "llvm/Pass.h"
-#include "liberty/Speculation/Read.h"
-#include "liberty/Speculation/UpdateOnClone.h"
+#include "scaf/SpeculationModules/Read.h"
+#include "scaf/SpeculationModules/UpdateOnClone.h"
 
 namespace liberty
 {

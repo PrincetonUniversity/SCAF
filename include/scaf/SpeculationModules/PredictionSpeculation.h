@@ -16,8 +16,8 @@
 #include "llvm/IR/Instruction.h"
 
 #include "scaf/MemoryAnalysisModules/LoopAA.h"
-#include "liberty/Orchestration/Remediator.h"
-#include "liberty/Strategy/PerformanceEstimator.h"
+#include "scaf/SpeculationModules/Remediator.h"
+#include "scaf/SpeculationModules/PerformanceEstimator.h"
 
 #include <unordered_map>
 #include <unordered_set>

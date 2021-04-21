@@ -8,11 +8,11 @@
 
 #include "scaf/MemoryAnalysisModules/LoopAA.h"
 
-#include "liberty/Speculation/ControlSpeculator.h"
-#include "liberty/Speculation/FoldManager.h"
-#include "liberty/Speculation/UpdateOnClone.h"
-#include "liberty/PointsToProfiler/Parse.h"
-#include "liberty/Redux/Reduction.h"
+#include "scaf/SpeculationModules/ControlSpeculator.h"
+#include "scaf/SpeculationModules/FoldManager.h"
+#include "scaf/SpeculationModules/UpdateOnClone.h"
+#include "scaf/SpeculationModules/PointsToProfiler/Parse.h"
+#include "scaf/SpeculationModules/Reduction.h"
 
 #include <map>
 #include <list>
