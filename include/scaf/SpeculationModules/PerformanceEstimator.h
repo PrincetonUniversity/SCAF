@@ -6,8 +6,8 @@
 #define DEBUG_TYPE "pipeline"
 #endif
 
-#include "liberty/Strategy/PipelineStrategy.h"
-#include "liberty/Utilities/MakePtr.h"
+//#include "liberty/Strategy/PipelineStrategy.h"
+#include "scaf/Utilities/MakePtr.h"
 #include "llvm/Support/Format.h"
 #include "llvm/Support/Debug.h"
 
@@ -81,27 +81,28 @@ struct PerformanceEstimator
   // By default, this method uses the simple pipeline model,
   // which ignores pipeline fill, communication costs, etc:
   //  weight(pipeline) = max_{s in stages} weight(s)
-  virtual double estimate_pipeline_weight(const PipelineStrategy::Stages &stages);
-  virtual double estimate_pipeline_weight(const PipelineStrategy::Stages &stages, const Loop *loop);
-  double estimate_pipeline_weight(const PipelineStrategy &strategy)
-    { return estimate_pipeline_weight( strategy.stages ); }
-  double estimate_pipeline_weight(const PipelineStrategy &strategy, const Loop *loop)
-    { return estimate_pipeline_weight( strategy.stages, loop ); }
+
+  //virtual double estimate_pipeline_weight(const PipelineStrategy::Stages &stages);
+  //virtual double estimate_pipeline_weight(const PipelineStrategy::Stages &stages, const Loop *loop);
+  //double estimate_pipeline_weight(const PipelineStrategy &strategy)
+    //{ return estimate_pipeline_weight( strategy.stages ); }
+  //double estimate_pipeline_weight(const PipelineStrategy &strategy, const Loop *loop)
+    //{ return estimate_pipeline_weight( strategy.stages, loop ); }
 
 };
 
 /// This is the 'dumb' implementation of a performance estimator.
-struct FlatPerformanceEstimator : public PerformanceEstimator
-{
-  /// Each instruction is worth 1.
-  /// No matter what kind of instruction.
-  /// No matter how much it executes.
-  virtual double estimate_weight(const Instruction *inst) { return 1ul; }
-  virtual double estimate_parallelization_weight(const Instruction *inst, const Loop* loop)
-  {
-    return 1.0;
-  }
-};
+//struct FlatPerformanceEstimator : public PerformanceEstimator
+//{
+  ///// Each instruction is worth 1.
+  ///// No matter what kind of instruction.
+  ///// No matter how much it executes.
+  //virtual double estimate_weight(const Instruction *inst) { return 1ul; }
+  //virtual double estimate_parallelization_weight(const Instruction *inst, const Loop* loop)
+  //{
+    //return 1.0;
+  //}
+//};
 
 }
 }
