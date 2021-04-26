@@ -25,6 +25,7 @@
 #include "llvm/IR/Dominators.h"
 #include "llvm/IR/CallSite.h"
 #include "llvm/IR/DataLayout.h"
+#include "llvm/Analysis/PostDominators.h"
 
 #include "scaf/Utilities/FindUnderlyingObjects.h"
 
