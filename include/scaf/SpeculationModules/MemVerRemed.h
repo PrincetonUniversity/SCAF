@@ -25,8 +25,8 @@ class MemVerRemediator : public Remediator {
 public:
   StringRef getRemediatorName() const { return "mem-ver-remediator"; }
 
-  RemedResp memdep(const Instruction *A, const Instruction *B, bool loopCarried,
-                   DataDepType dataDepTy, const Loop *L);
+  //RemedResp memdep(const Instruction *A, const Instruction *B, bool loopCarried,
+                   //DataDepType dataDepTy, const Loop *L);
 };
 
 } // namespace liberty

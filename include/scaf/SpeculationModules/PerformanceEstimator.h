@@ -7,6 +7,8 @@
 #endif
 
 //#include "liberty/Strategy/PipelineStrategy.h"
+#include "llvm/IR/Instruction.h"
+#include "llvm/Analysis/LoopInfo.h"
 #include "scaf/Utilities/MakePtr.h"
 #include "llvm/Support/Format.h"
 #include "llvm/Support/Debug.h"
