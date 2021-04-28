@@ -183,12 +183,19 @@ bool Tracer::traceConcreteIntegerValues(Value *expr, IntSet &output,
         case BinaryOperator::Xor:
           output.insert(vi ^ vj);
           break;
+        case BinaryOperator::Sub:
+          output.insert(vi - vj);
+          break;
+        case BinaryOperator::Mul:
+          output.insert(vi * vj);
+          break;
 
         default:
           // TODO: Sub, Mul, UDiv, SDiv, URem, SRem, LShr, AShr, And, Xor
           errs() << "traceConcreteIntegerValues() failed on: ``" << *expr
                  << "''\n";
-          assert(false && "Implement more binops");
+          //assert(false && "Implement more binops");
+          return false;
           break;
         }
       }
