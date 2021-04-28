@@ -27,10 +27,10 @@ public:
 
   StringRef getRemediatorName() const { return "counted-iv-remediator"; }
 
-  RemedResp regdep(const Instruction *A, const Instruction *B,
-                   bool loopCarried);
+  //RemedResp regdep(const Instruction *A, const Instruction *B,
+                   //bool loopCarried);
 
-  RemedResp ctrldep(const Instruction *A, const Instruction *B);
+  //RemedResp ctrldep(const Instruction *A, const Instruction *B);
 
 private:
   LoopDependenceInfo *ldi;

@@ -9,7 +9,7 @@
 #include "scaf/MemoryAnalysisModules/SimpleAA.h"
 #include "scaf/SpeculationModules/LAMP/LAMPLoadProfile.h"
 #include "scaf/SpeculationModules/LAMP/LampOracleAA.h"
-#include "scaf/SpeculationModules/CommutativeLibsAA.h"
+//#include "scaf/SpeculationModules/CommutativeLibsAA.h"
 #include "scaf/SpeculationModules/EdgeCountOracleAA.h"
 #include "scaf/SpeculationModules/LocalityAA.h"
 #include "scaf/SpeculationModules/PointsToAA.h"

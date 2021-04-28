@@ -1,14 +1,10 @@
-add_subdirectory(LAMPLoad)
-add_subdirectory(LoopProf)
-add_subdirectory(PointsToProfiler)
-
 file(GLOB SRCS
     "*.cpp"
 )
 
 # Compilation flags
 set_source_files_properties(${SRCS} PROPERTIES COMPILE_FLAGS "-std=c++17 -fPIC")
-set(PassName "SpeculationModules")
+set(PassName "LAMPLoad")
 
 list(APPEND CMAKE_MODULE_PATH "${LLVM_CMAKE_DIR}")
 #include(HandleLLVMOptions)
