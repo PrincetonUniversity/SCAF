@@ -46,6 +46,7 @@ public:
   std::unique_ptr<PDG> getLoopPDG(Loop *loop);
 
 private:
+  unsigned loopCount = 0;
   const DataLayout *DL;
   NoControlSpeculation noctrlspec;
   SmtxAA *smtxaa;
