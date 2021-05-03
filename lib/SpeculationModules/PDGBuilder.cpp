@@ -1,3 +1,4 @@
+#include "scaf/Utilities/ModuleLoops.h"
 #define DEBUG_TYPE "pdgbuilder"
 
 #include "llvm/Analysis/LoopInfo.h"
@@ -19,7 +20,9 @@
 #include "scaf/Utilities/PDGBuilder.hpp"
 #include "scaf/SpeculationModules/ProfilePerformanceEstimator.h"
 #include "scaf/Utilities/ReportDump.h"
+#include "scaf/SpeculationModules/LoopProf/Targets.h"
 
+#include "PDGPrinter.hpp"
 #include "Assumptions.h"
 
 using namespace llvm;
@@ -41,11 +44,20 @@ void llvm::PDGBuilder::getAnalysisUsage(AnalysisUsage &AU) const {
   AU.addRequired<KillFlow_CtrlSpecAware>();
   AU.addRequired<CallsiteDepthCombinator_CtrlSpecAware>();
   AU.addRequired< ProfilePerformanceEstimator >();
+  AU.addRequired< Targets >();
+  AU.addRequired< ModuleLoops >();
   AU.setPreservesAll();
 }
 
 bool llvm::PDGBuilder::runOnModule (Module &M){
   DL = &M.getDataLayout();
+  
+  ModuleLoops &mloops = getAnalysis< ModuleLoops >();
+  Targets &targets = getAnalysis< Targets >();
+  for(Targets::iterator i=targets.begin(mloops), e=targets.end(mloops); i!=e; ++i) {
+      Loop *loop = *i;
+      getLoopPDG(loop);
+    }
   return false;
 }
 
@@ -72,6 +84,10 @@ std::unique_ptr<llvm::noelle::PDG> llvm::PDGBuilder::getLoopPDG(Loop *loop) {
 
   REPORT_DUMP(errs() << "PDG construction completed\n");
 
+  std::string filename;
+  raw_string_ostream ros(filename);
+  ros << "pdg-function-" << loop->getHeader()->getParent()->getName() << "-loop" << this->loopCount++ << "-refined.dot";
+  llvm::noelle::DGPrinter::writeClusteredGraph<PDG, Value>(ros.str(), pdg.get());
   return pdg;
 }
 
@@ -117,6 +133,7 @@ void llvm::PDGBuilder::addSpecModulesToLoopAA() {
 void llvm::PDGBuilder::specModulesLoopSetup(Loop *loop) {
   PerformanceEstimator *perf = &getAnalysis<ProfilePerformanceEstimator>();
   ctrlspec->setLoopOfInterest(loop->getHeader());
+
   predaa->setLoopOfInterest(loop);
 
   const HeapAssignment &asgn = classify->getAssignmentFor(loop);

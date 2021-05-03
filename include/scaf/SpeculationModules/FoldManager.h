@@ -2,7 +2,6 @@
 #define LLVM_LIBERTY_SPEC_PRIV_FOLD_MANAGER_H
 
 #include "scaf/SpeculationModules/PointsToProfiler/Pieces.h"
-#include "scaf/SpeculationModules/FoldManager.h"
 
 namespace liberty
 {

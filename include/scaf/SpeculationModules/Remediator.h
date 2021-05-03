@@ -42,7 +42,7 @@ enum DataDepType { RAW = 0, WAW = 1, WAR = 2 };
 
 class Remediator {
 public:
-  //virtual Remedies satisfy(const PDG &pdg, Loop *loop, const Criticisms &criticisms);
+  virtual Remedies satisfy(const PDG &pdg, Loop *loop, const Criticisms &criticisms);
 
   struct RemedResp {
     DepResult depRes;
@@ -58,22 +58,16 @@ public:
   // Query for mem deps
   virtual RemedResp memdep(const Instruction *A, const Instruction *B,
                            bool loopCarried, DataDepType dataDepTy,
-                           const Loop *L) {
-    return RemedResp{DepResult::Dep, NULL};
-  }
+                           const Loop *L);
 
   // Query for RAW register dependences
   // is there a RAW reg dep from A to B?
   virtual RemedResp regdep(const Instruction *A, const Instruction *B,
-                           bool loopCarried, const Loop *L) {
-    return RemedResp{DepResult::Dep, NULL};
-  }
+                           bool loopCarried, const Loop *L);
 
   // Query for control dependences
   virtual RemedResp ctrldep(const Instruction *A, const Instruction *B,
-                            const Loop *L) {
-    return RemedResp{DepResult::Dep, NULL};
-  }
+                            const Loop *L);
 
   Remedy_ptr tryRemoveMemEdge(const Instruction *sop, const Instruction *dop,
                               bool loopCarried, DataDepType dataDepTy,
@@ -100,9 +94,7 @@ public:
   virtual LoopAA::ModRefResult modref_many(const Instruction *A,
                                            LoopAA::TemporalRelation rel,
                                            const Instruction *B, const Loop *L,
-                                           Remedies &R) {
-    return LoopAA::ModRef;
-  }
+                                           Remedies &R);
 
   virtual LoopAA::ModRefResult
   modref_with_ptrs(const Instruction *A, const Value *ptrA,

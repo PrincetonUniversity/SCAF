@@ -66,11 +66,11 @@ public:
   void findMemReductions(Loop *l);
   void findMinMaxRegReductions(Loop *l);
 
-  //RemedResp regdep(const Instruction *A, const Instruction *B, bool loopCarried,
-                   //const Loop *L);
+  RemedResp regdep(const Instruction *A, const Instruction *B, bool loopCarried,
+                   const Loop *L);
 
-  //RemedResp memdep(const Instruction *A, const Instruction *B, bool LoopCarried,
-                   //DataDepType dataDepTy, const Loop *L);
+  RemedResp memdep(const Instruction *A, const Instruction *B, bool LoopCarried,
+                   DataDepType dataDepTy, const Loop *L);
 
   bool isRegReductionPHI(Instruction *I, Loop *l);
   bool isConditionalReductionPHI(const Instruction *I, const Loop *l) const;

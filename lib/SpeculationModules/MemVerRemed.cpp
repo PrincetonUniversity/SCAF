@@ -2,7 +2,7 @@
 
 #include "llvm/ADT/Statistic.h"
 
-#include "liberty/Orchestration/MemVerRemed.h"
+#include "scaf/SpeculationModules/MemVerRemed.h"
 
 //#define DEFAULT_MEM_VER_REMED_COST 49
 #define DEFAULT_MEM_VER_REMED_COST 151
