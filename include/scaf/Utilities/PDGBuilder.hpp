@@ -36,7 +36,16 @@ namespace llvm {
 struct PDGBuilder : public ModulePass {
 public:
   static char ID;
-  PDGBuilder() : ModulePass(ID) {}
+  PDGBuilder() : ModulePass(ID) {
+    smtxaa = 0;
+    edgeaa = 0;
+    predaa = 0;
+    ptrresaa = 0;
+    pointstoaa = 0;
+    roaa = 0;
+    localaa = 0;
+    simpleaa = 0;
+  }
   virtual ~PDGBuilder() {}
 
   // bool doInitialization (Module &M) override ;

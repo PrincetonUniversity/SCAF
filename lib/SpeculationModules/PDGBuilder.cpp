@@ -29,23 +29,58 @@ using namespace llvm;
 using namespace llvm::noelle;
 using namespace liberty;
 
+static cl::opt<bool> DumpPDG(
+    "dump-pdg",
+    cl::init(false),
+    cl::NotHidden,
+    cl::desc("Dump out the PDG as dot files"));
+
+static cl::opt<bool> EnableEdgeProf(
+    "enable-edgeprof",
+    cl::init(false),
+    cl::NotHidden,
+    cl::desc("Enable edge prof and control spec modules"));
+
+static cl::opt<bool> EnableLamp(
+    "enable-lamp",
+    cl::init(false),
+    cl::NotHidden,
+    cl::desc("Enable LAMP and mem spec modules"));
+
+static cl::opt<bool> EnableSpecPriv(
+    "enable-specpriv",
+    cl::init(false),
+    cl::NotHidden,
+    cl::desc("Enable SpecPriv and related modules"));
+
 void llvm::PDGBuilder::getAnalysisUsage(AnalysisUsage &AU) const {
   AU.addRequired<TargetLibraryInfoWrapperPass>();
   AU.addRequired<LoopInfoWrapperPass>();
   AU.addRequired< LoopAA >();
   AU.addRequired<PostDominatorTreeWrapperPass>();
   AU.addRequired<LLVMAAResults>();
-  AU.addRequired<ProfileGuidedControlSpeculator>();
-  AU.addRequired<ProfileGuidedPredictionSpeculator>();
-  AU.addRequired<SmtxSpeculationManager>();
-  AU.addRequired<PtrResidueSpeculationManager>();
-  AU.addRequired<ReadPass>();
-  AU.addRequired<Classify>();
-  AU.addRequired<KillFlow_CtrlSpecAware>();
-  AU.addRequired<CallsiteDepthCombinator_CtrlSpecAware>();
+
+  if (EnableEdgeProf) {
+    AU.addRequired<ProfileGuidedControlSpeculator>();
+    AU.addRequired<KillFlow_CtrlSpecAware>();
+    AU.addRequired<CallsiteDepthCombinator_CtrlSpecAware>();
+  }
+
+  if (EnableLamp) {
+    AU.addRequired<SmtxSpeculationManager>();
+  }
+
+  if (EnableSpecPriv) {
+    AU.addRequired<ProfileGuidedPredictionSpeculator>();
+    AU.addRequired<PtrResidueSpeculationManager>();
+    AU.addRequired<ReadPass>();
+    AU.addRequired<Classify>();
+  }
+
   AU.addRequired< ProfilePerformanceEstimator >();
   AU.addRequired< Targets >();
   AU.addRequired< ModuleLoops >();
+
   AU.setPreservesAll();
 }
 
@@ -53,11 +88,22 @@ bool llvm::PDGBuilder::runOnModule (Module &M){
   DL = &M.getDataLayout();
   
   ModuleLoops &mloops = getAnalysis< ModuleLoops >();
+
+  // LoopProf is always required
   Targets &targets = getAnalysis< Targets >();
   for(Targets::iterator i=targets.begin(mloops), e=targets.end(mloops); i!=e; ++i) {
-      Loop *loop = *i;
-      getLoopPDG(loop);
+    Loop *loop = *i;
+    auto pdg = getLoopPDG(loop);
+
+    // dump pdg to dot files
+    if (DumpPDG) {
+      std::string filename;
+      raw_string_ostream ros(filename);
+      ros << "pdg-function-" << loop->getHeader()->getParent()->getName() << "-loop" << this->loopCount++ << "-refined.dot";
+      llvm::noelle::DGPrinter::writeClusteredGraph<PDG, Value>(ros.str(), pdg.get());
     }
+  }
+
   return false;
 }
 
@@ -73,97 +119,106 @@ std::unique_ptr<llvm::noelle::PDG> llvm::PDGBuilder::getLoopPDG(Loop *loop) {
   REPORT_DUMP(errs() << "annotateMemDepsWithRemedies with SCAF ...\n");
   annotateMemDepsWithRemedies(*pdg,loop,aa);
 
-  REPORT_DUMP(errs() << "constructEdgesFromControl ...\n");
+  REPORT_DUMP(errs() << "construct Edges From Control ...\n");
 
   constructEdgesFromControl(*pdg, loop);
 
-  REPORT_DUMP(errs() << "constructEdgesFromUseDefs ...\n");
+  REPORT_DUMP(errs() << "construct Edges From UseDefs ...\n");
 
   // constructEdgesFromUseDefs adds external nodes for live-ins and live-outs
   constructEdgesFromUseDefs(*pdg, loop);
 
   REPORT_DUMP(errs() << "PDG construction completed\n");
 
-  std::string filename;
-  raw_string_ostream ros(filename);
-  ros << "pdg-function-" << loop->getHeader()->getParent()->getName() << "-loop" << this->loopCount++ << "-refined.dot";
-  llvm::noelle::DGPrinter::writeClusteredGraph<PDG, Value>(ros.str(), pdg.get());
   return pdg;
 }
 
 void llvm::PDGBuilder::addSpecModulesToLoopAA() {
   PerformanceEstimator *perf = &getAnalysis<ProfilePerformanceEstimator>();
-  SmtxSpeculationManager &smtxMan = getAnalysis<SmtxSpeculationManager>();
-  smtxaa = new SmtxAA(&smtxMan, perf); // LAMP
-  smtxaa->InitializeLoopAA(this, *DL);
 
-  ctrlspec = getAnalysis<ProfileGuidedControlSpeculator>().getControlSpecPtr();
-  edgeaa = new EdgeCountOracle(ctrlspec); // Control Spec
-  edgeaa->InitializeLoopAA(this, *DL);
+  if (EnableLamp) {
+    SmtxSpeculationManager &smtxMan = getAnalysis<SmtxSpeculationManager>();
+    smtxaa = new SmtxAA(&smtxMan, perf); // LAMP
+    smtxaa->InitializeLoopAA(this, *DL);
+  }
 
-  predspec =
+  if (EnableEdgeProf) {
+    ctrlspec = getAnalysis<ProfileGuidedControlSpeculator>().getControlSpecPtr();
+    edgeaa = new EdgeCountOracle(ctrlspec); // Control Spec
+    edgeaa->InitializeLoopAA(this, *DL);
+    killflow_aware = &getAnalysis<KillFlow_CtrlSpecAware>(); // KillFlow
+    callsite_aware = &getAnalysis<CallsiteDepthCombinator_CtrlSpecAware>(); // CallsiteDepth
+  }
+
+  if (EnableSpecPriv) {
+    predspec =
       getAnalysis<ProfileGuidedPredictionSpeculator>().getPredictionSpecPtr();
-  predaa = new PredictionAA(predspec, perf); //Value Prediction 
-  predaa->InitializeLoopAA(this, *DL);
+    predaa = new PredictionAA(predspec, perf); //Value Prediction 
+    predaa->InitializeLoopAA(this, *DL);
 
-  PtrResidueSpeculationManager &ptrresMan =
+    PtrResidueSpeculationManager &ptrresMan =
       getAnalysis<PtrResidueSpeculationManager>();
-  ptrresaa = new PtrResidueAA(*DL, ptrresMan, perf); // Pointer Residue SpecPriv
-  ptrresaa->InitializeLoopAA(this, *DL);
+    ptrresaa = new PtrResidueAA(*DL, ptrresMan, perf); // Pointer Residue SpecPriv
+    ptrresaa->InitializeLoopAA(this, *DL);
 
-  spresults = &getAnalysis<ReadPass>().getProfileInfo(); // SpecPriv Results
+    spresults = &getAnalysis<ReadPass>().getProfileInfo(); // SpecPriv Results
+    classify = &getAnalysis<Classify>(); // SpecPriv Classify
 
-  // cannot validate points-to object info.
-  // should only be used within localityAA validation only for points-to heap
-  // use it to explore coverage. points-to is always avoided
-  pointstoaa = new PointsToAA(*spresults);
-  pointstoaa->InitializeLoopAA(this, *DL);
+    // cannot validate points-to object info.
+    // should only be used within localityAA validation only for points-to heap
+    // use it to explore coverage. points-to is always avoided
+    pointstoaa = new PointsToAA(*spresults);
+    pointstoaa->InitializeLoopAA(this, *DL);
+  }
 
   simpleaa = new SimpleAA();
   simpleaa->InitializeLoopAA(this, *DL);
 
-  classify = &getAnalysis<Classify>(); // SpecPriv Classify
-
-  killflow_aware = &getAnalysis<KillFlow_CtrlSpecAware>(); // KillFlow
-  callsite_aware = &getAnalysis<CallsiteDepthCombinator_CtrlSpecAware>(); // CallsiteDepth
-
+  // Commutative Libraries 
   //commlibsaa.InitializeLoopAA(this, *DL);
 }
 
 void llvm::PDGBuilder::specModulesLoopSetup(Loop *loop) {
   PerformanceEstimator *perf = &getAnalysis<ProfilePerformanceEstimator>();
-  ctrlspec->setLoopOfInterest(loop->getHeader());
 
-  predaa->setLoopOfInterest(loop);
-
-  const HeapAssignment &asgn = classify->getAssignmentFor(loop);
-  if (!asgn.isValidFor(loop)) {
-    errs() << "ASSIGNMENT INVALID FOR LOOP: "
-           << loop->getHeader()->getParent()->getName()
-           << "::" << loop->getHeader()->getName() << '\n';
+  if (EnableEdgeProf) {
+    ctrlspec->setLoopOfInterest(loop->getHeader());
+    killflow_aware->setLoopOfInterest(ctrlspec, loop);
+    callsite_aware->setLoopOfInterest(ctrlspec, loop);
   }
 
-  const Ctx *ctx = spresults->getCtx(loop);
-  roaa = new ReadOnlyAA(*spresults, asgn, ctx, perf);
-  roaa->InitializeLoopAA(this, *DL);
+  if (EnableSpecPriv) {
+    predaa->setLoopOfInterest(loop);
 
-  localaa = new ShortLivedAA(*spresults, asgn, ctx, perf);
-  localaa->InitializeLoopAA(this, *DL);
+    const HeapAssignment &asgn = classify->getAssignmentFor(loop);
+    if (!asgn.isValidFor(loop)) {
+      errs() << "ASSIGNMENT INVALID FOR LOOP: "
+        << loop->getHeader()->getParent()->getName()
+        << "::" << loop->getHeader()->getName() << '\n';
+    }
 
-  killflow_aware->setLoopOfInterest(ctrlspec, loop);
-  callsite_aware->setLoopOfInterest(ctrlspec, loop);
+    const Ctx *ctx = spresults->getCtx(loop);
+    roaa = new ReadOnlyAA(*spresults, asgn, ctx, perf);
+    roaa->InitializeLoopAA(this, *DL);
+
+    localaa = new ShortLivedAA(*spresults, asgn, ctx, perf);
+    localaa->InitializeLoopAA(this, *DL);
+  }
 }
 
 void llvm::PDGBuilder::removeSpecModulesFromLoopAA() {
-    delete smtxaa;
-    delete edgeaa;
-    delete predaa;
-    delete ptrresaa;
-    delete pointstoaa;
-    delete roaa;
-    delete localaa;
-    delete simpleaa;
+  // c++ guarantee that if null nothing bad will happen
+  delete smtxaa;
+  delete edgeaa;
+  delete predaa;
+  delete ptrresaa;
+  delete pointstoaa;
+  delete roaa;
+  delete localaa;
+  delete simpleaa;
+  if (killflow_aware) {
     killflow_aware->setLoopOfInterest(nullptr, nullptr);
+  }
 }
 
 void llvm::PDGBuilder::constructEdgesFromUseDefs(PDG &pdg, Loop *loop) {
@@ -566,7 +621,6 @@ void llvm::PDGBuilder::annotateMemDepsWithRemedies(PDG &pdg, Loop *loop,
 
   // LLVM_DEBUG(errs() << "revert stack to CAF ...\n");
   removeSpecModulesFromLoopAA();
-  // aa->dump();
 }
 
 char PDGBuilder::ID = 0;
