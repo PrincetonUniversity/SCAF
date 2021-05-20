@@ -1,4 +1,3 @@
-#include "scaf/Utilities/ModuleLoops.h"
 #define DEBUG_TYPE "pdgbuilder"
 
 #include "llvm/Analysis/LoopInfo.h"
@@ -17,7 +16,7 @@
 #include "llvm/ADT/iterator_range.h"
 
 #include "scaf/MemoryAnalysisModules/LLVMAAResults.h"
-#include "scaf/Utilities/PDGBuilder.hpp"
+#include "scaf/SpeculationModules/PDGBuilder.hpp"
 #include "scaf/SpeculationModules/ProfilePerformanceEstimator.h"
 #include "scaf/Utilities/ReportDump.h"
 #include "scaf/SpeculationModules/LoopProf/Targets.h"
@@ -86,17 +85,15 @@ void llvm::PDGBuilder::getAnalysisUsage(AnalysisUsage &AU) const {
 
 bool llvm::PDGBuilder::runOnModule (Module &M){
   DL = &M.getDataLayout();
-  
-  ModuleLoops &mloops = getAnalysis< ModuleLoops >();
+  if (DumpPDG) {
+    // LoopProf is always required
+    ModuleLoops &mloops = getAnalysis< ModuleLoops >();
+    Targets &targets = getAnalysis< Targets >();
+    for(Targets::iterator i=targets.begin(mloops), e=targets.end(mloops); i!=e; ++i) {
+      Loop *loop = *i;
+      auto pdg = getLoopPDG(loop);
 
-  // LoopProf is always required
-  Targets &targets = getAnalysis< Targets >();
-  for(Targets::iterator i=targets.begin(mloops), e=targets.end(mloops); i!=e; ++i) {
-    Loop *loop = *i;
-    auto pdg = getLoopPDG(loop);
-
-    // dump pdg to dot files
-    if (DumpPDG) {
+      // dump pdg to dot files
       std::string filename;
       raw_string_ostream ros(filename);
       ros << "pdg-function-" << loop->getHeader()->getParent()->getName() << "-loop" << this->loopCount++ << "-refined.dot";

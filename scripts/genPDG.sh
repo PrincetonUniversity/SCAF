@@ -1,10 +1,12 @@
 #!/usr/bin/env bash
 
-if [[ x"$SCAF_LIBS_DIR" == x"" ]]
-then
-    echo SCAF_LIBS_DIR not found, please export it
-    exit
-fi
+#SCAF_LIBS_DIR="/u/ziyangx/SCAF/build/install/lib"
+SCAF_LIBS_DIR="/u/ziyangx/SCAF/build-release/install/lib"
+# if [[ x"$SCAF_LIBS_DIR" == x"" ]]
+# then
+#     echo SCAF_LIBS_DIR not found, please export it
+#     exit
+# fi
 
 if [ ! -f $SCAF_LIBS_DIR/libSpeculationModules.so ];
 then
@@ -53,9 +55,9 @@ ENABLE_SPECPRIV="-enable-specpriv"
 
 BENCHMARK="benchmark.bc"
 
-#ENABLES=""
-ENABLES="$ENABLE_EDGE $ENABLE_LAMP $ENABLE_SPECPRIV"
+ENABLES=""
+#ENABLES="$ENABLE_EDGE $ENABLE_LAMP $ENABLE_SPECPRIV"
 
-CMD="opt $SCAF_BASE_LIBS $NOELLE_LIBS $SCAF_SPEC_LIBS $AA_PASSES $ENABLES $DEBUG_PASSES $BENCHMARK -pdgbuilder -disable-output"
+CMD="opt $SCAF_BASE_LIBS $NOELLE_LIBS $SCAF_SPEC_LIBS $AA_PASSES $ENABLES $DEBUG_PASSES $BENCHMARK -pdgbuilder $1 -dump-pdg -disable-output"
 echo $CMD
 $CMD
