@@ -158,8 +158,8 @@ LoopAA::ModRefResult LLVMAAResults::modref(const Instruction *A,
 
   Instruction *nA = const_cast<Instruction *>(A);
   Instruction *nB = const_cast<Instruction *>(B);
-  auto *callA = dyn_cast<CallInst>(nA);
-  auto *callB = dyn_cast<CallInst>(nB);
+  auto *callA = dyn_cast<CallBase>(nA);
+  auto *callB = dyn_cast<CallBase>(nB);
 
   if (callA && callB)
     aaRes = aa->getModRefInfo(callA, callB);

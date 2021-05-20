@@ -10,6 +10,7 @@
 #include "llvm/IR/Instruction.h"
 #include "llvm/Analysis/LoopInfo.h"
 #include "scaf/Utilities/MakePtr.h"
+#include "scaf/Utilities/PipelineStrategy.h"
 #include "llvm/Support/Format.h"
 #include "llvm/Support/Debug.h"
 
@@ -84,12 +85,12 @@ struct PerformanceEstimator
   // which ignores pipeline fill, communication costs, etc:
   //  weight(pipeline) = max_{s in stages} weight(s)
 
-  //virtual double estimate_pipeline_weight(const PipelineStrategy::Stages &stages);
-  //virtual double estimate_pipeline_weight(const PipelineStrategy::Stages &stages, const Loop *loop);
-  //double estimate_pipeline_weight(const PipelineStrategy &strategy)
-    //{ return estimate_pipeline_weight( strategy.stages ); }
-  //double estimate_pipeline_weight(const PipelineStrategy &strategy, const Loop *loop)
-    //{ return estimate_pipeline_weight( strategy.stages, loop ); }
+  virtual double estimate_pipeline_weight(const PipelineStrategy::Stages &stages);
+  virtual double estimate_pipeline_weight(const PipelineStrategy::Stages &stages, const Loop *loop);
+  double estimate_pipeline_weight(const PipelineStrategy &strategy)
+    { return estimate_pipeline_weight( strategy.stages ); }
+  double estimate_pipeline_weight(const PipelineStrategy &strategy, const Loop *loop)
+    { return estimate_pipeline_weight( strategy.stages, loop ); }
 
 };
 
