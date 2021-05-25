@@ -168,11 +168,15 @@ void llvm::PDGBuilder::addSpecModulesToLoopAA() {
     pointstoaa->InitializeLoopAA(this, *DL);
   }
 
+  // FIXME: try to add txio and commlib back to PDG Building
+  txioaa = new TXIOAA();
+  txioaa->InitializeLoopAA(this, *DL);
+
+  commlibsaa = new CommutativeLibsAA();
+  commlibsaa->InitializeLoopAA(this, *DL);
+
   simpleaa = new SimpleAA();
   simpleaa->InitializeLoopAA(this, *DL);
-
-  // Commutative Libraries 
-  //commlibsaa.InitializeLoopAA(this, *DL);
 }
 
 void llvm::PDGBuilder::specModulesLoopSetup(Loop *loop) {
@@ -212,6 +216,8 @@ void llvm::PDGBuilder::removeSpecModulesFromLoopAA() {
   delete pointstoaa;
   delete roaa;
   delete localaa;
+  delete txioaa;
+  delete commlibsaa;
   delete simpleaa;
   if (killflow_aware) {
     killflow_aware->setLoopOfInterest(nullptr, nullptr);

@@ -23,6 +23,9 @@
 #include "scaf/SpeculationModules/PredictionSpeculator.h"
 #include "scaf/SpeculationModules/Read.h"
 
+#include "scaf/SpeculationModules/TXIOAA.h"
+#include "scaf/SpeculationModules/CommutativeLibsAA.h"
+
 #include "PDG.hpp"
 
 #include <unordered_set>
@@ -45,6 +48,10 @@ public:
     roaa = 0;
     localaa = 0;
     simpleaa = 0;
+    killflow_aware = 0;
+    callsite_aware = 0;
+    txioaa = 0;
+    commlibsaa = 0;
   }
   virtual ~PDGBuilder() {}
 
@@ -67,6 +74,10 @@ private:
   PointsToAA *pointstoaa;
   ReadOnlyAA *roaa;
   ShortLivedAA *localaa;
+
+  TXIOAA *txioaa;
+  CommutativeLibsAA *commlibsaa;
+
   SimpleAA *simpleaa;
   Read *spresults;
   Classify *classify;
