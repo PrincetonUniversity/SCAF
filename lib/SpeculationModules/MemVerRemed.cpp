@@ -50,7 +50,9 @@ Remediator::RemedResp MemVerRemediator::memdep(const Instruction *A,
       remedy->waw = true;
       // DISABLE WAW functionality for MemVer (Cannot handle
       // last-liveout value in the codegen)
-      remedResp.depRes = DepResult::Dep;
+      // remedResp.depRes = DepResult::Dep;
+      // Ziyang Enable versioning with high cost
+      remedy->cost = DEFAULT_MEM_VER_REMED_COST;
     }
     else {
       // with process-based parallelization, WAR are removed for free.

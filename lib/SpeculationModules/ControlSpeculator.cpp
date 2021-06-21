@@ -334,6 +334,10 @@ void ProfileGuidedControlSpeculator::visit(const Function *fcn)
                    << ", " << (unsigned)rate << "/" << (unsigned)pred_cnt << "\n");
           continue;
         }
+        //if (pred->getName() == "primal_bea_mpp.exit.i") {
+          //volatile int* i = 0;
+           //int j = *(int*)i;
+        //}
       }
       else
       {

@@ -388,7 +388,7 @@ bool LAMPLoadProfile::runOnModule(Module& M)
   unsigned int num_cnt = 0;
   unsigned int num, i1_id=0, i2_id=0, cross_iter=0, loop_id=0, times=0;
 
-  BasicBlock* BB;
+  BasicBlock* BB = nullptr;
   std::map<BasicBlock*, InstPairSet >::iterator iter;
   while (ifs >> s)
   {
@@ -935,8 +935,9 @@ bool LAMPLoadProfile::runOnModule(Module& M)
         break;
       case 0: /* Number of iterations of the loop that the dependence manifested */
         {
-          biikey_t biikey(BB, Namer::getInstrId(IdToInstMap[i1_id]),
+          biikey_t biikey(BB, Namer::getInstrId(IdToInstMap[i1_id]), 
               Namer::getInstrId(IdToInstMap[i2_id]), cross_iter);
+
           if(cross_iter)
           {
             if( num != 0)

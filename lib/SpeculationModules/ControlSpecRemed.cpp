@@ -271,11 +271,13 @@ Remediator::RemedResp ControlSpecRemediator::ctrldep(const Instruction *A,
   assert(A->isTerminator());
 
   if (speculator->misspecInProfLoopExit(A)) {
-    // avoid spec on loop exits completely
-    remedResp.remedy = remedy;
-    return remedResp;
+    /*
+     * // avoid spec on loop exits completely
+     * remedResp.remedy = remedy;
+     * return remedResp;
+     */
 
-    //remedy->cost = EXPENSIVE_CTRL_REMED_COST;
+    remedy->cost = EXPENSIVE_CTRL_REMED_COST;
   }
 
   remedResp.depRes = DepResult::NoDep;

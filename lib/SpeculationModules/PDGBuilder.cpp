@@ -15,6 +15,7 @@
 
 #include "llvm/ADT/iterator_range.h"
 
+#include "scaf/SpeculationModules/GlobalConfig.h"
 #include "scaf/MemoryAnalysisModules/LLVMAAResults.h"
 #include "scaf/SpeculationModules/PDGBuilder.hpp"
 #include "scaf/SpeculationModules/ProfilePerformanceEstimator.h"
@@ -34,20 +35,17 @@ static cl::opt<bool> DumpPDG(
     cl::NotHidden,
     cl::desc("Dump out the PDG as dot files"));
 
-static cl::opt<bool> EnableEdgeProf(
-    "enable-edgeprof",
+cl::opt<bool> EnableEdgeProf = cl::opt<bool> ( "enable-edgeprof",
     cl::init(false),
     cl::NotHidden,
     cl::desc("Enable edge prof and control spec modules"));
 
-static cl::opt<bool> EnableLamp(
-    "enable-lamp",
+cl::opt<bool> EnableLamp = cl::opt<bool> ( "enable-lamp",
     cl::init(false),
     cl::NotHidden,
     cl::desc("Enable LAMP and mem spec modules"));
 
-static cl::opt<bool> EnableSpecPriv(
-    "enable-specpriv",
+cl::opt<bool> EnableSpecPriv = cl::opt<bool> ( "enable-specpriv",
     cl::init(false),
     cl::NotHidden,
     cl::desc("Enable SpecPriv and related modules"));
