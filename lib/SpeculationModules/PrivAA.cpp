@@ -36,7 +36,7 @@ bool PrivRemedy::compare(const Remedy_ptr rhs) const {
         return this->type < privRhs->type;
       }
     } else {
-      this->altPrivPtr < privRhs->altPrivPtr;
+      return this->altPrivPtr < privRhs->altPrivPtr;
     }
   }
   return this->privPtr < privRhs->privPtr;
