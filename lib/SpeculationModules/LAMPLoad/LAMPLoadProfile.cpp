@@ -33,6 +33,7 @@
 #include <utility>
 #include <sys/stat.h>
 #include <climits>
+#include <vector>
 
 #include "scaf/SpeculationModules/LAMP/LAMPLoadProfile.h"
 #include "scaf/SpeculationModules/LAMP/LAMPFlags.h"
@@ -348,9 +349,10 @@ bool LAMPLoadProfile::runOnModule(Module& M)
   std::string s;
 
   // Get rid of the 'worthless' things in the results file
-  const unsigned MAX_LOOPS = 5000;
-  unsigned int itercounts[MAX_LOOPS] = {0};
-  for(unsigned i=0; i<MAX_LOOPS; i++)
+  //unsigned int itercounts[MAX_LOOPS] = {0};
+  std::vector<unsigned int> itercounts;
+  unsigned loopCount = 0;
+  while (true)
   {
     ifs >> s;
     // To handle dynamic numbers of loops, break out early when we hit the end
@@ -362,7 +364,8 @@ bool LAMPLoadProfile::runOnModule(Module& M)
       break;
     }
     ifs >> s;
-    itercounts[i] = str_to_int(s);
+    itercounts.push_back(str_to_int(s));
+    loopCount++;
   }
 
   std::ofstream lcfile(LCOUTFILE);
@@ -994,18 +997,16 @@ bool LAMPLoadProfile::runOnModule(Module& M)
    */
 
   // intentionally skip loop 0, since that is the global contex.
-  for(unsigned i=1; i<MAX_LOOPS; i++)
-  {
-    if( itercounts[i] > 0 )
-    {
+  LLVM_DEBUG(for (unsigned i = 1; i < loopCount; i++) {
+    if (itercounts[i] > 0) {
       BasicBlock *header = IdToLoopMap_global[i];
-      if( header )
-      {
-        // Function *fcn = header->getParent();
-//        errs() << "NONZERO " << fcn->getName() << ' ' << header->getName() << '\n';
+      if (header) {
+         Function *fcn = header->getParent();
+                errs() << "NONZERO " << fcn->getName() << ' ' <<
+                header->getName() << '\n';
       }
     }
-  }
+  });
 
   return true;
 }
