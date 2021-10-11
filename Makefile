@@ -1,11 +1,12 @@
 SCAF_INSTALL_DEBUG?=$(shell pwd)/scaf-install-debug
 SCAF_INSTALL_RELEASE?=$(shell pwd)/scaf-install-release
+SVF_AVAILABLE?=0
 JOBS?=16
 
 CC=clang
 CXX=clang++
 
-all: scaf-debug
+all: scaf-debug scaf-release
 
 clean:
 		rm -rf scaf-build-debug scaf-build-release
