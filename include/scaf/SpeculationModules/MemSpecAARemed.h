@@ -55,11 +55,13 @@ public:
                       PtrResidueSpeculationManager *pman,
                       KillFlow_CtrlSpecAware *killflowA,
                       CallsiteDepthCombinator_CtrlSpecAware *callsiteA,
-                      KillFlow &kill, ModuleLoops &ml, PerformanceEstimator *pf)
+                      ModuleLoops &ml, PerformanceEstimator *pf)
       : Remediator(), proxy(p), ctrlspec(cs), lamp(lp), spresults(read),
         asgn(c), predspec(ps), smtxMan(sman), ptrresMan(pman),
-        killflow_aware(killflowA), callsite_aware(callsiteA), killFlow(kill),
-        mloops(ml), perf(pf) {}
+        killflow_aware(killflowA), callsite_aware(callsiteA),
+        mloops(ml), perf(pf) {
+          killFlow = proxy.getAnalysisIfAvailable<KillFlow>();
+        }
 
   StringRef getRemediatorName() const { return "mem-spec-aa-remediator"; }
 
@@ -91,7 +93,7 @@ private:
   SimpleAA *simpleaa;
   KillFlow_CtrlSpecAware *killflow_aware;
   CallsiteDepthCombinator_CtrlSpecAware *callsite_aware;
-  KillFlow &killFlow;
+  KillFlow *killFlow;
   ModuleLoops &mloops;
   PrivAA *privaa;
   PerformanceEstimator *perf;
