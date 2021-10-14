@@ -1,3 +1,5 @@
+#include <sstream>
+#include <streambuf>
 #define DEBUG_TYPE "pdgbuilder"
 
 #include "llvm/Analysis/LoopInfo.h"
@@ -21,6 +23,7 @@
 #include "scaf/SpeculationModules/ProfilePerformanceEstimator.h"
 #include "scaf/Utilities/ReportDump.h"
 #include "scaf/SpeculationModules/LoopProf/Targets.h"
+#include "scaf/Utilities/Metadata.h"
 
 #include "PDGPrinter.hpp"
 #include "Assumptions.h"
@@ -34,6 +37,10 @@ static cl::opt<bool> DumpPDG(
     cl::init(false),
     cl::NotHidden,
     cl::desc("Dump out the PDG as dot files"));
+
+static cl::opt<std::string> QueryDep(
+  "query-dep", cl::init(""), cl::NotHidden,
+  cl::desc("Query a specific dependence"));
 
 cl::opt<bool> EnableEdgeProf = cl::opt<bool> ( "enable-edgeprof",
     cl::init(false),
@@ -97,6 +104,52 @@ bool llvm::PDGBuilder::runOnModule (Module &M){
       ros << "pdg-function-" << loop->getHeader()->getParent()->getName() << "-loop" << this->loopCount++ << "-refined.dot";
       llvm::noelle::DGPrinter::writeClusteredGraph<PDG, Value>(ros.str(), pdg.get());
     }
+  }
+
+  std::stringstream ss(QueryDep);
+  int instrIdSrc, instrIdDst;
+
+  auto findInstr = [] (Loop *loop, int instrId) {
+    for (auto &block : loop->getBlocks()) {
+      for (auto &instr : *block) {
+        if (liberty::Namer::getInstrId(&instr) == instrId)
+          return &instr;
+      }
+    }
+    return (Instruction *)nullptr;
+  };
+
+  // if there's content in both field
+  if (ss >> instrIdSrc >> instrIdDst) { 
+    ModuleLoops &mloops = getAnalysis< ModuleLoops >();
+    Targets &targets = getAnalysis< Targets >();
+    for(Targets::iterator i=targets.begin(mloops), e=targets.end(mloops); i!=e; ++i) {
+      Loop *loop = *i;
+      Instruction *src = findInstr(loop, instrIdSrc);
+      Instruction *dst = findInstr(loop, instrIdDst);
+
+      errs() << "In loop " << loop->getHeader()->getParent()->getName()  << "::" << loop->getHeader()->getName() << "\n";
+      // get deps
+      //errs() << "Control Dep: ";
+      //errs() << "Control Dep (LC): ";
+      errs() << "Deps between instr \n" << *src << "\n -> \n" << *dst << "\n";
+
+      getAnalysis<LLVMAAResults>().computeAAResults(loop->getHeader()->getParent());
+      LoopAA *aa = getAnalysis< LoopAA >().getTopAA();
+
+      auto pdg = std::make_unique<llvm::noelle::PDG>(loop);
+
+      queryLoopCarriedMemoryDep(src, dst, loop, aa, *pdg);
+      queryIntraIterationMemoryDep(src, dst, loop, aa, *pdg);
+
+      for (auto edge: pdg->fetchEdges(pdg->fetchNode(src), pdg->fetchNode(dst))) {
+        errs() << edge->toString() << "\n";
+      }
+      errs() << "End of deps";
+      //errs() << "Reg Dep: ";
+      //errs() << "Reg Dep (LC): ";
+    }
+
   }
 
   return false;
