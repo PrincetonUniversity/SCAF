@@ -1,3 +1,4 @@
+#include "llvm/IR/InstrTypes.h"
 #include <sstream>
 #include <streambuf>
 #define DEBUG_TYPE "pdgbuilder"
@@ -57,6 +58,11 @@ cl::opt<bool> EnableSpecPriv = cl::opt<bool> ( "enable-specpriv",
     cl::NotHidden,
     cl::desc("Enable SpecPriv and related modules"));
 
+cl::opt<bool> IgnoreCallsite = cl::opt<bool> ( "pdg-ignore-callsite",
+    cl::init(false),
+    cl::NotHidden,
+    cl::desc("Ignore all callsite in PDG"));
+
 void llvm::PDGBuilder::getAnalysisUsage(AnalysisUsage &AU) const {
   AU.addRequired<TargetLibraryInfoWrapperPass>();
   AU.addRequired<LoopInfoWrapperPass>();
@@ -66,8 +72,8 @@ void llvm::PDGBuilder::getAnalysisUsage(AnalysisUsage &AU) const {
 
   if (EnableEdgeProf) {
     AU.addRequired<ProfileGuidedControlSpeculator>();
-    AU.addRequired<KillFlow_CtrlSpecAware>();
-    AU.addRequired<CallsiteDepthCombinator_CtrlSpecAware>();
+    //AU.addRequired<KillFlow_CtrlSpecAware>();
+    //AU.addRequired<CallsiteDepthCombinator_CtrlSpecAware>();
   }
 
   if (EnableLamp) {
@@ -194,8 +200,8 @@ void llvm::PDGBuilder::addSpecModulesToLoopAA() {
     ctrlspec = getAnalysis<ProfileGuidedControlSpeculator>().getControlSpecPtr();
     edgeaa = new EdgeCountOracle(ctrlspec); // Control Spec
     edgeaa->InitializeLoopAA(this, *DL);
-    killflow_aware = &getAnalysis<KillFlow_CtrlSpecAware>(); // KillFlow
-    callsite_aware = &getAnalysis<CallsiteDepthCombinator_CtrlSpecAware>(); // CallsiteDepth
+    //killflow_aware = &getAnalysis<KillFlow_CtrlSpecAware>(); // KillFlow
+    //callsite_aware = &getAnalysis<CallsiteDepthCombinator_CtrlSpecAware>(); // CallsiteDepth
   }
 
   if (EnableSpecPriv) {
@@ -235,8 +241,8 @@ void llvm::PDGBuilder::specModulesLoopSetup(Loop *loop) {
 
   if (EnableEdgeProf) {
     ctrlspec->setLoopOfInterest(loop->getHeader());
-    killflow_aware->setLoopOfInterest(ctrlspec, loop);
-    callsite_aware->setLoopOfInterest(ctrlspec, loop);
+    //killflow_aware->setLoopOfInterest(ctrlspec, loop);
+    //callsite_aware->setLoopOfInterest(ctrlspec, loop);
   }
 
   if (EnableSpecPriv) {
@@ -522,6 +528,12 @@ void llvm::PDGBuilder::constructEdgesFromMemory(PDG &pdg, Loop *loop,
     if (!i->mayReadOrWriteMemory())
       continue;
 
+    if (IgnoreCallsite) {
+      // FIXME: ignore callsite
+      if (dyn_cast<CallBase>(i))
+        continue;
+    }
+
     for (auto nodeJ : make_range(pdg.begin_nodes(), pdg.end_nodes())) {
       Value *pdgValueJ = nodeJ->getT();
       Instruction *j = dyn_cast<Instruction>(pdgValueJ);
@@ -529,6 +541,12 @@ void llvm::PDGBuilder::constructEdgesFromMemory(PDG &pdg, Loop *loop,
 
       if (!j->mayReadOrWriteMemory())
         continue;
+
+      if (IgnoreCallsite) {
+        // FIXME: ignore callsite
+        if (dyn_cast<CallBase>(j))
+          continue;
+      }
 
       ++memDepQueryCnt;
 

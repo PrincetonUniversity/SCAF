@@ -252,15 +252,25 @@ Remediator::RemedResp ControlSpecRemediator::ctrldep(const Instruction *A,
   remedy->cost = 0;
   //remedy->cost = DEFAULT_CTRL_REMED_COST;
 
-  // check if the control speculator was able to remove the control
-  // dependence when it preprocesed the loop
 
-  if (unremovableCtrlDeps.count(A)) {
-    auto &unremCtrlDepsFromA = unremovableCtrlDeps[A];
-    if (unremCtrlDepsFromA.count(B)) {
-      // unable to remove this ctrl dep
-      remedResp.remedy = remedy;
-      return remedResp;
+  // FIXME: chek if any edge is speculatively dead
+  if (speculator->isSpeculativelyDead(A)) {
+    ++numCtrlDepRem;
+  }
+  else if (speculator->isSpeculativelyDead(B)) {
+    ++numCtrlDepRem;
+  }
+  else {
+    // check if the control speculator was able to remove the control
+    // dependence when it preprocesed the loop
+
+    if (unremovableCtrlDeps.count(A)) {
+      auto &unremCtrlDepsFromA = unremovableCtrlDeps[A];
+      if (unremCtrlDepsFromA.count(B)) {
+        // unable to remove this ctrl dep
+        remedResp.remedy = remedy;
+        return remedResp;
+      }
     }
   }
 

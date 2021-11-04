@@ -1,3 +1,4 @@
+#include "llvm/Support/Casting.h"
 #define DEBUG_TYPE "smtx-aa"
 
 #define LAMP_COLLECTS_OUTPUT_DEPENDENCES  (0)
@@ -28,6 +29,11 @@ namespace SpecPriv
     "smtx-threshhold", cl::init(0),
     cl::NotHidden,
     cl::desc("Maximum number of observed flows to report NoModRef"));
+
+  static cl::opt<bool> EnableExternalCall(
+    "smtx-enable-excall", cl::init(false),
+    cl::NotHidden,
+    cl::desc("Enable external call"));
 
   bool SmtxLampRemedy::compare(const Remedy_ptr rhs) const {
     std::shared_ptr<SmtxLampRemedy> smtxRhs =
@@ -120,6 +126,22 @@ namespace SpecPriv
     remedyA->setCost(perf);
     remedyB->setCost(perf);
 
+    auto isExternalCall = [](const Instruction *A) {
+      if (!EnableExternalCall)
+        return false;
+      else {
+        const CallBase *callee = dyn_cast<CallBase>(A);
+
+        if (callee) {
+          auto *fn = callee->getCalledFunction();
+          if (fn && fn->isDeclaration())
+            return true;
+        }
+
+        return false;
+      }
+    };
+
     // Loop carried forward queries, or
     // Same queries.
     if( rel == Before || rel == Same )
@@ -142,6 +164,11 @@ namespace SpecPriv
           result = Mod;
       }
 
+      // FIXME: quick test for external libray call
+      else if ( isExternalCall(A) ) {
+        result = ModRef;
+      }
+
       else
       {
         // Callsites, etc: inapplicable
@@ -157,6 +184,10 @@ namespace SpecPriv
       else if( isMemIntrinsic(B) && intrinsicMayRead(B) )
       {
         // okay
+      }
+      // FIXME: quick test for external libray call
+      else if ( isExternalCall(A) ) {
+        result = ModRef;
       }
       else
       {
@@ -230,6 +261,10 @@ namespace SpecPriv
       else if( LAMP_COLLECTS_OUTPUT_DEPENDENCES && isa<StoreInst>(A) )
         // Stores don't ref
         result = Mod;
+      // FIXME: quick test for external libray call
+      else if ( isExternalCall(A) ) {
+        result = ModRef;
+      }
 
       else
       {
@@ -247,6 +282,10 @@ namespace SpecPriv
       else if( isMemIntrinsic(B) )
       {
         // good
+      }
+      // FIXME: quick test for external libray call
+      else if ( isExternalCall(A) ) {
+        result = ModRef;
       }
       else
       {

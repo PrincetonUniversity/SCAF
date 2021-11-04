@@ -155,7 +155,8 @@ void ProfileGuidedControlSpeculator::visit(const Function *fcn)
   // How confident must we be before speculating?
   //const double MinSamples = 10.0;
   //const double MinSamples = 5.0;
-  const double MinSamples = 2.0;
+  // const double MinSamples = 2.0;
+  const double MinSamples = 1.0;
   const double MaxMisspec = 0.00001; // 0.001%
   const double MaxMisspecLoopExit = 0.0;
 
