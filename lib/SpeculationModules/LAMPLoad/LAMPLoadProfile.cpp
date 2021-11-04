@@ -354,18 +354,23 @@ bool LAMPLoadProfile::runOnModule(Module& M)
   unsigned loopCount = 0;
   while (true)
   {
-    ifs >> s;
     // To handle dynamic numbers of loops, break out early when we hit the end
     // of the loop section, clears out the 'BEGIN Memory Profile' line
-    if(s == "BEGIN")
-    {
+    if (ifs >> s) {
+      if(s == "BEGIN")
+      {
+        ifs >> s;
+        ifs >> s;
+        break;
+      }
       ifs >> s;
-      ifs >> s;
-      break;
+      itercounts.push_back(str_to_int(s));
+      loopCount++;
     }
-    ifs >> s;
-    itercounts.push_back(str_to_int(s));
-    loopCount++;
+    else {
+      LLVM_DEBUG(errs() << "LAMP profile incomplete\n");
+      return false;
+    }
   }
 
   std::ofstream lcfile(LCOUTFILE);
