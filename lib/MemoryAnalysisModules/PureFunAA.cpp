@@ -5,6 +5,7 @@
 #include "llvm/ADT/SmallPtrSet.h"
 #include "llvm/Analysis/Passes.h"
 #include "llvm/Analysis/ValueTracking.h"
+#include "llvm/IR/CallSite.h"
 #include "llvm/IR/InstIterator.h"
 #include "llvm/IR/Instructions.h"
 #include "llvm/IR/IntrinsicInst.h"
@@ -205,6 +206,31 @@ void PureFunAA::runOnSCC(const SCC &scc) {
   ++sccCount;
 }
 
+static unsigned getArgSize(const ImmutableCallSite CS) {
+  const IntrinsicInst *II = dyn_cast<IntrinsicInst>(CS.getInstruction());
+  unsigned Len = ClassicLoopAA::UnknownSize;
+  if (II != 0)
+    switch (II->getIntrinsicID()) {
+    default:
+      break;
+    case Intrinsic::memcpy:
+    case Intrinsic::memmove: {
+      if (ConstantInt *LenCI = dyn_cast<ConstantInt>(II->getArgOperand(2)))
+        Len = LenCI->getZExtValue();
+      break;
+    }
+    case Intrinsic::memset:
+      // Since memset is 'accesses arguments' only, the LoopAA base class
+      // will handle it for the variable length case.
+      if (ConstantInt *LenCI = dyn_cast<ConstantInt>(II->getArgOperand(2))) {
+        Len = LenCI->getZExtValue();
+      }
+      break;
+    }
+
+  return Len;
+}
+
 bool PureFunAA::argumentsAlias(const ImmutableCallSite CS1,
                                const ImmutableCallSite CS2, LoopAA *aa,
                                const DataLayout *TD, Remedies &R) {
@@ -212,8 +238,13 @@ bool PureFunAA::argumentsAlias(const ImmutableCallSite CS1,
   typedef ImmutableCallSite::arg_iterator ArgIt;
   for (ArgIt arg = CS1.arg_begin(); arg != CS1.arg_end(); ++arg) {
     if ((*arg)->getType()->isPointerTy()) {
-      if (argumentsAlias(CS2, *arg, liberty::getTargetSize(*arg, TD), aa, TD,
-                         R)) {
+
+      // Special considertion
+      unsigned argSize = getArgSize(CS1);
+      if (argSize == UnknownSize)
+        argSize = liberty::getTargetSize(*arg, TD);
+
+      if (argumentsAlias(CS2, *arg, argSize, aa, TD, R)) {
         return true;
       }
     }
@@ -233,7 +264,13 @@ bool PureFunAA::argumentsAlias(const ImmutableCallSite CS, const Value *P,
 
       // add check here for argument attribute
 
-      const int argSize = liberty::getTargetSize(arg, TD);
+      // FIXME: only fix memset and memcpy here
+
+
+      unsigned argSize = getArgSize(CS);
+      if (argSize == UnknownSize)
+        argSize = liberty::getTargetSize(arg, TD);
+
       if (aa->alias(P, Size, Same, arg, argSize, NULL, R)) {
         return true;
       }
