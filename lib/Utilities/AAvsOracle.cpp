@@ -1,7 +1,7 @@
 #include "AAvsOracle.h"
 #include "llvm/IR/Constants.h"
 
-#include "scaf/Utilities/CallSiteFactory.h"
+#include "scaf/Utilities/CallBaseFactory.h"
 
 #include <cstdio>
 
@@ -28,14 +28,14 @@ bool AAvsOracle_EarlyHelper::gather(Function *oracle, Truths &collection,
   typedef std::vector<Value *> Values;
   Values tmp(oracle->user_begin(), oracle->user_end());
   for (Values::iterator i = tmp.begin(), e = tmp.end(); i != e; ++i) {
-    CallSite cs = getCallSite(*i);
-    if (!cs.getInstruction())
+    CallBase* cs = getCallBase(*i);
+    if (!cs)
       continue;
 
-    const DebugLoc &location = cs.getInstruction()->getDebugLoc();
+    const DebugLoc &location = cs->getDebugLoc();
     std::string desc;
     {
-      Value *description = cs.getArgument(0);
+      Value *description = cs->getArgOperand(0);
       if (User *udesc = dyn_cast<User>(description))
         if (GlobalVariable *gv = dyn_cast<GlobalVariable>(udesc->getOperand(0)))
           if (ConstantDataArray *carr =
@@ -43,8 +43,8 @@ bool AAvsOracle_EarlyHelper::gather(Function *oracle, Truths &collection,
             desc = carr->getAsString();
     }
 
-    Value *ptr1 = cs.getArgument(1);
-    Value *ptr2 = cs.getArgument(2);
+    Value *ptr1 = cs->getArgOperand(1);
+    Value *ptr2 = cs->getArgOperand(2);
 
     PointerType *pty1 = dyn_cast<PointerType>(ptr1->getType()),
                 *pty2 = dyn_cast<PointerType>(ptr2->getType());
@@ -71,7 +71,7 @@ bool AAvsOracle_EarlyHelper::gather(Function *oracle, Truths &collection,
     collection.back().ptr2 = ptr2;
     collection.back().s2 = s2;
 
-    cs.getInstruction()->eraseFromParent();
+    cs->eraseFromParent();
     modified = true;
   }
 
@@ -107,7 +107,7 @@ void AAvsOracle::test(unsigned truth, ATI begin, ATI end, unsigned *stat_row) {
 
   for (ATI i = begin; i != end; ++i) {
     switch (alias.alias(i->ptr1, i->s1, i->ptr2, i->s2)) {
-    case NoAlias:
+    case llvm::AliasResult::NoAlias:
       ++stat_row[AA_NO];
       if (truth == AA_MAY || truth == AA_MUST) {
         fprintf(stderr,
@@ -116,8 +116,8 @@ void AAvsOracle::test(unsigned truth, ATI begin, ATI end, unsigned *stat_row) {
                 i->line, i->desc.c_str());
       }
       break;
-    case MayAlias:
-    case PartialAlias:
+    case llvm::AliasResult::MayAlias:
+    case llvm::AliasResult::PartialAlias:
       ++stat_row[AA_MAY];
       if (truth != AA_MAY) {
         fprintf(
@@ -126,7 +126,7 @@ void AAvsOracle::test(unsigned truth, ATI begin, ATI end, unsigned *stat_row) {
             i->line, i->desc.c_str(), truth);
       }
       break;
-    case MustAlias:
+    case llvm::AliasResult::MustAlias:
       ++stat_row[AA_MUST];
       if (truth != AA_MUST) {
         fprintf(stderr,

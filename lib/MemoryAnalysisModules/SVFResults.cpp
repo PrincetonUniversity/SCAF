@@ -5,7 +5,7 @@
 #include "llvm/ADT/Statistic.h"
 
 #include "scaf/MemoryAnalysisModules/SVFResults.h"
-#include "scaf/Utilities/CallSiteFactory.h"
+#include "scaf/Utilities/CallBaseFactory.h"
 #include "scaf/Utilities/GetMemOper.h"
 
 namespace liberty {

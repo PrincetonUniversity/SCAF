@@ -8,7 +8,7 @@
 #include "llvm/Support/Debug.h"
 #include "llvm/Support/raw_ostream.h"
 
-#include "scaf/Utilities/CallSiteFactory.h"
+#include "scaf/Utilities/CallBaseFactory.h"
 #include "scaf/Utilities/FindUnderlyingObjects.h"
 
 #include "scaf/MemoryAnalysisModules/NoEscapeFieldsAA.h"
@@ -100,7 +100,7 @@ bool Tracer::traceConcreteIntegerValues(Value *expr, IntSet &output,
       for (Value::user_iterator i = context->user_begin(),
                                 e = context->user_end();
            i != e; ++i) {
-        CallSite cs = getCallSite(&**i);
+        CallBase cs = getCallBase(&**i);
         assert(cs.getInstruction() && "WTF--all uses should be callsites (2)");
 
         if (!traceConcreteIntegerValues(cs.getArgument(argno), output, already))
@@ -275,7 +275,7 @@ bool Tracer::traceConcreteFunctionPointers(Value *fcn_ptr, FcnList &output,
       for (Value::user_iterator i = context->user_begin(),
                                 e = context->user_end();
            i != e; ++i) {
-        CallSite cs = getCallSite(&**i);
+        CallBase cs = getCallBase(&**i);
         assert(cs.getInstruction() && "WTF--all uses should be callsites");
 
         if (!traceConcreteFunctionPointers(cs.getArgument(argno), output,
@@ -341,7 +341,7 @@ bool Tracer::traceConcreteFunctionPointersLoadedFrom(
       for (Value::user_iterator i = context->user_begin(),
                                 e = context->user_end();
            i != e; ++i) {
-        CallSite cs = getCallSite(&**i);
+        CallBase cs = getCallBase(&**i);
         assert(cs.getInstruction() && "WTF--all uses should be callsites (2)");
 
         if (!traceConcreteFunctionPointersLoadedFrom(cs.getArgument(argno),

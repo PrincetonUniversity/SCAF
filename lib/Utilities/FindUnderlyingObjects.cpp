@@ -14,7 +14,7 @@ static void findUnderlyingObjects(const Value *value,
   const Module *mod = inst->getModule();
   const DataLayout &DL = mod->getDataLayout();
 
-  const Value *object = GetUnderlyingObject(value, DL);
+  const Value *object = getUnderlyingObject(value);
   if (const PHINode *phi = dyn_cast<PHINode>(object)) {
 
     if (!visited.insert(phi).second)
@@ -50,7 +50,7 @@ static void GetUnderlyingObjects(const Value *ptr, UO &beforePHI,
   // Strip-away pointer casts, GEPs, etc, but stop at any operation
   // which has more than one UO.
 
-  const Value *obj = GetUnderlyingObject(ptr, DL, 0);
+  const Value *obj = getUnderlyingObject(ptr, 0);
 
   // Detect cycles.
   if (isAfterPHI) {

@@ -27,11 +27,11 @@ public:
 
   virtual bool runOnModule(llvm::Module &M);
 
-  virtual ModRefResult getModRefInfo(llvm::CallSite CS1, TemporalRelation Rel,
-                                     llvm::CallSite CS2, const llvm::Loop *L,
+  virtual ModRefResult getModRefInfo(llvm::CallBase CS1, TemporalRelation Rel,
+                                     llvm::CallBase CS2, const llvm::Loop *L,
                                      Remedies &R);
 
-  virtual ModRefResult getModRefInfo(llvm::CallSite CS, TemporalRelation Rel,
+  virtual ModRefResult getModRefInfo(llvm::CallBase CS, TemporalRelation Rel,
                                      const Pointer &P, const llvm::Loop *L,
                                      Remedies &R);
 

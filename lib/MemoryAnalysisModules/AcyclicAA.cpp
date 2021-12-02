@@ -7,7 +7,6 @@
 #include "llvm/Analysis/MemoryBuiltins.h"
 #include "llvm/Analysis/ValueTracking.h"
 #include "llvm/IR/CFG.h"
-#include "llvm/IR/CallSite.h"
 #include "llvm/IR/Constants.h"
 #include "llvm/IR/InstIterator.h"
 #include "llvm/IR/LLVMContext.h"
@@ -20,7 +19,7 @@
 #include "scaf/MemoryAnalysisModules/NoEscapeFieldsAA.h"
 #include "scaf/MemoryAnalysisModules/LoopAA.h"
 #include "scaf/MemoryAnalysisModules/TypeSanity.h"
-#include "scaf/Utilities/CallSiteFactory.h"
+#include "scaf/Utilities/CallBaseFactory.h"
 #include "scaf/Utilities/FindUnderlyingObjects.h"
 
 namespace liberty {
@@ -60,7 +59,7 @@ static bool isAlloc(const Value *v, const DataLayout &td,
   if (isa<AllocaInst>(v))
     return true;
 
-  CallSite cs = getCallSite(v);
+  CallBase cs = getCallBase(v);
   if (!cs.getInstruction())
     return false;
 
@@ -153,7 +152,7 @@ static bool isAcyclic(Value *tl, Val2Bool &valuesAcyclic, const DataLayout &td,
     return true;
   }
 
-  CallSite cs = getCallSite(tl);
+  CallBase cs = getCallBase(tl);
   if (cs.getInstruction() != 0) {
     Function *f = cs.getCalledFunction();
 

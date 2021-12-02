@@ -2,7 +2,6 @@
 
 #include "llvm/ADT/DenseSet.h"
 #include "llvm/Analysis/ValueTracking.h"
-#include "llvm/IR/CallSite.h"
 #include "llvm/IR/Function.h"
 #include "llvm/IR/Instruction.h"
 #include "llvm/IR/Instructions.h"
@@ -10,7 +9,7 @@
 #include "llvm/Support/Debug.h"
 #include "llvm/Support/raw_ostream.h"
 
-#include "scaf/Utilities/CallSiteFactory.h"
+#include "scaf/Utilities/CallBaseFactory.h"
 #include "scaf/Utilities/CaptureUtil.h"
 
 #include <set>
@@ -68,14 +67,14 @@ static bool captures(const Value *v, const Value *use, VisitedSet &visited,
   if (const PHINode *phi = dyn_cast<PHINode>(inst))
     return findAllCapturesRec(phi, visited, captureSet);
 
-  CallSite CS = getCallSite(const_cast<Instruction *>(inst));
-  if (!CS.getInstruction()) {
+  CallBase* CS = getCallBase(const_cast<Instruction *>(inst));
+  if (!CS) {
     if (captureSet)
       captureSet->insert(use);
     return true;
   }
 
-  const Function *f = CS.getCalledFunction();
+  const Function *f = CS->getCalledFunction();
   if (!f) {
     if (captureSet)
       captureSet->insert(use);
@@ -86,17 +85,17 @@ static bool captures(const Value *v, const Value *use, VisitedSet &visited,
     if (f->getName().equals(nonCaptureFunctions[j]))
       return false;
 
-  if (CS.getCalledValue() == use) {
+  if (CS == use) {
     if (captureSet)
       captureSet->insert(use);
     return true;
   }
 
-  for (unsigned i = 0; i < CS.arg_size(); ++i) {
-    if (CS.getArgument(i) == v &&
-        (i + 1 == CS.arg_size() ||
-         (!CS.paramHasAttr(i + 1, Attribute::NoCapture) &&
-          !CS.paramHasAttr(i + 1, Attribute::ByVal)))) {
+  for (unsigned i = 0; i < CS->arg_size(); ++i) {
+    if (CS->getArgOperand(i) == v &&
+        (i + 1 == CS->arg_size() ||
+         (!CS->paramHasAttr(i + 1, Attribute::NoCapture) &&
+          !CS->paramHasAttr(i + 1, Attribute::ByVal)))) {
 
       Function::const_arg_iterator arg = f->arg_begin();
       for (unsigned j = 0; j < i; ++j)

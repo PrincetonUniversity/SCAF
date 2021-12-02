@@ -61,7 +61,7 @@ class KillFlow : public ModulePass, public LoopAA {
                               const Instruction *before, time_t queryStart,
                               unsigned Timeout);
 
-  bool allLoadsAreKilledBefore(const Loop *L, CallSite &cs, time_t queryStart,
+  bool allLoadsAreKilledBefore(const Loop *L, CallBase &cs, time_t queryStart,
                                unsigned Timeout);
 
   BasicBlock *getLoopEntryBB(const Loop *loop);

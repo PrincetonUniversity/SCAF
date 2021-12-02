@@ -86,7 +86,7 @@ void SemiLocalFunAA::initGlobalMod(const Function *fun, GlobalSet &mods,
   }
 }
 
-LoopAA::ModRefResult SemiLocalFunAA::getModRefInfo(const ImmutableCallSite CS,
+LoopAA::ModRefResult SemiLocalFunAA::getModRefInfo(const ImmutableCallBase CS,
                                                    const unsigned argNo) {
 
   const Function *fun = CS.getCalledFunction();
@@ -108,7 +108,7 @@ LoopAA::ModRefResult SemiLocalFunAA::getModRefInfo(const ImmutableCallSite CS,
 }
 
 LoopAA::ModRefResult
-SemiLocalFunAA::aliasedArgumentsModRef(const ImmutableCallSite CS,
+SemiLocalFunAA::aliasedArgumentsModRef(const ImmutableCallBase CS,
                                        const Value *P, const unsigned Size,
                                        Remedies &R) const {
 
@@ -254,16 +254,16 @@ bool SemiLocalFunAA::writeOnlyFormalArg(const Function *fcn, unsigned argno) {
   return writeOnlyFormalArg(f);
 }
 
-LoopAA::ModRefResult SemiLocalFunAA::getModRefInfo(CallSite CS1,
+LoopAA::ModRefResult SemiLocalFunAA::getModRefInfo(CallBase CS1,
                                                    TemporalRelation Rel,
-                                                   CallSite CS2, const Loop *L,
+                                                   CallBase CS2, const Loop *L,
                                                    Remedies &R) {
 
   Remedies tmpR;
 
   // If one is local, the other semi-local and if their args do not alias,
 
-  // then these two CallSites NoModRef.
+  // then these two CallBases NoModRef.
   const Function *f1 = CS1.getCalledFunction();
   const Function *f2 = CS2.getCalledFunction();
   if (f1 && f2) {
@@ -278,7 +278,7 @@ LoopAA::ModRefResult SemiLocalFunAA::getModRefInfo(CallSite CS1,
       // For each actual parameter of callsite 1 which is a pointer
       ModRefResult join = NoModRef;
 
-      typedef CallSite::arg_iterator ArgIt;
+      typedef CallBase::arg_iterator ArgIt;
       unsigned arg1no = 0;
       for (ArgIt i = CS1.arg_begin(), e = CS1.arg_end();
            i != e && join != ModRef; ++i, ++arg1no) {
@@ -328,7 +328,7 @@ LoopAA::ModRefResult SemiLocalFunAA::getModRefInfo(CallSite CS1,
   return ModRef;
 }
 
-LoopAA::ModRefResult SemiLocalFunAA::getModRefInfo(CallSite CS,
+LoopAA::ModRefResult SemiLocalFunAA::getModRefInfo(CallBase CS,
                                                    TemporalRelation Rel,
                                                    const Pointer &P,
                                                    const Loop *L, Remedies &R) {

@@ -7,7 +7,7 @@
 #include "scaf/MemoryAnalysisModules/Introspection.h"
 #include "scaf/MemoryAnalysisModules/LoopAA.h"
 #include "scaf/MemoryAnalysisModules/QueryCacheing.h"
-#include "scaf/Utilities/CallSiteFactory.h"
+#include "scaf/Utilities/CallBaseFactory.h"
 #include "scaf/Utilities/CaptureUtil.h"
 #include "scaf/Utilities/FindUnderlyingObjects.h"
 
@@ -216,7 +216,7 @@ private:
 
       const Value *use = *j;
 
-      CallSite cs = getCallSite(use);
+      CallBase cs = getCallBase(use);
 
       if (cs.getInstruction()) {
         Function *fcn = cs.getCalledFunction();
@@ -230,7 +230,7 @@ private:
         else if (!fcn->isDeclaration()) {
           Function::arg_iterator j = fcn->arg_begin(), z = fcn->arg_end();
 
-          for (CallSite::arg_iterator i = cs.arg_begin(), e = cs.arg_end();
+          for (CallBase::arg_iterator i = cs.arg_begin(), e = cs.arg_end();
                i != e; ++i, ++j) {
             if (j == z) {
               // In the case of variadic functions, there may be
@@ -348,14 +348,14 @@ private:
     else if (const Argument *arg = dyn_cast<Argument>(v)) {
       // Try to find sources of this argument.
       const Function *callee = arg->getParent();
-      CallSiteList callers;
+      CallBaseList callers;
       if (!getCallers(callee, callers))
         return 0; // partial list
 
       AccessPath *uniqueActualPath = 0;
-      for (CallSiteList::const_iterator i = callers.begin(), e = callers.end();
+      for (CallBaseList::const_iterator i = callers.begin(), e = callers.end();
            i != e; ++i) {
-        const CallSite &callsite = *i;
+        const CallBase &callsite = *i;
         const Function *caller =
             callsite.getInstruction()->getParent()->getParent();
 

@@ -12,7 +12,7 @@
 #include "llvm/Support/raw_ostream.h"
 
 #include "scaf/MemoryAnalysisModules/PureFunAA.h"
-#include "scaf/Utilities/CallSiteFactory.h"
+#include "scaf/Utilities/CallBaseFactory.h"
 #include "scaf/Utilities/GetSize.h"
 
 #include "RefineCFG.h"
@@ -147,8 +147,8 @@ bool PureFunAA::isRecursiveProperty(const Function *fun,
       return false;
     }
 
-    const CallSite call =
-        liberty::getCallSite(const_cast<Instruction *>(&*inst));
+    const CallBase call =
+        liberty::getCallBase(const_cast<Instruction *>(&*inst));
     if (call.getInstruction()) {
       const Value *value = call.getCalledValue()->stripPointerCasts();
 
@@ -205,11 +205,11 @@ void PureFunAA::runOnSCC(const SCC &scc) {
   ++sccCount;
 }
 
-bool PureFunAA::argumentsAlias(const ImmutableCallSite CS1,
-                               const ImmutableCallSite CS2, LoopAA *aa,
+bool PureFunAA::argumentsAlias(const ImmutableCallBase CS1,
+                               const ImmutableCallBase CS2, LoopAA *aa,
                                const DataLayout *TD, Remedies &R) {
 
-  typedef ImmutableCallSite::arg_iterator ArgIt;
+  typedef ImmutableCallBase::arg_iterator ArgIt;
   for (ArgIt arg = CS1.arg_begin(); arg != CS1.arg_end(); ++arg) {
     if ((*arg)->getType()->isPointerTy()) {
       if (argumentsAlias(CS2, *arg, liberty::getTargetSize(*arg, TD), aa, TD,
@@ -222,7 +222,7 @@ bool PureFunAA::argumentsAlias(const ImmutableCallSite CS1,
   return false;
 }
 
-bool PureFunAA::argumentsAlias(const ImmutableCallSite CS, const Value *P,
+bool PureFunAA::argumentsAlias(const ImmutableCallBase CS, const Value *P,
                                const unsigned Size, LoopAA *aa,
                                const DataLayout *TD, Remedies &R) {
 
@@ -294,13 +294,13 @@ bool PureFunAA::isPure(const Function *fun) const {
   return isReadOnly(fun) && isLocal(fun);
 }
 
-static Function *getCalledFunction(CallSite CS) {
+static Function *getCalledFunction(CallBase CS) {
   return dyn_cast<Function>(CS.getCalledValue()->stripPointerCasts());
 }
 
-PureFunAA::ModRefResult PureFunAA::getModRefInfo(CallSite CS1,
+PureFunAA::ModRefResult PureFunAA::getModRefInfo(CallBase CS1,
                                                  TemporalRelation Rel,
-                                                 CallSite CS2, const Loop *L,
+                                                 CallBase CS2, const Loop *L,
                                                  Remedies &R) {
 
   const Function *fun1 = getCalledFunction(CS1);
@@ -343,7 +343,7 @@ PureFunAA::ModRefResult PureFunAA::getModRefInfo(CallSite CS1,
   return ModRef;
 }
 
-PureFunAA::ModRefResult PureFunAA::getModRefInfo(CallSite CS,
+PureFunAA::ModRefResult PureFunAA::getModRefInfo(CallBase CS,
                                                  TemporalRelation Rel,
                                                  const Pointer &P,
                                                  const Loop *L, Remedies &R) {

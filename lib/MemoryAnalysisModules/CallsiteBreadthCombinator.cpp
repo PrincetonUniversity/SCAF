@@ -5,7 +5,7 @@
 #include "scaf/MemoryAnalysisModules/KillFlow.h"
 #include "scaf/MemoryAnalysisModules/LoopAA.h"
 #include "scaf/MemoryAnalysisModules/QueryCacheing.h"
-#include "scaf/Utilities/CallSiteFactory.h"
+#include "scaf/Utilities/CallBaseFactory.h"
 #include "scaf/Utilities/CaptureUtil.h"
 
 #include "llvm/ADT/DenseMap.h"
@@ -44,7 +44,7 @@ class CallsiteBreadthCombinator : public ModulePass, public liberty::LoopAA {
   const DataLayout *DL;
 
   unsigned countPtrArgs(const Instruction *inst) {
-    CallSite cs = getCallSite(inst);
+    CallBase cs = getCallBase(inst);
 
     unsigned n = 0;
     for (User::const_op_iterator i = cs.arg_begin(), e = cs.arg_end(); i != e;
@@ -141,7 +141,7 @@ class CallsiteBreadthCombinator : public ModulePass, public liberty::LoopAA {
       if (!instFromCallee->mayReadFromMemory() &&
           !instFromCallee->mayWriteToMemory())
         continue;
-      CallSite nested = getCallSite(instFromCallee);
+      CallBase nested = getCallBase(instFromCallee);
       if (!nested.getInstruction())
         continue;
 
@@ -235,7 +235,7 @@ class CallsiteBreadthCombinator : public ModulePass, public liberty::LoopAA {
       if (!instFromCallee->mayReadFromMemory() &&
           !instFromCallee->mayWriteToMemory())
         continue;
-      CallSite nested = getCallSite(instFromCallee);
+      CallBase nested = getCallBase(instFromCallee);
       if (!nested.getInstruction())
         continue;
 
@@ -334,7 +334,7 @@ class CallsiteBreadthCombinator : public ModulePass, public liberty::LoopAA {
       if (!instFromCallee->mayReadFromMemory() &&
           !instFromCallee->mayWriteToMemory())
         continue;
-      CallSite nested = getCallSite(instFromCallee);
+      CallBase nested = getCallBase(instFromCallee);
       if (!nested.getInstruction())
         continue;
 
@@ -355,7 +355,7 @@ class CallsiteBreadthCombinator : public ModulePass, public liberty::LoopAA {
   }
 
   const Function *getEligibleFunction(const Instruction *i) const {
-    CallSite cs = getCallSite(i);
+    CallBase cs = getCallBase(i);
     if (!cs.getInstruction())
       return 0;
 

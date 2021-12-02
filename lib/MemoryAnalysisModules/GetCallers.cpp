@@ -1,11 +1,11 @@
 #include "scaf/MemoryAnalysisModules/GetCallers.h"
 #include "scaf/MemoryAnalysisModules/LoopAA.h" // for FULL_UNIVERSAL
-#include "scaf/Utilities/CallSiteFactory.h"
+#include "scaf/Utilities/CallBaseFactory.h"
 #include "llvm/IR/Constants.h"
 
 namespace liberty {
 using namespace llvm::noelle;
-bool getCallers(const Function *fcn, CallSiteList &callsitesOut) {
+bool getCallers(const Function *fcn, CallBaseList &callsitesOut) {
   bool addressCaptured = false;
   for (Value::const_user_iterator i = fcn->user_begin(), e = fcn->user_end();
        i != e; ++i) {
@@ -20,7 +20,7 @@ bool getCallers(const Function *fcn, CallSiteList &callsitesOut) {
     //         We can't unless we keep looking into another layer; this
     //         case seems rare, so we assume it's captured conservatively.
 
-    CallSite cs = getCallSite(v);
+    CallBase cs = getCallBase(v);
 
     if (cs.getInstruction()) {
       if (cs.getCalledFunction() == fcn) {
@@ -31,7 +31,7 @@ bool getCallers(const Function *fcn, CallSiteList &callsitesOut) {
 
     if (const ConstantExpr *cexp = dyn_cast<ConstantExpr>(v))
       if (cexp->isCast() && cexp->hasOneUse()) {
-        cs = getCallSite(*cexp->user_begin());
+        cs = getCallBase(*cexp->user_begin());
         if (cs.getInstruction()) {
           if (cs.getCalledFunction() == fcn) {
             callsitesOut.push_back(cs);

@@ -14,7 +14,7 @@
 #include "scaf/MemoryAnalysisModules/ClassicLoopAA.h"
 #include "scaf/MemoryAnalysisModules/FindSource.h"
 #include "scaf/MemoryAnalysisModules/TypeSanity.h"
-#include "scaf/Utilities/CallSiteFactory.h"
+#include "scaf/Utilities/CallBaseFactory.h"
 #include "scaf/Utilities/CaptureUtil.h"
 
 #include "scaf/MemoryAnalysisModules/NoEscapeFieldsAA.h"
@@ -69,7 +69,7 @@ public:
   typedef DenseSet<const Instruction *> InstSet;
   typedef DenseSet<const StoreInst *> StoreSet;
 
-  static bool isSafeCall(const CallSite &CS) {
+  static bool isSafeCall(const CallBase &CS) {
 
     if (isa<MemIntrinsic>(CS.getInstruction()))
       return true;
@@ -94,7 +94,7 @@ public:
     if (isa<LoadInst>(inst))
       return true;
 
-    CallSite CS = liberty::getCallSite(inst);
+    CallBase CS = liberty::getCallBase(inst);
     if (CS.getInstruction())
       return isSafeCall(CS);
 

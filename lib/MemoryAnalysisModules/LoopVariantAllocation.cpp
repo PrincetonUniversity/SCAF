@@ -9,7 +9,7 @@
 #include "llvm/Support/Debug.h"
 #include "llvm/Support/raw_ostream.h"
 
-#include "scaf/Utilities/CallSiteFactory.h"
+#include "scaf/Utilities/CallBaseFactory.h"
 
 #include "LoopVariantAllocation.h"
 
@@ -27,15 +27,15 @@ bool LoopVariantAllocation::runOnModule(Module &M) {
   return false;
 }
 
-LoopAA::ModRefResult LoopVariantAllocation::getModRefInfo(llvm::CallSite CS1,
+LoopAA::ModRefResult LoopVariantAllocation::getModRefInfo(llvm::CallBase CS1,
                                                           TemporalRelation Rel,
-                                                          llvm::CallSite CS2,
+                                                          llvm::CallBase CS2,
                                                           const llvm::Loop *L,
                                                           Remedies &R) {
   return ModRef;
 }
 
-LoopAA::ModRefResult LoopVariantAllocation::getModRefInfo(llvm::CallSite CS,
+LoopAA::ModRefResult LoopVariantAllocation::getModRefInfo(llvm::CallBase CS,
                                                           TemporalRelation Rel,
                                                           const Pointer &P,
                                                           const llvm::Loop *L,
@@ -49,7 +49,7 @@ static bool isNoaliasWithinLoop(const Value *src, const Loop *L,
     if (L->contains(alloca))
       return true;
 
-  CallSite cs = getCallSite(src);
+  CallBase cs = getCallBase(src);
   if (cs.getInstruction())
     if (L->contains(cs.getInstruction())) {
       if (cs.getCalledFunction())

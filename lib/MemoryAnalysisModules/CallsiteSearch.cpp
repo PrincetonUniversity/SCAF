@@ -8,7 +8,7 @@
 #include "scaf/MemoryAnalysisModules/KillFlow.h"
 #include "scaf/MemoryAnalysisModules/PureFunAA.h"
 #include "scaf/MemoryAnalysisModules/SemiLocalFunAA.h"
-#include "scaf/Utilities/CallSiteFactory.h"
+#include "scaf/Utilities/CallBaseFactory.h"
 
 namespace liberty {
 using namespace llvm;
@@ -24,8 +24,8 @@ using namespace llvm;
       x->decref();                                                             \
   } while (0)
 
-CallsiteContext::CallsiteContext(const CallSite &call, CallsiteContext *within)
-    : cs(call), parent(within), refcount(0) {
+CallsiteContext::CallsiteContext(const CallBase &call, CallsiteContext *within)
+    : cs(&call), parent(within), refcount(0) {
   INCREF(parent);
 }
 
@@ -41,7 +41,7 @@ bool CallsiteContext::operator==(const CallsiteContext &other) const {
   if (this == &other)
     return true;
 
-  if (this->cs.getInstruction() != other.cs.getInstruction())
+  if (this->cs != other.cs)
     return false;
 
   if (!this->parent && !other.parent)
@@ -56,9 +56,9 @@ bool CallsiteContext::operator<(const CallsiteContext &other) const {
   if (this == &other)
     return false;
 
-  if (this->cs.getInstruction() < other.cs.getInstruction())
+  if (this->cs < other.cs)
     return true;
-  if (this->cs.getInstruction() > other.cs.getInstruction())
+  if (this->cs > other.cs)
     return false;
 
   if (!this->parent && other.parent)
@@ -82,7 +82,7 @@ Context &Context::operator=(const Context &other) {
   return *this;
 }
 
-Context Context::getSubContext(const CallSite &cs) const {
+Context Context::getSubContext(const CallBase &cs) const {
   CallsiteContext *ctx = new CallsiteContext(cs, first);
   return Context(ctx);
 }
@@ -114,7 +114,7 @@ bool Context::kills(KillFlow &kill, const Value *ptr, const Value *obj,
   // If this aggregate is a context-private allocation unit, it cannot escape.
   const Module *M = locInCtx->getParent()->getParent()->getParent();
   const DataLayout &DL = M->getDataLayout();
-  obj = GetUnderlyingObject(obj, DL, 0);
+  obj = getUnderlyingObject(obj, 0);
   if (const AllocaInst *alloca = dyn_cast<AllocaInst>(obj))
     if (alloca->getParent()->getParent() == ctx->getFunction()) {
       INTROSPECT(errs() << "context::kills(" << *ptr << ") underlying object "
@@ -170,11 +170,11 @@ bool Context::kills(KillFlow &kill, const Value *ptr, const Value *obj,
   // Possibly replace formal parameter with actual parameter.
   if (PointerIsLocalToContext) {
     if (const Argument *arg = dyn_cast<Argument>(ptr))
-      if (arg->getParent() == ctx->getCallSite().getCalledFunction())
-        ptr = ctx->getCallSite().getArgument(arg->getArgNo());
+      if (arg->getParent() == ctx->getCallBase().getCalledFunction())
+        ptr = ctx->getCallBase().getArgOperand(arg->getArgNo());
     if (const Argument *arg = dyn_cast<Argument>(obj))
-      if (arg->getParent() == ctx->getCallSite().getCalledFunction())
-        obj = ctx->getCallSite().getArgument(arg->getArgNo());
+      if (arg->getParent() == ctx->getCallBase().getCalledFunction())
+        obj = ctx->getCallBase().getArgOperand(arg->getArgNo());
   }
 
   // Before recurring, check for timeout.
@@ -232,8 +232,8 @@ void Context::getUnderlyingObjects(KillFlow &kill, const Value *ptr,
 
     // Substitute formal parameters
     if (const Argument *arg = dyn_cast<Argument>(obj))
-      if (arg->getParent() == ctx->getCallSite().getCalledFunction())
-        obj = ctx->getCallSite().getArgument(arg->getArgNo());
+      if (arg->getParent() == ctx->getCallBase().getCalledFunction())
+        obj = ctx->getCallBase().getArgOperand(arg->getArgNo());
 
     // And recur.
     getUnderlyingObjects(kill, obj, ctx->getLocationWithinParent(),
@@ -341,10 +341,10 @@ bool CtxInst::getNonLocalFootprint(KillFlow &kill, PureFunAA &pure,
     } else
       assert(false && "Unknown memory intrinsic");
   } else {
-    CallSite cs = getCallSite(inst);
-    assert(cs.getInstruction() && "WTF");
+    const CallBase *cs = getCallBase(inst);
+    assert(cs && "WTF");
 
-    Function *f = cs.getCalledFunction();
+    Function *f = cs->getCalledFunction();
     if (!f)
       complete = false;
     else if (semi.isSemiLocal(f, pure)) {
@@ -356,7 +356,7 @@ bool CtxInst::getNonLocalFootprint(KillFlow &kill, PureFunAA &pure,
     assert(f->isDeclaration() &&
            "Callsite search should have expanded internally-defined function");
 
-    for (unsigned i = 0, n = cs.arg_size(); i < n; ++i) {
+    for (unsigned i = 0, n = cs->arg_size(); i < n; ++i) {
       bool readsArg = true, writesArg = true;
 
       if (f) {
@@ -369,7 +369,7 @@ bool CtxInst::getNonLocalFootprint(KillFlow &kill, PureFunAA &pure,
           writesArg = false;
       }
 
-      const Value *v = cs.getArgument(i);
+      const Value *v = cs->getArgOperand(i);
       if (readsArg)
         ctx.getUnderlyingObjects(kill, v, inst, readsIn, true);
       if (writesArg)
@@ -418,8 +418,8 @@ bool InstSearch::mayReadFromMemory(const Instruction *inst) const {
       return false;
   }
 
-  CallSite cs = getCallSite(inst);
-  if (cs.getInstruction()) {
+  const CallBase * cs = getCallBase(inst);
+  if (cs) {
     if (isa<DbgInfoIntrinsic>(inst))
       return false;
 
@@ -428,7 +428,7 @@ bool InstSearch::mayReadFromMemory(const Instruction *inst) const {
 
     // TODO: this is ugly; should instead query
     // the Pure Function list...
-    if (const Function *callee = cs.getCalledFunction()) {
+    if (const Function *callee = cs->getCalledFunction()) {
       const StringRef name = callee->getName();
       if (name == "llvm.lifetime.start" || name == "llvm.lifetime.end" ||
           name == "llvm.invariant.start" || name == "llvm.invariant.end" ||
@@ -456,14 +456,14 @@ bool InstSearch::mayWriteToMemory(const Instruction *inst) const {
       return false;
   }
 
-  CallSite cs = getCallSite(inst);
-  if (cs.getInstruction()) {
+  const CallBase *cs = getCallBase(inst);
+  if (cs) {
     if (isa<DbgInfoIntrinsic>(inst))
       return false;
 
     // TODO: this is ugly; should instead query
     // the Pure Function list...
-    if (const Function *callee = cs.getCalledFunction()) {
+    if (const Function *callee = cs->getCalledFunction()) {
       if (pure && pure->isReadOnly(callee))
         return false;
 
@@ -528,9 +528,9 @@ bool ForwardSearch::goal(const CtxInst &n) {
 
 bool ForwardSearch::isGoalState(const CtxInst &n) {
   const Instruction *inst = n.getInst();
-  CallSite cs = getCallSite(inst);
-  if (cs.getInstruction()) {
-    const Function *callee = cs.getCalledFunction();
+  const CallBase *cs = getCallBase(inst);
+  if (cs) {
+    const Function *callee = cs->getCalledFunction();
 
     // indirect calls
     if (!callee)
@@ -561,7 +561,7 @@ bool ForwardSearch::isGoalState(const CtxInst &n) {
       visited.insert(inst);
 
       // Find the entry of the callee
-      Context c2 = n.getContext().getSubContext(cs);
+      Context c2 = n.getContext().getSubContext(*cs);
       CtxInst csucc(&callee->front().front(), c2);
 
       fringe.push_back(csucc);
@@ -641,9 +641,9 @@ bool ReverseSearch::goal(const CtxInst &n) {
 
 bool ReverseSearch::isGoalState(const CtxInst &n) {
   const Instruction *inst = n.getInst();
-  CallSite cs = getCallSite(inst);
-  if (cs.getInstruction()) {
-    const Function *callee = cs.getCalledFunction();
+  const CallBase *cs = getCallBase(inst);
+  if (cs) {
+    const Function *callee = cs->getCalledFunction();
 
     // indirect calls
     if (!callee)
@@ -675,7 +675,7 @@ bool ReverseSearch::isGoalState(const CtxInst &n) {
 
       // Find the exits of the callee
       const PostDominatorTree *pdt = kill.getPDT(callee);
-      const Context c2 = n.getContext().getSubContext(cs);
+      const Context c2 = n.getContext().getSubContext(*cs);
       expandRoots(pdt, c2);
 
       return false;

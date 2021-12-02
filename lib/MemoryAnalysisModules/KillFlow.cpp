@@ -9,7 +9,7 @@
 #include "scaf/MemoryAnalysisModules/AnalysisTimeout.h"
 #include "scaf/MemoryAnalysisModules/Introspection.h"
 #include "scaf/MemoryAnalysisModules/KillFlow.h"
-#include "scaf/Utilities/CallSiteFactory.h"
+#include "scaf/Utilities/CallBaseFactory.h"
 #include "scaf/Utilities/FindUnderlyingObjects.h"
 #include "scaf/Utilities/GepRange.h"
 #include "scaf/Utilities/GetMemOper.h"
@@ -128,7 +128,7 @@ bool KillFlow::instMustKill(const Instruction *inst, const Value *ptr,
     }
   }
 
-  CallSite cs = getCallSite(inst);
+  CallBase cs = getCallBase(inst);
   if (cs.getInstruction() && cs.getCalledFunction()) {
     Function *f = cs.getCalledFunction();
 
@@ -756,7 +756,7 @@ bool KillFlow::blockMustKill(const BasicBlock *bb, const Value *ptr,
 }
 
 std::set<Instruction *> instList;
-bool KillFlow::allLoadsAreKilledBefore(const Loop *L, CallSite &cs,
+bool KillFlow::allLoadsAreKilledBefore(const Loop *L, CallBase &cs,
                                        time_t queryStart, unsigned Timeout) {
   Function *fcn = cs.getCalledFunction();
 
@@ -771,7 +771,7 @@ bool KillFlow::allLoadsAreKilledBefore(const Loop *L, CallSite &cs,
                               cs.getInstruction()))
         continue;
 
-    CallSite cs2 = getCallSite(inst);
+    CallBase cs2 = getCallBase(inst);
     if (cs2.getInstruction())
       if (Function *f2 = cs2.getCalledFunction())
         if (!f2->isDeclaration()) {
@@ -1068,7 +1068,7 @@ bool KillFlow::instMustKillAggregate(const Instruction *inst,
     }
   }
 
-  CallSite cs = getCallSite(inst);
+  CallBase cs = getCallBase(inst);
   if (cs.getInstruction()) {
     if (const MemIntrinsic *mi = dyn_cast<MemIntrinsic>(inst)) {
       const Value *killed = GetUnderlyingObject(mi->getRawDest(), *DL, 0);

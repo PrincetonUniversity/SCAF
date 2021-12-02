@@ -8,7 +8,7 @@
 #include "llvm/Support/Debug.h"
 #include "llvm/Support/raw_ostream.h"
 
-#include "scaf/Utilities/CallSiteFactory.h"
+#include "scaf/Utilities/CallBaseFactory.h"
 #include "scaf/Utilities/FindUnderlyingObjects.h"
 
 namespace liberty {
@@ -93,13 +93,13 @@ bool NoCaptureFcn::onlyUsedAsCallTarget(Value *v, ValueSet &already) const {
         continue;
       }
 
-    CallSite cs = getCallSite(user);
+    CallBase cs = getCallBase(user);
     if (!cs.getInstruction())
       return false; // used by something other than call, invoke
 
     // Ensure that 'fcn' is not used by this callsite as a
     // parameter.
-    for (CallSite::arg_iterator j = cs.arg_begin(), z = cs.arg_end(); j != z;
+    for (CallBase::arg_iterator j = cs.arg_begin(), z = cs.arg_end(); j != z;
          ++j)
       if (v == *j)
         return false; // address of function escapes.

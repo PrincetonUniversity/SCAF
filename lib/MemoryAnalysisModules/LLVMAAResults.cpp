@@ -3,7 +3,7 @@
 #include "llvm/ADT/Statistic.h"
 
 #include "scaf/MemoryAnalysisModules/LLVMAAResults.h"
-#include "scaf/Utilities/CallSiteFactory.h"
+#include "scaf/Utilities/CallBaseFactory.h"
 #include "scaf/Utilities/GetMemOper.h"
 
 #include <vector>

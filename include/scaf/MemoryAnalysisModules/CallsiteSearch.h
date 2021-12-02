@@ -22,7 +22,7 @@
 #ifndef LLVM_LIBERTY_CALLSITE_SEARCH_H
 #define LLVM_LIBERTY_CALLSITE_SEARCH_H
 
-#include "llvm/IR/CallSite.h"
+#include "llvm/IR/Instructions.h"
 #include "llvm/IR/DataLayout.h"
 #include "llvm/IR/Dominators.h"
 #include "llvm/Analysis/PostDominators.h"
@@ -35,7 +35,7 @@
 #include <set>
 
 namespace llvm {
-class CallSite;
+class CallBase;
 }
 
 namespace liberty {
@@ -51,7 +51,7 @@ class SemiLocalFunAA;
 /// observed an instruction; effectively
 /// a list of nested callsites.
 struct CallsiteContext {
-  CallsiteContext(const CallSite &call, CallsiteContext *within);
+  CallsiteContext(const CallBase &call, CallsiteContext *within);
 
   void incref() { ++refcount; }
   void decref() {
@@ -60,10 +60,10 @@ struct CallsiteContext {
   }
 
   const Instruction *getLocationWithinParent() const {
-    return cs.getInstruction();
+    return cs;
   }
-  const CallSite &getCallSite() const { return cs; }
-  const Function *getFunction() const { return cs.getCalledFunction(); }
+  const CallBase &getCallBase() const { return *cs; }
+  const Function *getFunction() const { return cs->getCalledFunction(); }
   CallsiteContext *getParent() const { return parent; }
 
   void print(raw_ostream &out) const;
@@ -82,7 +82,7 @@ private:
     return *this;
   }
 
-  const CallSite cs;
+  const CallBase* cs;
   CallsiteContext *parent;
   unsigned refcount;
 };
@@ -95,7 +95,7 @@ struct Context {
   Context &operator=(const Context &other);
   ~Context();
 
-  Context getSubContext(const CallSite &cs) const;
+  Context getSubContext(const CallBase &cs) const;
 
   void print(raw_ostream &out) const;
   const CallsiteContext *front() const { return first; }

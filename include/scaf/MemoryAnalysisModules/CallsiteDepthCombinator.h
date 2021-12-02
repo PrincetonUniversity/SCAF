@@ -1,7 +1,7 @@
-/* CallSiteDepthCombinator
+/* CallBaseDepthCombinator
 
-   This is a refinement on the CallSiteCombinator based on a few observations:
-    (1) The CallSiteCombinator would generate new queries, but those queries
+   This is a refinement on the CallBaseCombinator based on a few observations:
+    (1) The CallBaseCombinator would generate new queries, but those queries
         would lose their calling context.
     (2) I'm much more concerned with loop-carried deps than intra-iteration
         deps.  This does not concern itself with intra-iteration deps.

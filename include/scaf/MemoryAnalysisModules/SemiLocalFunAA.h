@@ -1,7 +1,11 @@
 #ifndef LLVM_LIBERTY_SEMI_LOCAL_FUN_AA_H
 #define LLVM_LIBERTY_SEMI_LOCAL_FUN_AA_H
 
+#include "llvm/ADT/DenseSet.h"
+#include "llvm/IR/GlobalVariable.h"
+#include "llvm/Pass.h"
 #include "llvm/Support/DJB.h"
+#include "llvm/ADT/DenseMapInfo.h"
 
 namespace liberty {
 
@@ -35,7 +39,8 @@ template <> struct DenseMapInfo<liberty::Formal> {
 } // namespace llvm
 
 namespace liberty {
-using namespace llvm::noelle;
+//using namespace llvm::noelle;
+using namespace llvm;
 class SemiLocalFunAA : public ModulePass, public liberty::ClassicLoopAA {
 
   typedef DenseSet<const Function *> FuncSet;
@@ -65,10 +70,10 @@ class SemiLocalFunAA : public ModulePass, public liberty::ClassicLoopAA {
   static void initGlobalMod(const Function *fun, GlobalSet &mods,
                             GlobalSet &refs, FuncSet &funcs);
 
-  static ModRefResult getModRefInfo(const ImmutableCallSite CS,
+  static ModRefResult getModRefInfo(const ImmutableCallBase CS,
                                     const unsigned argNo);
 
-  ModRefResult aliasedArgumentsModRef(const ImmutableCallSite CS,
+  ModRefResult aliasedArgumentsModRef(const ImmutableCallBase CS,
                                       const Value *P, const unsigned Size,
                                       Remedies &R) const;
 
@@ -97,10 +102,10 @@ public:
 
   static bool writeOnlyFormalArg(const Function *fcn, unsigned argno);
 
-  ModRefResult getModRefInfo(CallSite CS1, TemporalRelation Rel, CallSite CS2,
+  ModRefResult getModRefInfo(CallBase CS1, TemporalRelation Rel, CallBase CS2,
                              const Loop *L, Remedies &R);
 
-  ModRefResult getModRefInfo(CallSite CS, TemporalRelation Rel,
+  ModRefResult getModRefInfo(CallBase CS, TemporalRelation Rel,
                              const Pointer &P, const Loop *L, Remedies &R);
 
   StringRef getLoopAAName() const { return "semi-local-fun-aa"; }

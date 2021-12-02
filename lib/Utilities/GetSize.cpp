@@ -25,8 +25,9 @@ unsigned getTargetSize(const Value *value, const DataLayout *TD) {
   Type *type = value->getType();
 
   Type *targetType;
-  SequentialType *seqType = dyn_cast<SequentialType>(type);
-  if (seqType)
+  if (auto seqType = dyn_cast<ArrayType>(type))
+    targetType = seqType->getElementType();
+  if (auto seqType = dyn_cast<VectorType>(type))
     targetType = seqType->getElementType();
   else {
     PointerType *pType = dyn_cast<PointerType>(type);

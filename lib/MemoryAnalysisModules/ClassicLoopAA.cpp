@@ -1,5 +1,5 @@
 #include "scaf/MemoryAnalysisModules/ClassicLoopAA.h"
-#include "scaf/Utilities/CallSiteFactory.h"
+#include "scaf/Utilities/CallBaseFactory.h"
 #include "scaf/Utilities/GetMemOper.h"
 #include "scaf/Utilities/GetSize.h"
 #include "scaf/Utilities/IsVolatile.h"
@@ -9,24 +9,24 @@ using namespace llvm::noelle;
 using namespace liberty;
 
 /// May not call down the LoopAA stack, but may top
-LoopAA::ModRefResult ClassicLoopAA::getModRefInfo(CallSite CS1,
+LoopAA::ModRefResult ClassicLoopAA::getModRefInfo(CallBase CS1,
                                                   TemporalRelation Rel,
-                                                  CallSite CS2, const Loop *L,
+                                                  CallBase CS2, const Loop *L,
                                                   Remedies &R) {
   return ModRef;
 }
 
-/// V is never a CallSite
+/// V is never a CallBase
 /// May not call down the LoopAA stack, but may top
-LoopAA::ModRefResult ClassicLoopAA::getModRefInfo(CallSite CS,
+LoopAA::ModRefResult ClassicLoopAA::getModRefInfo(CallBase CS,
                                                   TemporalRelation Rel,
                                                   const Pointer &P,
                                                   const Loop *L, Remedies &R) {
   return ModRef;
 }
 
-/// V1 is never a CallSite
-/// V2 is never a CallSite
+/// V1 is never a CallBase
+/// V2 is never a CallBase
 /// May not call down the LoopAA stack, but may top
 LoopAA::AliasResult ClassicLoopAA::aliasCheck(const Pointer &P1,
                                               TemporalRelation Rel,
@@ -47,8 +47,8 @@ LoopAA::ModRefResult ClassicLoopAA::modref(const Instruction *I1,
   if (!I2->mayReadFromMemory() && !I2->mayWriteToMemory())
     return NoModRef;
 
-  CallSite CS1 = getCallSite(const_cast<Instruction *>(I1));
-  CallSite CS2 = getCallSite(const_cast<Instruction *>(I2));
+  CallBase CS1 = getCallBase(const_cast<Instruction *>(I1));
+  CallBase CS2 = getCallBase(const_cast<Instruction *>(I2));
 
   ModRefResult MR = ModRef;
   Remedies tmpR;
@@ -90,7 +90,7 @@ LoopAA::ModRefResult ClassicLoopAA::modref(const Instruction *I,
                                            unsigned Size, const Loop *L,
                                            Remedies &R) {
 
-  CallSite CS = getCallSite(const_cast<Instruction *>(I));
+  CallBase CS = getCallBase(const_cast<Instruction *>(I));
   ModRefResult MR;
   Remedies tmpR;
   Remedies chainRemeds;

@@ -152,13 +152,13 @@ void pquery(StringRef who, bool enter, const Value *p1, unsigned s1,
   errs() << '\n';
 }
 
-void pquery(StringRef who, bool enter, const CallSite &CS1,
-            LoopAA::TemporalRelation Rel, const CallSite &CS2, const Loop *L,
+void pquery(StringRef who, bool enter, const CallBase &CS1,
+            LoopAA::TemporalRelation Rel, const CallBase &CS2, const Loop *L,
             LoopAA::ModRefResult res) {
   pquery(who, enter, CS1.getInstruction(), Rel, CS2.getInstruction(), L, res);
 }
 
-void pquery(StringRef who, bool enter, const CallSite &CS1,
+void pquery(StringRef who, bool enter, const CallBase &CS1,
             LoopAA::TemporalRelation Rel, const ClassicLoopAA::Pointer &P2,
             const Loop *L, LoopAA::ModRefResult res) {
   pquery(who, enter, CS1.getInstruction(), Rel, P2.ptr, P2.size, L, res);

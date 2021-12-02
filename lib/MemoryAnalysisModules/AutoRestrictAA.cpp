@@ -14,7 +14,7 @@
 
 #include "scaf/MemoryAnalysisModules/FindSource.h"
 
-#include "scaf/Utilities/CallSiteFactory.h"
+#include "scaf/Utilities/CallBaseFactory.h"
 
 using namespace llvm;
 using namespace llvm::noelle;
@@ -49,8 +49,8 @@ private:
   void recursiveTaint(const Function &fun) {
     for (const_inst_iterator inst = inst_begin(fun); inst != inst_end(fun);
          ++inst) {
-      const CallSite CS =
-          liberty::getCallSite(const_cast<Instruction *>(&*inst));
+      const CallBase CS =
+          liberty::getCallBase(const_cast<Instruction *>(&*inst));
       if (CS.getInstruction()) {
         if (const Function *target = CS.getCalledFunction()) {
           if (!tainted.count(target)) {
@@ -87,7 +87,7 @@ private:
 
     for (UserIt user = fun->user_begin(); user != fun->user_end(); ++user) {
 
-      const CallSite CS = liberty::getCallSite(const_cast<User *>(*user));
+      const CallBase CS = liberty::getCallBase(const_cast<User *>(*user));
       assert(CS.getInstruction() && "This should be tainted.");
       assert(CS.getCalledFunction() && "This should be tainted.");
 
@@ -124,7 +124,7 @@ private:
 
     for (UserIt user = fun->user_begin(); user != fun->user_end(); ++user) {
 
-      const CallSite CS = liberty::getCallSite(const_cast<User *>(*user));
+      const CallBase CS = liberty::getCallBase(const_cast<User *>(*user));
       assert(CS.getCalledFunction() && "This should be tainted.");
 
       const Value *callerArg = CS.getArgument(arg->getArgNo());

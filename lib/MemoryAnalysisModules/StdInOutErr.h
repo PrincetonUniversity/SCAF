@@ -30,12 +30,12 @@ public:
                                  DesiredAliasResult dAliasRes = DNoOrMustAlias);
 
   /// May not call down the LoopAA stack, but may top
-  virtual ModRefResult getModRefInfo(CallSite CS1, TemporalRelation Rel,
-                                     CallSite CS2, const Loop *L, Remedies &R);
+  virtual ModRefResult getModRefInfo(CallBase CS1, TemporalRelation Rel,
+                                     CallBase CS2, const Loop *L, Remedies &R);
 
-  /// V is never a CallSite
+  /// V is never a CallBase
   /// May not call down the LoopAA stack, but may top
-  virtual ModRefResult getModRefInfo(CallSite CS, TemporalRelation Rel,
+  virtual ModRefResult getModRefInfo(CallBase CS, TemporalRelation Rel,
                                      const Pointer &P, const Loop *L,
                                      Remedies &R);
 

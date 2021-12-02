@@ -6,7 +6,7 @@
 #include "llvm/Support/Debug.h"
 
 #include "scaf/MemoryAnalysisModules/LoopAA.h"
-#include "scaf/Utilities/CallSiteFactory.h"
+#include "scaf/Utilities/CallBaseFactory.h"
 #include "scaf/Utilities/GetMemOper.h"
 
 #include <cstdio>
@@ -649,8 +649,8 @@ LoopAA::ModRefResult AAToLoopAA::modref(const Instruction *A,
   // loop!
   if (rel == Same) {
     if (isValid(L, A) || isValid(L, B)) {
-      CallSite csA = getCallSite(const_cast<Instruction *>(A));
-      CallSite csB = getCallSite(const_cast<Instruction *>(B));
+      CallBase csA = getCallBase(const_cast<Instruction *>(A));
+      CallBase csB = getCallBase(const_cast<Instruction *>(B));
 
       const CallBase *cbA = dyn_cast<CallBase>(A);
       const CallBase *cbB = dyn_cast<CallBase>(B);

@@ -9,7 +9,7 @@
 #include "scaf/MemoryAnalysisModules/KillFlow.h"
 #include "scaf/MemoryAnalysisModules/PureFunAA.h"
 #include "scaf/MemoryAnalysisModules/SemiLocalFunAA.h"
-#include "scaf/Utilities/CallSiteFactory.h"
+#include "scaf/Utilities/CallBaseFactory.h"
 
 #include <ctime>
 
@@ -60,7 +60,7 @@ bool CallsiteDepthCombinator::runOnModule(Module &mod) {
 }
 
 bool CallsiteDepthCombinator::isEligible(const Instruction *i) const {
-  CallSite cs = getCallSite(i);
+  CallBase cs = getCallBase(i);
   if (!cs.getInstruction())
     return false;
 
@@ -491,7 +491,7 @@ LoopAA::ModRefResult CallsiteDepthCombinator::modref(const Instruction *inst1,
   // Maybe turn-on introspection
   bool introspect = false;
   if (WatchCallsitePair) {
-    CallSite cs1 = getCallSite(inst1), cs2 = getCallSite(inst2);
+    CallBase cs1 = getCallBase(inst1), cs2 = getCallBase(inst2);
     if (cs1.getInstruction() && cs2.getInstruction())
       if (const Function *f1 = cs1.getCalledFunction())
         if (const Function *f2 = cs2.getCalledFunction())
@@ -501,7 +501,7 @@ LoopAA::ModRefResult CallsiteDepthCombinator::modref(const Instruction *inst1,
   }
 
   else if (WatchCallsite2Store) {
-    CallSite cs1 = getCallSite(inst1);
+    CallBase cs1 = getCallBase(inst1);
     const StoreInst *st2 = dyn_cast<StoreInst>(inst2);
 
     if (cs1.getInstruction() && st2)
@@ -513,7 +513,7 @@ LoopAA::ModRefResult CallsiteDepthCombinator::modref(const Instruction *inst1,
 
   else if (WatchStore2Callsite) {
     const StoreInst *st1 = dyn_cast<StoreInst>(inst1);
-    CallSite cs2 = getCallSite(inst2);
+    CallBase cs2 = getCallBase(inst2);
 
     if (cs2.getInstruction() && st1)
       if (const Function *f2 = cs2.getCalledFunction())

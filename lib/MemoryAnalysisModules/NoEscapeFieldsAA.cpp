@@ -5,7 +5,6 @@
 #include "llvm/ADT/DenseSet.h"
 #include "llvm/ADT/Statistic.h"
 #include "llvm/IR/CFG.h"
-#include "llvm/IR/CallSite.h"
 #include "llvm/IR/DataLayout.h"
 #include "llvm/IR/InstIterator.h"
 #include "llvm/IR/LLVMContext.h"
@@ -17,7 +16,7 @@
 #include "scaf/MemoryAnalysisModules/NoEscapeFieldsAA.h"
 #include "scaf/MemoryAnalysisModules/LoopAA.h"
 #include "scaf/MemoryAnalysisModules/TypeSanity.h"
-#include "scaf/Utilities/CallSiteFactory.h"
+#include "scaf/Utilities/CallBaseFactory.h"
 #include "scaf/Utilities/GetMemOper.h"
 #include "scaf/Utilities/GetSize.h"
 
@@ -454,7 +453,7 @@ bool NonCapturedFieldsAnalysis::captured(StructType *ty, uint64_t field) const {
 }
 
 LoopAA::ModRefResult NoEscapeFieldsAA::callsiteTouchesNonEscapingField(
-    CallSite cs, const Pointer &p2, StructType *struct2,
+    CallBase cs, const Pointer &p2, StructType *struct2,
     const ConstantInt *field2, Remedies &R) {
   LoopAA *top = getTopAA();
   NonCapturedFieldsAnalysis &ncfa = getAnalysis<NonCapturedFieldsAnalysis>();
@@ -481,7 +480,7 @@ LoopAA::ModRefResult NoEscapeFieldsAA::callsiteTouchesNonEscapingField(
   // may alias with the field.
   std::vector<Argument *> aliasArgs;
   Function::arg_iterator j = callee->arg_begin();
-  for (CallSite::arg_iterator i = cs.arg_begin(), e = cs.arg_end(); i != e;
+  for (CallBase::arg_iterator i = cs.arg_begin(), e = cs.arg_end(); i != e;
        ++i, ++j) {
     StructType *actual_struct = 0;
     const ConstantInt *actual_field = 0;
@@ -520,7 +519,7 @@ LoopAA::ModRefResult NoEscapeFieldsAA::callsiteTouchesNonEscapingField(
       // or it is another operation which reads/writes memory.
 
       // Case 1: callsite
-      CallSite cs3 = getCallSite(inst);
+      CallBase cs3 = getCallBase(inst);
       if (cs3.getInstruction()) {
         // recur.
         ModRefResult r =
@@ -581,14 +580,14 @@ LoopAA::ModRefResult NoEscapeFieldsAA::callsiteTouchesNonEscapingField(
 }
 
 LoopAA::ModRefResult
-NoEscapeFieldsAA::getModRefInfo(CallSite cs, TemporalRelation rel, CallSite cs2,
+NoEscapeFieldsAA::getModRefInfo(CallBase cs, TemporalRelation rel, CallBase cs2,
                                 const Loop *L, Remedies &R) {
   // I don't handle this case.
   return ModRef;
 }
 
 LoopAA::ModRefResult
-NoEscapeFieldsAA::getModRefInfo(CallSite cs, TemporalRelation rel,
+NoEscapeFieldsAA::getModRefInfo(CallBase cs, TemporalRelation rel,
                                 const Pointer &p2, const Loop *L, Remedies &R) {
   DEBUG_WITH_TYPE("loopaa", errs() << "NoEscapeFieldsAA\n");
 

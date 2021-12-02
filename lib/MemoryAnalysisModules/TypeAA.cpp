@@ -5,7 +5,6 @@
 #include "llvm/ADT/DenseSet.h"
 #include "llvm/ADT/Statistic.h"
 #include "llvm/IR/CFG.h"
-#include "llvm/IR/CallSite.h"
 #include "llvm/IR/DataLayout.h"
 #include "llvm/IR/DebugLoc.h"
 #include "llvm/IR/GetElementPtrTypeIterator.h"
@@ -19,7 +18,7 @@
 
 #include "scaf/MemoryAnalysisModules/LoopAA.h"
 #include "scaf/MemoryAnalysisModules/TypeSanity.h"
-#include "scaf/Utilities/CallSiteFactory.h"
+#include "scaf/Utilities/CallBaseFactory.h"
 #include "scaf/Utilities/Count.h"
 #include "scaf/Utilities/GetSize.h"
 
@@ -116,7 +115,7 @@ bool TypeSanityAnalysis::runOnModule(Module &mod) {
 }
 
 static bool isCallToMalloc(Value *src) {
-  CallSite cs = getCallSite(src);
+  CallBase cs = getCallBase(src);
   if (!cs.getInstruction())
     return false;
 
@@ -141,7 +140,7 @@ static bool isCallToMalloc(Value *src) {
 }
 
 static bool isCallToFree(Value *use) {
-  CallSite cs = getCallSite(use);
+  CallBase cs = getCallBase(use);
   if (!cs.getInstruction())
     return false;
 
@@ -430,7 +429,7 @@ bool TypeSanityAnalysis::runOnFunction(Function &fcn) {
 
   for (inst_iterator i = inst_begin(fcn), e = inst_end(fcn); i != e; ++i) {
     Instruction *inst = &*i;
-    CallSite cs = getCallSite(inst);
+    CallBase cs = getCallBase(inst);
 
     if (isCastInst(inst)) // isa<CastInst>( inst ) )
     {

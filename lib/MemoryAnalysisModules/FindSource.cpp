@@ -1,13 +1,12 @@
 
 #include "llvm/ADT/DenseSet.h"
 #include "llvm/Analysis/ValueTracking.h"
-#include "llvm/IR/CallSite.h"
 #include "llvm/IR/Instructions.h"
 #include "llvm/IR/Module.h"
 #include "llvm/Pass.h"
 #include "llvm/Support/raw_ostream.h"
 
-#include "scaf/Utilities/CallSiteFactory.h"
+#include "scaf/Utilities/CallBaseFactory.h"
 #include "scaf/Utilities/GetMemOper.h"
 
 #include "scaf/MemoryAnalysisModules/FindSource.h"
@@ -97,7 +96,7 @@ const Instruction *findNoAliasSource(const Value *v,
   if (isa<AllocaInst>(source))
     return source;
 
-  CallSite CS = getCallSite(const_cast<Instruction *>(source));
+  CallBase CS = getCallBase(const_cast<Instruction *>(source));
   if (!CS.getInstruction())
     return NULL;
 
@@ -159,7 +158,7 @@ const Value *findActualArgumentSource(const Value *v) {
     return NULL;
   }
 
-  const CallSite call(const_cast<Instruction *>(inst));
+  const CallBase call(const_cast<Instruction *>(inst));
   assert(call.getInstruction());
 
   return findSource(call.getArgument(a->getArgNo()));

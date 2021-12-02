@@ -4,7 +4,7 @@
 #include "llvm/Support/Debug.h"
 #include "llvm/Support/raw_ostream.h"
 
-#include "scaf/Utilities/CallSiteFactory.h"
+#include "scaf/Utilities/CallBaseFactory.h"
 
 #include "RefineCFG.h"
 
@@ -29,13 +29,13 @@ bool RefineCFG::runOnFunction(const Function &F) {
   bool changed = false;
 
   for (const_inst_iterator inst = inst_begin(F); inst != inst_end(F); ++inst) {
-    changed |= runOnCallSite(liberty::getCallSite(&*inst));
+    changed |= runOnCallBase(liberty::getCallBase(&*inst));
   }
 
   return changed;
 }
 
-bool RefineCFG::runOnCallSite(const CallSite &CS) {
+bool RefineCFG::runOnCallBase(const CallBase &CS) {
 
   Instruction *call = CS.getInstruction();
   if (!call)

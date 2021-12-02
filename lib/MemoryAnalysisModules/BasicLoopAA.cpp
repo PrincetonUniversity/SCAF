@@ -441,12 +441,12 @@ struct BasicLoopAA : public liberty::ClassicLoopAA, public ModulePass {
     return false;
   }
 
-  virtual ModRefResult getModRefInfo(CallSite CS1, TemporalRelation Rel,
-                                     CallSite CS2, const Loop *L, Remedies &R) {
+  virtual ModRefResult getModRefInfo(CallBase CS1, TemporalRelation Rel,
+                                     CallBase CS2, const Loop *L, Remedies &R) {
     return ModRef;
   }
 
-  virtual ModRefResult getModRefInfo(CallSite CS, TemporalRelation Rel,
+  virtual ModRefResult getModRefInfo(CallBase CS, TemporalRelation Rel,
                                      const Pointer &P2, const Loop *L,
                                      Remedies &R);
 
@@ -533,7 +533,7 @@ bool BasicLoopAA::pointsToConstantMemory(const Value *P, const Loop *L) {
 /// really can't say much about this query.  We do, however, use simple "address
 /// taken" analysis on local objects.
 liberty::LoopAA::ModRefResult
-BasicLoopAA::getModRefInfo(CallSite CS, TemporalRelation Rel, const Pointer &P2,
+BasicLoopAA::getModRefInfo(CallBase CS, TemporalRelation Rel, const Pointer &P2,
                            const Loop *L, Remedies &R) {
 
   const Value *V = P2.ptr;
@@ -566,7 +566,7 @@ BasicLoopAA::getModRefInfo(CallSite CS, TemporalRelation Rel, const Pointer &P2,
     bool PassedAsArg = false;
     unsigned ArgNo = 0;
     Remedies tmpR;
-    for (ImmutableCallSite::arg_iterator CI = CS.arg_begin(), CE = CS.arg_end();
+    for (ImmutableCallBase::arg_iterator CI = CS.arg_begin(), CE = CS.arg_end();
          CI != CE; ++CI, ++ArgNo) {
       // Only look at the no-capture pointer arguments.
       if (!(*CI)->getType()->isPointerTy() ||

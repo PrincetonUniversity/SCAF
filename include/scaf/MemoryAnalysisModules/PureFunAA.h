@@ -62,12 +62,12 @@ private:
   void runOnSCC(const SCC &scc);
 
 public:
-  static bool argumentsAlias(const llvm::ImmutableCallSite CS1,
-                             const llvm::ImmutableCallSite CS2,
+  static bool argumentsAlias(const llvm::CallBase CS1,
+                             const llvm::CallBase CS2,
                              liberty::LoopAA *aa, const llvm::DataLayout *TD,
                              Remedies &R);
 
-  static bool argumentsAlias(const llvm::ImmutableCallSite CS,
+  static bool argumentsAlias(const llvm::CallBase CS,
                              const llvm::Value *P, const unsigned Size,
                              liberty::LoopAA *aa, const llvm::DataLayout *TD,
                              Remedies &R);
@@ -92,11 +92,11 @@ public:
                            const StringSet &knownFunSet,
                            Property property) const;
 
-  virtual ModRefResult getModRefInfo(llvm::CallSite CS1, TemporalRelation Rel,
-                                     llvm::CallSite CS2, const llvm::Loop *L,
+  virtual ModRefResult getModRefInfo(llvm::CallBase CS1, TemporalRelation Rel,
+                                     llvm::CallBase CS2, const llvm::Loop *L,
                                      Remedies &R);
 
-  virtual ModRefResult getModRefInfo(llvm::CallSite CS, TemporalRelation Rel,
+  virtual ModRefResult getModRefInfo(llvm::CallBase CS, TemporalRelation Rel,
                                      const Pointer &P, const llvm::Loop *L,
                                      Remedies &R);
 

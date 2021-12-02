@@ -3,7 +3,6 @@
 
 #include "scaf/MemoryAnalysisModules/ClassicLoopAA.h"
 #include "scaf/MemoryAnalysisModules/LoopAA.h"
-#include "llvm/IR/CallSite.h"
 #include "llvm/Support/CommandLine.h"
 
 namespace liberty {
@@ -38,10 +37,10 @@ void pquery(StringRef who, bool enter, const Instruction *i1,
 void pquery(StringRef who, bool enter, const Value *v1, unsigned s1,
             LoopAA::TemporalRelation Rel, const Value *p2, unsigned s2,
             const Loop *L, LoopAA::AliasResult res = LoopAA::MayAlias);
-void pquery(StringRef who, bool enter, const CallSite &CS1,
-            LoopAA::TemporalRelation Rel, const CallSite &CS2, const Loop *L,
+void pquery(StringRef who, bool enter, const CallBase &CS1,
+            LoopAA::TemporalRelation Rel, const CallBase &CS2, const Loop *L,
             LoopAA::ModRefResult res = LoopAA::ModRef);
-void pquery(StringRef who, bool enter, const CallSite &CS1,
+void pquery(StringRef who, bool enter, const CallBase &CS1,
             LoopAA::TemporalRelation Rel, const ClassicLoopAA::Pointer &P2,
             const Loop *L, LoopAA::ModRefResult res = LoopAA::ModRef);
 void pquery(StringRef who, bool enter, const ClassicLoopAA::Pointer &P1,
