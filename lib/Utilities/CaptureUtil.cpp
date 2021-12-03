@@ -106,7 +106,7 @@ static bool captures(const Value *v, const Value *use, VisitedSet &visited,
           findAllCapturesRec(arg, visited, NULL)) {
         const Module *M = f->getParent();
         const DataLayout &DL = M->getDataLayout();
-        LLVM_DEBUG(errs() << "Captured " << *GetUnderlyingObject(v, DL)
+        LLVM_DEBUG(errs() << "Captured " << *getUnderlyingObject(v)
                           << " by call to '" << f->getName() << "'\n");
 
         if (captureSet)

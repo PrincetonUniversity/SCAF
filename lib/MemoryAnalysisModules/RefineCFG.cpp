@@ -28,20 +28,19 @@ bool RefineCFG::runOnModule(Module &M) {
 bool RefineCFG::runOnFunction(const Function &F) {
   bool changed = false;
 
-  for (const_inst_iterator inst = inst_begin(F); inst != inst_end(F); ++inst) {
+  for (auto inst = inst_begin(F); inst != inst_end(F); ++inst) {
     changed |= runOnCallBase(liberty::getCallBase(&*inst));
   }
 
   return changed;
 }
 
-bool RefineCFG::runOnCallBase(const CallBase &CS) {
+bool RefineCFG::runOnCallBase(const CallBase *CS) {
 
-  Instruction *call = CS.getInstruction();
-  if (!call)
+  if (!CS)
     return false;
 
-  const Value *target = CS.getCalledValue();
+  const Value *target = CS->getCalledOperand();
   const Function *targetFun = dyn_cast<Function>(target->stripPointerCasts());
   if (!targetFun)
     return false;
@@ -49,12 +48,11 @@ bool RefineCFG::runOnCallBase(const CallBase &CS) {
   if (target == targetFun)
     return false;
 
-  const Function *F = call->getParent()->getParent();
+  const Function *F = CS->getParent()->getParent();
 
-  const CallBase *callB = dyn_cast<CallBase>(call);
-  if (!callB)
-    return false;
-  (*CG)[F]->addCalledFunction(const_cast<CallBase *>(callB), (*CG)[targetFun]);
+  // FIXME: very bad, bypass const pointer
+  auto CS_n = (CallBase *)CS;
+  (*CG)[F]->addCalledFunction(CS_n, (*CG)[targetFun]);
   LLVM_DEBUG(errs() << "RefineCFG: " << F->getName() << " calls "
                     << targetFun->getName() << "\n");
 

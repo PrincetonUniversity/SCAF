@@ -11,7 +11,7 @@ using namespace llvm::noelle;
 
 class IntrinsicAA : public ModulePass, public liberty::ClassicLoopAA {
 
-  static bool isRedCall(CallBase CS) {
+  static bool isRedCall(const CallBase &CS) {
 
     Function *F = CS.getCalledFunction();
     if (!F)
@@ -34,8 +34,8 @@ public:
     return false;
   }
 
-  virtual ModRefResult getModRefInfo(CallBase CS1, TemporalRelation Rel,
-                                     CallBase CS2, const Loop *L, Remedies &R) {
+  virtual ModRefResult getModRefInfo(const CallBase &CS1, TemporalRelation Rel,
+                                     const CallBase &CS2, const Loop *L, Remedies &R) {
     if (isRedCall(CS1))
       return NoModRef;
 
@@ -45,7 +45,7 @@ public:
     return ModRef;
   }
 
-  virtual ModRefResult getModRefInfo(CallBase CS, TemporalRelation Rel,
+  virtual ModRefResult getModRefInfo(const CallBase &CS, TemporalRelation Rel,
                                      const Pointer &P, const Loop *L,
                                      Remedies &R) {
     if (isRedCall(CS))

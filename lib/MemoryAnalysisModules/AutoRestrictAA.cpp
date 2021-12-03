@@ -49,10 +49,10 @@ private:
   void recursiveTaint(const Function &fun) {
     for (const_inst_iterator inst = inst_begin(fun); inst != inst_end(fun);
          ++inst) {
-      const CallBase CS =
+      const CallBase* CS =
           liberty::getCallBase(const_cast<Instruction *>(&*inst));
-      if (CS.getInstruction()) {
-        if (const Function *target = CS.getCalledFunction()) {
+      if (CS) {
+        if (const Function *target = CS->getCalledFunction()) {
           if (!tainted.count(target)) {
             tainted.insert(target);
             recursiveTaint(fun);
@@ -87,12 +87,12 @@ private:
 
     for (UserIt user = fun->user_begin(); user != fun->user_end(); ++user) {
 
-      const CallBase CS = liberty::getCallBase(const_cast<User *>(*user));
-      assert(CS.getInstruction() && "This should be tainted.");
-      assert(CS.getCalledFunction() && "This should be tainted.");
+      const CallBase *CS = liberty::getCallBase(const_cast<User *>(*user));
+      assert(CS && "This should be tainted.");
+      assert(CS->getCalledFunction() && "This should be tainted.");
 
-      const Value *callerArg1 = CS.getArgument(arg1->getArgNo());
-      const Value *callerArg2 = CS.getArgument(arg2->getArgNo());
+      const Value *callerArg1 = CS->getArgOperand(arg1->getArgNo());
+      const Value *callerArg2 = CS->getArgOperand(arg2->getArgNo());
 
       assert(arg1 != callerArg1 && "No progress!");
       assert(arg2 != callerArg2 && "No progress!");
@@ -124,10 +124,10 @@ private:
 
     for (UserIt user = fun->user_begin(); user != fun->user_end(); ++user) {
 
-      const CallBase CS = liberty::getCallBase(const_cast<User *>(*user));
-      assert(CS.getCalledFunction() && "This should be tainted.");
+      const CallBase * CS = liberty::getCallBase(const_cast<User *>(*user));
+      assert(CS->getCalledFunction() && "This should be tainted.");
 
-      const Value *callerArg = CS.getArgument(arg->getArgNo());
+      const Value *callerArg = CS->getArgOperand(arg->getArgNo());
 
       AliasResult AR =
           aa->alias(callerArg, V1Size, Same, V, V2Size, NULL, tmpR);

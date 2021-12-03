@@ -86,7 +86,7 @@ void SemiLocalFunAA::initGlobalMod(const Function *fun, GlobalSet &mods,
   }
 }
 
-LoopAA::ModRefResult SemiLocalFunAA::getModRefInfo(const ImmutableCallBase CS,
+LoopAA::ModRefResult SemiLocalFunAA::getModRefInfo(const CallBase &CS,
                                                    const unsigned argNo) {
 
   const Function *fun = CS.getCalledFunction();
@@ -108,7 +108,7 @@ LoopAA::ModRefResult SemiLocalFunAA::getModRefInfo(const ImmutableCallBase CS,
 }
 
 LoopAA::ModRefResult
-SemiLocalFunAA::aliasedArgumentsModRef(const ImmutableCallBase CS,
+SemiLocalFunAA::aliasedArgumentsModRef(const CallBase &CS,
                                        const Value *P, const unsigned Size,
                                        Remedies &R) const {
 
@@ -123,7 +123,7 @@ SemiLocalFunAA::aliasedArgumentsModRef(const ImmutableCallBase CS,
   assert(fun);
 
   for (unsigned i = 0; i < CS.arg_size(); ++i) {
-    const Value *arg = CS.getArgument(i);
+    const Value *arg = CS.getArgOperand(i);
 
     if (arg->getType()->isPointerTy()) {
 
@@ -254,9 +254,9 @@ bool SemiLocalFunAA::writeOnlyFormalArg(const Function *fcn, unsigned argno) {
   return writeOnlyFormalArg(f);
 }
 
-LoopAA::ModRefResult SemiLocalFunAA::getModRefInfo(CallBase CS1,
+LoopAA::ModRefResult SemiLocalFunAA::getModRefInfo(const CallBase &CS1,
                                                    TemporalRelation Rel,
-                                                   CallBase CS2, const Loop *L,
+                                                   const CallBase &CS2, const Loop *L,
                                                    Remedies &R) {
 
   Remedies tmpR;
@@ -278,9 +278,8 @@ LoopAA::ModRefResult SemiLocalFunAA::getModRefInfo(CallBase CS1,
       // For each actual parameter of callsite 1 which is a pointer
       ModRefResult join = NoModRef;
 
-      typedef CallBase::arg_iterator ArgIt;
       unsigned arg1no = 0;
-      for (ArgIt i = CS1.arg_begin(), e = CS1.arg_end();
+      for (auto i = CS1.arg_begin(), e = CS1.arg_end();
            i != e && join != ModRef; ++i, ++arg1no) {
         Value *arg1 = *i;
         if (!arg1->getType()->isPointerTy())
@@ -289,7 +288,7 @@ LoopAA::ModRefResult SemiLocalFunAA::getModRefInfo(CallBase CS1,
         const unsigned s1 = liberty::getTargetSize(arg1, TD);
 
         // For each actual parameter of callsite 2 which is a pointer
-        for (ArgIt j = CS2.arg_begin(), f = CS2.arg_end(); j != f; ++j) {
+        for (auto j = CS2.arg_begin(), f = CS2.arg_end(); j != f; ++j) {
           Value *arg2 = *j;
           if (!arg2->getType()->isPointerTy())
             continue;
@@ -328,7 +327,7 @@ LoopAA::ModRefResult SemiLocalFunAA::getModRefInfo(CallBase CS1,
   return ModRef;
 }
 
-LoopAA::ModRefResult SemiLocalFunAA::getModRefInfo(CallBase CS,
+LoopAA::ModRefResult SemiLocalFunAA::getModRefInfo(const CallBase &CS,
                                                    TemporalRelation Rel,
                                                    const Pointer &P,
                                                    const Loop *L, Remedies &R) {
@@ -358,9 +357,9 @@ LoopAA::ModRefResult SemiLocalFunAA::getModRefInfo(CallBase CS,
     return Ref;
   }
 
-  if (!CS.getInstruction()->getType()->isVoidTy()) {
+  if (!CS.getType()->isVoidTy()) {
     LoopAA *AA = getTopAA();
-    if (AA->alias(CS.getInstruction(), Size, Rel, V, Size, L, tmpR) != NoAlias)
+    if (AA->alias(&CS, Size, Rel, V, Size, L, tmpR) != NoAlias)
       return ModRef;
   }
 

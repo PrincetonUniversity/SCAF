@@ -36,9 +36,6 @@ struct ModuleLoops : public ModulePass {
 
   bool runOnModule(Module &mod) {
     td = &mod.getDataLayout();
-    TargetLibraryInfoWrapperPass *tliWrap =
-        &getAnalysis<TargetLibraryInfoWrapperPass>();
-    tli = &tliWrap->getTLI();
     return false;
   }
 
@@ -63,7 +60,6 @@ struct ModuleLoops : public ModulePass {
 
 private:
   const DataLayout *td;
-  TargetLibraryInfo *tli;
   std::map<const Function *, GimmeLoops *> results;
 
   GimmeLoops &compute(const Function *fcn);

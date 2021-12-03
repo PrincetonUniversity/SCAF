@@ -6,6 +6,7 @@
 #include "llvm/ADT/Statistic.h"
 #include "llvm/Analysis/MemoryBuiltins.h"
 #include "llvm/Analysis/ValueTracking.h"
+#include "llvm/Analysis/TargetLibraryInfo.h"
 #include "llvm/IR/CFG.h"
 #include "llvm/IR/Constants.h"
 #include "llvm/IR/InstIterator.h"
@@ -59,17 +60,14 @@ static bool isAlloc(const Value *v, const DataLayout &td,
   if (isa<AllocaInst>(v))
     return true;
 
-  CallBase cs = getCallBase(v);
-  if (!cs.getInstruction())
-    return false;
-
-  if (!cs.getCalledValue())
+  const CallBase* cs = getCallBase(v);
+  if (!cs)
     return false;
 
   // Compensate for constant expressions casting functions to different
   // types. These are especially common in pre-ANSI C programs.
-  Function *F =
-      dyn_cast<Function>(GetUnderlyingObject(cs.getCalledValue(), td));
+  auto uo = getUnderlyingObject(cs);
+  const Function *F = dyn_cast<Function>(uo);
   if (!F)
     return false;
 
@@ -152,9 +150,9 @@ static bool isAcyclic(Value *tl, Val2Bool &valuesAcyclic, const DataLayout &td,
     return true;
   }
 
-  CallBase cs = getCallBase(tl);
-  if (cs.getInstruction() != 0) {
-    Function *f = cs.getCalledFunction();
+  CallBase* cs = getCallBase(tl);
+  if (cs) {
+    Function *f = cs->getCalledFunction();
 
     if (isAcyclic(f, valuesAcyclic, tli)) {
       valuesAcyclic[tl] = true;
@@ -317,7 +315,7 @@ static bool proveAcyclic(Type *ty, Function &fcn, const DataLayout &td,
 // attempt to prove that every store to the
 // recursive field of objects of this type
 // is a new object.
-static bool proveAcyclic(Type *ty, Module &mod, const TargetLibraryInfo &tli) {
+static bool proveAcyclic(Type *ty, Module &mod, TargetLibraryInfoWrapperPass &tliw) {
   // Here, ty is something like "BSTNode *"
   // We are looking for a store of a "BSTNode *" into a "BSTNode **"
 
@@ -326,7 +324,7 @@ static bool proveAcyclic(Type *ty, Module &mod, const TargetLibraryInfo &tli) {
   typedef Module::iterator FI;
   for (FI i = mod.begin(), e = mod.end(); i != e; ++i) {
     Function &fcn = *i;
-    if (!proveAcyclic(ty, fcn, td, tli))
+    if (!proveAcyclic(ty, fcn, td, tliw.getTLI(fcn)))
       return false;
   }
   return true;
@@ -548,8 +546,8 @@ LoopAA::AliasResult AcyclicAA::aliasCheck(const Pointer &P1,
   if (isa<PHINode>(P2.ptr) || isa<SelectInst>(P2.ptr))
     return MayAlias;
 
-  const Value *UO1 = GetUnderlyingObject(P1.ptr, TD);
-  const Value *UO2 = GetUnderlyingObject(P2.ptr, TD);
+  const Value *UO1 = getUnderlyingObject(P1.ptr);
+  const Value *UO2 = getUnderlyingObject(P2.ptr);
 
   if (UO1->getType() == UO2->getType() && acyclic.count(UO1->getType())) {
 
@@ -592,8 +590,8 @@ bool AcyclicAA::runOnModule(Module &mod) {
   InitializeLoopAA(this, DL);
   currentModule = &mod;
 
-  const TargetLibraryInfo &tli =
-      getAnalysis<TargetLibraryInfoWrapperPass>().getTLI();
+  TargetLibraryInfoWrapperPass &tliw =
+      getAnalysis<TargetLibraryInfoWrapperPass>();
 
   // First, find all recursive types
   Types recTys;
@@ -606,7 +604,7 @@ bool AcyclicAA::runOnModule(Module &mod) {
     LLVM_DEBUG(errs() << "Checking cyclicity of "; errs() << *ty;
                errs() << '\n';);
 
-    if (proveAcyclic(ty, mod, tli))
+    if (proveAcyclic(ty, mod, tliw))
       acyclic.insert(ty);
   }
 

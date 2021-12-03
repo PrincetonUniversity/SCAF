@@ -21,7 +21,10 @@ using namespace llvm::noelle;
 LoopVariantAllocation::LoopVariantAllocation() : ModulePass(ID) {}
 
 bool LoopVariantAllocation::runOnModule(Module &M) {
-  tli = &getAnalysis<TargetLibraryInfoWrapperPass>().getTLI();
+  // FIXME: get a random function
+  assert(M.getFunctionList().size() > 0 && "Have to have at least one function");
+  auto &fcn = *M.getFunctionList().begin();
+  tli = &getAnalysis<TargetLibraryInfoWrapperPass>().getTLI(fcn);
   DL = &M.getDataLayout();
   InitializeLoopAA(this, *DL);
   return false;
@@ -49,11 +52,11 @@ static bool isNoaliasWithinLoop(const Value *src, const Loop *L,
     if (L->contains(alloca))
       return true;
 
-  CallBase cs = getCallBase(src);
-  if (cs.getInstruction())
-    if (L->contains(cs.getInstruction())) {
-      if (cs.getCalledFunction())
-        if (cs.getCalledFunction()->getAttributes().hasAttribute(
+  const CallBase *cs = getCallBase(src);
+  if (cs)
+    if (L->contains(cs)) {
+      if (cs->getCalledFunction())
+        if (cs->getCalledFunction()->getAttributes().hasAttribute(
                 0, Attribute::NoAlias))
           return true;
 
@@ -74,8 +77,8 @@ LoopVariantAllocation::aliasCheck(const Pointer &P1, TemporalRelation Rel,
   if (dAliasRes == DMustAlias)
     return MayAlias;
 
-  const Value *src1 = GetUnderlyingObject(P1.ptr, *DL, 0),
-              *src2 = GetUnderlyingObject(P2.ptr, *DL, 0);
+  const Value *src1 = getUnderlyingObject(P1.ptr, 0),
+              *src2 = getUnderlyingObject(P2.ptr, 0);
 
   LLVM_DEBUG(errs() << "LoopVariantAllocation(" << *src1 << ", " << *src2
                     << ")\n");

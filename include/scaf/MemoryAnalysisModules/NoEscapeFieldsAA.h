@@ -97,7 +97,7 @@ class NoEscapeFieldsAA : public ModulePass, public ClassicLoopAA {
   typedef DenseMap<const Instruction *, ModRefResult> CallsiteTouches;
   CallsiteTouches callsiteTouches;
 
-  ModRefResult callsiteTouchesNonEscapingField(CallBase cs, const Pointer &p2,
+  ModRefResult callsiteTouchesNonEscapingField(const CallBase &cs, const Pointer &p2,
                                                StructType *struct2,
                                                const ConstantInt *field2,
                                                Remedies &R);
@@ -128,10 +128,10 @@ public:
                          const Pointer &P2, const Loop *L, Remedies &R,
                          DesiredAliasResult dAliasRes = DNoOrMustAlias);
 
-  ModRefResult getModRefInfo(CallBase cs, TemporalRelation rel,
+  ModRefResult getModRefInfo(const CallBase &cs, TemporalRelation rel,
                              const Pointer &p2, const Loop *L, Remedies &R);
 
-  ModRefResult getModRefInfo(CallBase cs, TemporalRelation rel, CallBase cs2,
+  ModRefResult getModRefInfo(const CallBase &cs, TemporalRelation rel, const CallBase &cs2,
                              const Loop *L, Remedies &R);
 };
 } // namespace liberty

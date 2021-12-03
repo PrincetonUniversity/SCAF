@@ -35,13 +35,13 @@ struct MyPMDataManager;
 struct GimmeLoops {
   GimmeLoops() : td(0), tli(0), dtp(0), dt(0), pdt(0), li(0), se(0), mod(0) {}
 
-  GimmeLoops(const DataLayout *target, TargetLibraryInfo *lib, Function *fcn,
+  GimmeLoops(const DataLayout *target, Function *fcn,
              bool computeScalarEvolution = false)
       : td(0), tli(0), dtp(0), dt(0), pdt(0), li(0), se(0), mod(0) {
-    init(target, lib, fcn, computeScalarEvolution);
+    init(target, fcn, computeScalarEvolution);
   }
 
-  void init(const DataLayout *target, TargetLibraryInfo *lib, Function *fcn,
+  void init(const DataLayout *target, Function *fcn,
             bool computeScalarEvolution = false);
 
   ~GimmeLoops();

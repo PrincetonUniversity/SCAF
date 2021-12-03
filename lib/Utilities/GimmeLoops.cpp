@@ -69,7 +69,7 @@ GimmeLoops::~GimmeLoops() {
     delete ppp;
 }
 
-void GimmeLoops::init(const DataLayout *target, TargetLibraryInfo *lib,
+void GimmeLoops::init(const DataLayout *target,
                       Function *fcn, bool computeScalarEvolution) {
   assert(fcn && "Null function argument in GimmeLoops init");
   mod = fcn->getParent();

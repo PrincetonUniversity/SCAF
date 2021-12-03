@@ -11,7 +11,7 @@ private:
   llvm::CallGraph *CG;
 
   bool runOnFunction(const llvm::Function &F);
-  bool runOnCallBase(const llvm::CallBase &CS);
+  bool runOnCallBase(const llvm::CallBase *CS);
 
 public:
   static char ID;

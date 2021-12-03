@@ -50,8 +50,8 @@ public:
     if (V1 == V2)
       return MayAlias;
 
-    const Value *O1 = GetUnderlyingObject(V1, *DL);
-    const Value *O2 = GetUnderlyingObject(V2, *DL);
+    const Value *O1 = getUnderlyingObject(V1);
+    const Value *O2 = getUnderlyingObject(V2);
 
     bool isNoAlias1 = isNoAlias(O1);
     bool isNoAlias2 = isNoAlias(O2);

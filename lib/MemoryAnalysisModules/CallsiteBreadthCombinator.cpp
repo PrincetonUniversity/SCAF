@@ -44,10 +44,10 @@ class CallsiteBreadthCombinator : public ModulePass, public liberty::LoopAA {
   const DataLayout *DL;
 
   unsigned countPtrArgs(const Instruction *inst) {
-    CallBase cs = getCallBase(inst);
+    const CallBase *cs = getCallBase(inst);
 
     unsigned n = 0;
-    for (User::const_op_iterator i = cs.arg_begin(), e = cs.arg_end(); i != e;
+    for (User::const_op_iterator i = cs->arg_begin(), e = cs->arg_end(); i != e;
          ++i) {
       const Value *op = *i;
       Type *opTy = op->getType();
@@ -103,7 +103,7 @@ class CallsiteBreadthCombinator : public ModulePass, public liberty::LoopAA {
 
       if (const StoreInst *store = dyn_cast<StoreInst>(instFromCallee)) {
         if (isa<AllocaInst>(
-                GetUnderlyingObject(store->getPointerOperand(), *DL, 0))) {
+                getUnderlyingObject(store->getPointerOperand(), 0))) {
           // Allocas are patently local
           ++numKilledOps;
           continue;
@@ -112,7 +112,7 @@ class CallsiteBreadthCombinator : public ModulePass, public liberty::LoopAA {
 
       else if (const LoadInst *load = dyn_cast<LoadInst>(instFromCallee)) {
         if (isa<AllocaInst>(
-                GetUnderlyingObject(load->getPointerOperand(), *DL, 0))) {
+                getUnderlyingObject(load->getPointerOperand(),  0))) {
           // Allocas are patently local
           ++numKilledOps;
           continue;
@@ -141,8 +141,8 @@ class CallsiteBreadthCombinator : public ModulePass, public liberty::LoopAA {
       if (!instFromCallee->mayReadFromMemory() &&
           !instFromCallee->mayWriteToMemory())
         continue;
-      CallBase nested = getCallBase(instFromCallee);
-      if (!nested.getInstruction())
+      const CallBase * nested = getCallBase(instFromCallee);
+      if (!nested)
         continue;
 
       ++numOps;
@@ -197,7 +197,7 @@ class CallsiteBreadthCombinator : public ModulePass, public liberty::LoopAA {
 
       if (const StoreInst *store = dyn_cast<StoreInst>(instFromCallee)) {
         if (isa<AllocaInst>(
-                GetUnderlyingObject(store->getPointerOperand(), *DL, 0))) {
+                getUnderlyingObject(store->getPointerOperand(),  0))) {
           // Allocas are patently local
           ++numKilledOps;
           continue;
@@ -206,7 +206,7 @@ class CallsiteBreadthCombinator : public ModulePass, public liberty::LoopAA {
 
       else if (const LoadInst *load = dyn_cast<LoadInst>(instFromCallee)) {
         if (isa<AllocaInst>(
-                GetUnderlyingObject(load->getPointerOperand(), *DL, 0))) {
+                getUnderlyingObject(store->getPointerOperand(), 0))) {
           // Allocas are patently local
           ++numKilledOps;
           continue;
@@ -235,8 +235,8 @@ class CallsiteBreadthCombinator : public ModulePass, public liberty::LoopAA {
       if (!instFromCallee->mayReadFromMemory() &&
           !instFromCallee->mayWriteToMemory())
         continue;
-      CallBase nested = getCallBase(instFromCallee);
-      if (!nested.getInstruction())
+      const CallBase * nested = getCallBase(instFromCallee);
+      if (!nested)
         continue;
 
       ++numOps;
@@ -290,7 +290,7 @@ class CallsiteBreadthCombinator : public ModulePass, public liberty::LoopAA {
 
       if (const StoreInst *store = dyn_cast<StoreInst>(instFromCallee)) {
         if (isa<AllocaInst>(
-                GetUnderlyingObject(store->getPointerOperand(), *DL, 0))) {
+                getUnderlyingObject(store->getPointerOperand(), 0))) {
           // Allocas are patently local
           ++numKilledOps;
           continue;
@@ -299,7 +299,7 @@ class CallsiteBreadthCombinator : public ModulePass, public liberty::LoopAA {
 
       else if (const LoadInst *load = dyn_cast<LoadInst>(instFromCallee)) {
         if (isa<AllocaInst>(
-                GetUnderlyingObject(load->getPointerOperand(), *DL, 0))) {
+                getUnderlyingObject(store->getPointerOperand(), 0))) {
           // Allocas are patently local
           ++numKilledOps;
           continue;
@@ -334,8 +334,8 @@ class CallsiteBreadthCombinator : public ModulePass, public liberty::LoopAA {
       if (!instFromCallee->mayReadFromMemory() &&
           !instFromCallee->mayWriteToMemory())
         continue;
-      CallBase nested = getCallBase(instFromCallee);
-      if (!nested.getInstruction())
+      const CallBase * nested = getCallBase(instFromCallee);
+      if (!nested)
         continue;
 
       // top-query
@@ -355,11 +355,11 @@ class CallsiteBreadthCombinator : public ModulePass, public liberty::LoopAA {
   }
 
   const Function *getEligibleFunction(const Instruction *i) const {
-    CallBase cs = getCallBase(i);
-    if (!cs.getInstruction())
+    const CallBase * cs = getCallBase(i);
+    if (!cs)
       return 0;
 
-    const Function *f = cs.getCalledFunction();
+    const Function *f = cs->getCalledFunction();
     if (!f)
       return 0;
 

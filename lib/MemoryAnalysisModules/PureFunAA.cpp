@@ -25,7 +25,7 @@ namespace liberty {
 static bool isReadOnlyProp(const Instruction *inst) {
   const DataLayout &td = inst->getModule()->getDataLayout();
   if (const MemIntrinsic *mem = dyn_cast<MemIntrinsic>(inst)) {
-    const Value *obj = GetUnderlyingObject(mem->getDest(), td);
+    const Value *obj = getUnderlyingObject(mem->getDest());
     // if( !obj )
     //  return false;
     if (obj)
@@ -34,7 +34,7 @@ static bool isReadOnlyProp(const Instruction *inst) {
           return true;
     // return false;
   } else if (const StoreInst *store = dyn_cast<StoreInst>(inst)) {
-    const Value *obj = GetUnderlyingObject(store->getPointerOperand(), td);
+    const Value *obj = getUnderlyingObject(store->getPointerOperand());
     // if( !obj )
     //  return false;
     if (obj)
@@ -147,10 +147,10 @@ bool PureFunAA::isRecursiveProperty(const Function *fun,
       return false;
     }
 
-    const CallBase call =
+    const CallBase *call =
         liberty::getCallBase(const_cast<Instruction *>(&*inst));
-    if (call.getInstruction()) {
-      const Value *value = call.getCalledValue()->stripPointerCasts();
+    if (call) {
+      const Value *value = call->getCalledOperand()->stripPointerCasts();
 
       const Function *callee = dyn_cast<Function>(value);
       if (!callee) {
@@ -205,12 +205,11 @@ void PureFunAA::runOnSCC(const SCC &scc) {
   ++sccCount;
 }
 
-bool PureFunAA::argumentsAlias(const ImmutableCallBase CS1,
-                               const ImmutableCallBase CS2, LoopAA *aa,
+bool PureFunAA::argumentsAlias(const CallBase &CS1,
+                               const CallBase &CS2, LoopAA *aa,
                                const DataLayout *TD, Remedies &R) {
 
-  typedef ImmutableCallBase::arg_iterator ArgIt;
-  for (ArgIt arg = CS1.arg_begin(); arg != CS1.arg_end(); ++arg) {
+  for (auto arg = CS1.arg_begin(); arg != CS1.arg_end(); ++arg) {
     if ((*arg)->getType()->isPointerTy()) {
       if (argumentsAlias(CS2, *arg, liberty::getTargetSize(*arg, TD), aa, TD,
                          R)) {
@@ -222,12 +221,12 @@ bool PureFunAA::argumentsAlias(const ImmutableCallBase CS1,
   return false;
 }
 
-bool PureFunAA::argumentsAlias(const ImmutableCallBase CS, const Value *P,
+bool PureFunAA::argumentsAlias(const CallBase &CS, const Value *P,
                                const unsigned Size, LoopAA *aa,
                                const DataLayout *TD, Remedies &R) {
 
   for (unsigned i = 0; i < CS.arg_size(); ++i) {
-    const Value *arg = CS.getArgument(i);
+    const Value *arg = CS.getArgOperand(i);
 
     if (arg->getType()->isPointerTy()) {
 
@@ -294,20 +293,20 @@ bool PureFunAA::isPure(const Function *fun) const {
   return isReadOnly(fun) && isLocal(fun);
 }
 
-static Function *getCalledFunction(CallBase CS) {
-  return dyn_cast<Function>(CS.getCalledValue()->stripPointerCasts());
+static Function *getCalledFunction(const CallBase &CS) {
+  return dyn_cast<Function>(CS.getCalledOperand()->stripPointerCasts());
 }
 
-PureFunAA::ModRefResult PureFunAA::getModRefInfo(CallBase CS1,
+PureFunAA::ModRefResult PureFunAA::getModRefInfo(const CallBase &CS1,
                                                  TemporalRelation Rel,
-                                                 CallBase CS2, const Loop *L,
+                                                 const CallBase &CS2, const Loop *L,
                                                  Remedies &R) {
 
   const Function *fun1 = getCalledFunction(CS1);
   const Function *fun2 = getCalledFunction(CS2);
 
-  LLVM_DEBUG(errs() << "\tpure-fun-aa looking at " << *(CS1.getInstruction())
-                    << " to " << *(CS2.getInstruction()) << "\n");
+  LLVM_DEBUG(errs() << "\tpure-fun-aa looking at " << CS1
+                    << " to " << CS2 << "\n");
 
   if (!fun1 || !fun2) {
     return ModRef;
@@ -343,7 +342,7 @@ PureFunAA::ModRefResult PureFunAA::getModRefInfo(CallBase CS1,
   return ModRef;
 }
 
-PureFunAA::ModRefResult PureFunAA::getModRefInfo(CallBase CS,
+PureFunAA::ModRefResult PureFunAA::getModRefInfo(const CallBase &CS,
                                                  TemporalRelation Rel,
                                                  const Pointer &P,
                                                  const Loop *L, Remedies &R) {
@@ -363,17 +362,17 @@ PureFunAA::ModRefResult PureFunAA::getModRefInfo(CallBase CS,
 
   Remedies tmpR;
 
-  LLVM_DEBUG(errs() << "\tpure-fun-aa looking at " << *(CS.getInstruction())
+  LLVM_DEBUG(errs() << "\tpure-fun-aa looking at " << CS
                     << " to " << *Ptr << "\n");
 
   LoopAA *AA = getTopAA();
   const DataLayout *TD = getDataLayout();
   if (isLocal(fun) && !argumentsAlias(CS, Ptr, Size, AA, TD, tmpR) &&
-      !AA->alias(CS.getInstruction(), Size, Rel, Ptr, Size, L, tmpR)) {
+      !AA->alias(&CS, Size, Rel, Ptr, Size, L, tmpR)) {
 
     LLVM_DEBUG(
         errs() << "\t    result of query "
-               << AA->alias(CS.getInstruction(), Size, Rel, Ptr, Size, L, tmpR)
+               << AA->alias(&CS, Size, Rel, Ptr, Size, L, tmpR)
                << "\n");
     LLVM_DEBUG(errs() << "\t    pure-fun-aa returning NoModRef 2\n");
     for (auto remed : tmpR)

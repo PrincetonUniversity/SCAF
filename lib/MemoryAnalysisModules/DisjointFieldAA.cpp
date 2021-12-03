@@ -42,7 +42,10 @@ public:
     DL = &M.getDataLayout();
     InitializeLoopAA(this, *DL);
 
-    tli = &getAnalysis<TargetLibraryInfoWrapperPass>().getTLI();
+    // FIXME: get a random function
+    assert(M.getFunctionList().size() > 0 && "Have to have at least one function");
+    auto &fcn = *M.getFunctionList().begin();
+    tli = &getAnalysis<TargetLibraryInfoWrapperPass>().getTLI(fcn);
 
     TAA = &getAnalysis<liberty::TypeSanityAnalysis>();
 
@@ -71,7 +74,7 @@ public:
 
   static bool isSafeCall(const CallBase &CS) {
 
-    if (isa<MemIntrinsic>(CS.getInstruction()))
+    if (isa<MemIntrinsic>(&CS))
       return true;
 
     const Function *F = CS.getCalledFunction();
@@ -94,9 +97,9 @@ public:
     if (isa<LoadInst>(inst))
       return true;
 
-    CallBase CS = liberty::getCallBase(inst);
-    if (CS.getInstruction())
-      return isSafeCall(CS);
+    const CallBase *CS = liberty::getCallBase(inst);
+    if (CS)
+      return isSafeCall(*CS);
 
     const StoreInst *store = dyn_cast<StoreInst>(inst);
     if (!store) {
@@ -294,8 +297,8 @@ public:
     if (V1 == V2)
       return MayAlias;
 
-    const Value *O1 = GetUnderlyingObject(V1, *DL);
-    const Value *O2 = GetUnderlyingObject(V2, *DL);
+    const Value *O1 = getUnderlyingObject(V1);
+    const Value *O2 = getUnderlyingObject(V2);
 
     const LoadInst *L1 = dyn_cast<LoadInst>(O1);
     const LoadInst *L2 = dyn_cast<LoadInst>(O2);

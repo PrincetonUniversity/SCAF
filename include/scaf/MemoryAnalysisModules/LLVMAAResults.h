@@ -40,7 +40,7 @@ public:
   void getAnalysisUsage(AnalysisUsage &AU) const {
     LoopAA::getAnalysisUsage(AU);
     // AU.addRequired<AAResultsWrapperPass>();
-    AU.addRequired<AssumptionCacheTracker>();
+    //AU.addRequired<AssumptionCache>();
     AU.addRequired<DominatorTreeWrapperPass>();
     getAAResultsAnalysisUsage(AU);
     AU.setPreservesAll();

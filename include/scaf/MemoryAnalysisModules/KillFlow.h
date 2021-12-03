@@ -61,7 +61,7 @@ class KillFlow : public ModulePass, public LoopAA {
                               const Instruction *before, time_t queryStart,
                               unsigned Timeout);
 
-  bool allLoadsAreKilledBefore(const Loop *L, CallBase &cs, time_t queryStart,
+  bool allLoadsAreKilledBefore(const Loop *L, const CallBase &cs, time_t queryStart,
                                unsigned Timeout);
 
   BasicBlock *getLoopEntryBB(const Loop *loop);
@@ -90,7 +90,10 @@ public:
     DL = &M.getDataLayout();
     InitializeLoopAA(this, *DL);
     setModuleLoops(&getAnalysis<ModuleLoops>());
-    tli = &getAnalysis<TargetLibraryInfoWrapperPass>().getTLI();
+    // FIXME: get a random function
+    assert(M.getFunctionList().size() > 0 && "Have to have at least one function");
+    auto &fcn = *M.getFunctionList().begin();
+    tli = &getAnalysis<TargetLibraryInfoWrapperPass>().getTLI(fcn);
     // setProxy(this);
     return false;
   }

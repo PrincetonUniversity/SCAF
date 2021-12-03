@@ -1,3 +1,4 @@
+#include "llvm/Analysis/AliasAnalysis.h"
 #define DEBUG_TYPE "loopaa"
 
 #include "llvm/Analysis/TargetLibraryInfo.h"
@@ -61,7 +62,8 @@ LoopAA::~LoopAA() {
 void LoopAA::InitializeLoopAA(Pass *P, const DataLayout &t) {
   TargetLibraryInfoWrapperPass *tliWrap =
       &P->getAnalysis<TargetLibraryInfoWrapperPass>();
-  TargetLibraryInfo *ti = &tliWrap->getTLI();
+  // CRITICAL FIXME: force ignore here
+  TargetLibraryInfo * ti = nullptr;
   LoopAA *naa = P->getAnalysis<LoopAA>().getRealTopAA();
 
   InitializeLoopAA(&t, ti, naa);
@@ -467,7 +469,10 @@ bool NoLoopAA::runOnModule(Module &mod) {
   const DataLayout *t = &mod.getDataLayout();
   TargetLibraryInfoWrapperPass *tliWrap =
       &getAnalysis<TargetLibraryInfoWrapperPass>();
-  TargetLibraryInfo *ti = &tliWrap->getTLI();
+  // FIXME: get a random function
+  assert(mod.getFunctionList().size() > 0 && "Have to have at least one function");
+  auto &fcn = *mod.getFunctionList().begin();
+  TargetLibraryInfo *ti = &tliWrap->getTLI(fcn);
 
   InitializeLoopAA(t, ti, 0);
   return false;
@@ -523,13 +528,13 @@ bool NoLoopAA::pointsToConstantMemory(const Value *P, const Loop *L) {
 /// to a liberty::LoopAA::AliasResult.
 AAToLoopAA::AliasResult AAToLoopAA::Raise(llvm::AliasResult ar) {
   switch (ar) {
-  case llvm::NoAlias:
+    case llvm::AliasResult::NoAlias:
     return LoopAA::NoAlias;
 
-  case llvm::MustAlias:
+  case llvm::AliasResult::MustAlias:
     return LoopAA::MustAlias;
 
-  case llvm::MayAlias:
+  case llvm::AliasResult::MayAlias:
   default:
     return LoopAA::MayAlias;
   }
@@ -649,13 +654,10 @@ LoopAA::ModRefResult AAToLoopAA::modref(const Instruction *A,
   // loop!
   if (rel == Same) {
     if (isValid(L, A) || isValid(L, B)) {
-      CallBase csA = getCallBase(const_cast<Instruction *>(A));
-      CallBase csB = getCallBase(const_cast<Instruction *>(B));
-
       const CallBase *cbA = dyn_cast<CallBase>(A);
       const CallBase *cbB = dyn_cast<CallBase>(B);
 
-      if (csA.getInstruction() && csB.getInstruction() && cbA && cbB) {
+      if (cbA && cbB) {
         ModRefResult r = Raise(AA->getModRefInfo(cbA, cbB));
         if (r == NoModRef)
           return NoModRef;
@@ -667,7 +669,7 @@ LoopAA::ModRefResult AAToLoopAA::modref(const Instruction *A,
 
         else
           return ModRefResult(r & LoopAA::modref(A, rel, B, L, R));
-      } else if (csB.getInstruction()) {
+      } else if (cbB) {
         const Value *ptrA = getMemOper(A);
         PointerType *pty = cast<PointerType>(ptrA->getType());
         const unsigned sizeA =

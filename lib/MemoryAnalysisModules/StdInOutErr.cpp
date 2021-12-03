@@ -121,7 +121,7 @@ LoopAA::ModRefResult StdInOutErr::getModRefInfo(CallBase CS1,
   if (is(P.ptr, "stdin") || is(P.ptr, "stdout") || is(P.ptr, "stderr") ||
       (L && (isL(P, "stdin", *DL) || isL(P, "stdout", *DL) ||
              isL(P, "stderr", *DL)))) {
-    LLVM_DEBUG(errs() << "StdInOutErr: getModRefInfo(" << *CS1.getInstruction()
+    LLVM_DEBUG(errs() << "StdInOutErr: getModRefInfo(" << CS1
                       << ", " << *P.ptr << ")\n");
     INTROSPECT(EXIT(CS1, Rel, P, L, Ref));
     return Ref;

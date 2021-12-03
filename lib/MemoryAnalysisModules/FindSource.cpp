@@ -96,11 +96,11 @@ const Instruction *findNoAliasSource(const Value *v,
   if (isa<AllocaInst>(source))
     return source;
 
-  CallBase CS = getCallBase(const_cast<Instruction *>(source));
-  if (!CS.getInstruction())
+  const CallBase *CS = getCallBase(const_cast<Instruction *>(source));
+  if (!CS)
     return NULL;
 
-  const Function *f = CS.getCalledFunction();
+  const Function *f = CS->getCalledFunction();
   if (!f)
     return NULL;
 
@@ -158,10 +158,10 @@ const Value *findActualArgumentSource(const Value *v) {
     return NULL;
   }
 
-  const CallBase call(const_cast<Instruction *>(inst));
-  assert(call.getInstruction());
+  const CallBase *call = (dyn_cast<CallBase>(inst));
+  assert(call);
 
-  return findSource(call.getArgument(a->getArgNo()));
+  return findSource(call->getArgOperand(a->getArgNo()));
 }
 
 const Argument *findArgumentSource(const Value *v) {
@@ -179,13 +179,13 @@ const Argument *findArgumentSource(const Value *v) {
 const Argument *findLoadedNoCaptureArgument(const Value *v,
                                             const DataLayout &DL) {
 
-  const Value *o = GetUnderlyingObject(v, DL);
+  const Value *o = getUnderlyingObject(v);
   const LoadInst *load = dyn_cast<LoadInst>(o);
   if (!load)
     return NULL;
 
   const Value *pointer = load->getPointerOperand();
-  const Value *src = GetUnderlyingObject(pointer, DL);
+  const Value *src = getUnderlyingObject(pointer);
   const Argument *arg = dyn_cast<Argument>(src);
   if (!arg)
     return NULL;

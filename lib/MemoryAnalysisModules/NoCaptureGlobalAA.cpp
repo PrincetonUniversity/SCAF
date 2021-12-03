@@ -225,8 +225,8 @@ public:
 
     // Thom's version
     {
-      const Value *O1 = GetUnderlyingObject(V1, *DL);
-      const Value *O2 = GetUnderlyingObject(V2, *DL);
+      const Value *O1 = getUnderlyingObject(V1);
+      const Value *O2 = getUnderlyingObject(V2);
 
       const GlobalValue *G1 = dyn_cast<GlobalValue>(O1);
       const GlobalValue *G2 = dyn_cast<GlobalValue>(O2);

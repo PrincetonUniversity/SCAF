@@ -49,27 +49,29 @@ using namespace liberty;
 
 /// isNonEscapingLocalObject - Return true if the pointer is to a function-local
 /// object that never escapes from the function.
-static bool isNonEscapingLocalObject(const Value *V) {
-  // If this is a local allocation, check to see if it escapes.
-  if (isa<AllocaInst>(V) || isNoAliasCall(V))
-    // Set StoreCaptures to True so that we can assume in our callers that the
-    // pointer is not the result of a load instruction. Currently
-    // PointerMayBeCaptured doesn't have any special analysis for the
-    // StoreCaptures=false case; if it did, our callers could be refined to be
-    // more precise.
-    return !PointerMayBeCaptured(V, false, /*StoreCaptures=*/true);
-
-  // If this is an argument that corresponds to a byval or noalias argument,
-  // then it has not escaped before entering the function.  Check if it escapes
-  // inside the function.
-  if (const Argument *A = dyn_cast<Argument>(V))
-    if (A->hasByValAttr() || A->hasNoAliasAttr()) {
-      // Don't bother analyzing arguments already known not to escape.
-      if (A->hasNoCaptureAttr())
-        return true;
+namespace liberty {
+  static bool isNonEscapingLocalObject(const Value *V) {
+    // If this is a local allocation, check to see if it escapes.
+    if (isa<AllocaInst>(V) || isNoAliasCall(V))
+      // Set StoreCaptures to True so that we can assume in our callers that the
+      // pointer is not the result of a load instruction. Currently
+      // PointerMayBeCaptured doesn't have any special analysis for the
+      // StoreCaptures=false case; if it did, our callers could be refined to be
+      // more precise.
       return !PointerMayBeCaptured(V, false, /*StoreCaptures=*/true);
-    }
-  return false;
+
+    // If this is an argument that corresponds to a byval or noalias argument,
+    // then it has not escaped before entering the function.  Check if it escapes
+    // inside the function.
+    if (const Argument *A = dyn_cast<Argument>(V))
+      if (A->hasByValAttr() || A->hasNoAliasAttr()) {
+        // Don't bother analyzing arguments already known not to escape.
+        if (A->hasNoCaptureAttr())
+          return true;
+        return !PointerMayBeCaptured(V, false, /*StoreCaptures=*/true);
+      }
+    return false;
+  }
 }
 
 /// isEscapeSource - Return true if the pointer is one which would have been
@@ -441,12 +443,12 @@ struct BasicLoopAA : public liberty::ClassicLoopAA, public ModulePass {
     return false;
   }
 
-  virtual ModRefResult getModRefInfo(CallBase CS1, TemporalRelation Rel,
-                                     CallBase CS2, const Loop *L, Remedies &R) {
+  virtual ModRefResult getModRefInfo(CallBase &CS1, TemporalRelation Rel,
+                                     CallBase &CS2, const Loop *L, Remedies &R) {
     return ModRef;
   }
 
-  virtual ModRefResult getModRefInfo(CallBase CS, TemporalRelation Rel,
+  virtual ModRefResult getModRefInfo(CallBase &CS, TemporalRelation Rel,
                                      const Pointer &P2, const Loop *L,
                                      Remedies &R);
 
@@ -516,7 +518,7 @@ static RegisterAnalysisGroup<liberty::LoopAA> Y(X);
 /// global) or not.
 bool BasicLoopAA::pointsToConstantMemory(const Value *P, const Loop *L) {
   if (const GlobalVariable *GV = dyn_cast<GlobalVariable>(
-          GetUnderlyingObject(P, currentMod->getDataLayout())))
+          getUnderlyingObject(P)))
     // Note: this doesn't require GV to be "ODR" because it isn't legal for a
     // global to be marked constant in some modules and non-constant in others.
     // GV may even be a declaration, not a definition.
@@ -533,13 +535,13 @@ bool BasicLoopAA::pointsToConstantMemory(const Value *P, const Loop *L) {
 /// really can't say much about this query.  We do, however, use simple "address
 /// taken" analysis on local objects.
 liberty::LoopAA::ModRefResult
-BasicLoopAA::getModRefInfo(CallBase CS, TemporalRelation Rel, const Pointer &P2,
+BasicLoopAA::getModRefInfo(CallBase &CS, TemporalRelation Rel, const Pointer &P2,
                            const Loop *L, Remedies &R) {
 
   const Value *V = P2.ptr;
   const unsigned Size = P2.size;
 
-  if (isInterprocedural(CS.getInstruction(), V))
+  if (isInterprocedural(&CS, V))
     return ModRef;
 
   // If P points to a constant memory location, the call definitely could not
@@ -547,26 +549,25 @@ BasicLoopAA::getModRefInfo(CallBase CS, TemporalRelation Rel, const Pointer &P2,
   if (pointsToConstantMemory(V, L))
     return Ref;
 
-  const Value *Object = GetUnderlyingObject(V, currentMod->getDataLayout());
+  const Value *Object = getUnderlyingObject(V);
 
   // If this is a tail call and P points to a stack location, we know that the
   // tail call cannot access or modify the local stack.  We cannot exclude byval
   // arguments here; these belong to the caller of the current function not to
   // the current function, and a tail callee may reference them.
   if (isa<AllocaInst>(Object))
-    if (const CallInst *CI = dyn_cast<CallInst>(CS.getInstruction()))
+    if (const CallInst *CI = dyn_cast<CallInst>(&CS))
       if (CI->isTailCall())
         return NoModRef;
 
   // If the pointer is to a locally allocated object that does not escape, then
   // the call cannot mod/ref the pointer unless the call takes the pointer as an
   // argument, and itself doesn't capture it.
-  if (!isa<Constant>(Object) && CS.getInstruction() != Object &&
-      isNonEscapingLocalObject(Object)) {
+  if (!isa<Constant>(Object) && &CS != Object && liberty::isNonEscapingLocalObject(Object)) {
     bool PassedAsArg = false;
     unsigned ArgNo = 0;
     Remedies tmpR;
-    for (ImmutableCallBase::arg_iterator CI = CS.arg_begin(), CE = CS.arg_end();
+    for (auto CI = CS.arg_begin(), CE = CS.arg_end();
          CI != CE; ++CI, ++ArgNo) {
       // Only look at the no-capture pointer arguments.
       if (!(*CI)->getType()->isPointerTy() ||
@@ -593,7 +594,7 @@ BasicLoopAA::getModRefInfo(CallBase CS, TemporalRelation Rel, const Pointer &P2,
   }
 
   // Finally, handle specific knowledge of intrinsics.
-  const IntrinsicInst *II = dyn_cast<IntrinsicInst>(CS.getInstruction());
+  const IntrinsicInst *II = dyn_cast<IntrinsicInst>(&CS);
   if (II != 0)
     switch (II->getIntrinsicID()) {
     default:
@@ -964,8 +965,8 @@ BasicLoopAA::aliasCommon(const Value *V1, unsigned V1Size, TemporalRelation Rel,
     return NoAlias; // Scalars cannot alias each other
 
   // Figure out what objects these things are pointing to if we can.
-  const Value *O1 = GetUnderlyingObject(V1, currentMod->getDataLayout());
-  const Value *O2 = GetUnderlyingObject(V2, currentMod->getDataLayout());
+  const Value *O1 = getUnderlyingObject(V1);
+  const Value *O2 = getUnderlyingObject(V2);
 
   // Null values in the default address space don't point to any object, so they
   // don't alias any other pointer.
@@ -1009,9 +1010,9 @@ BasicLoopAA::aliasCommon(const Value *V1, unsigned V1Size, TemporalRelation Rel,
     // store the nocapture argument's value in a temporary memory location if
     // that memory location doesn't escape. Or it may pass a nocapture value to
     // other functions as long as they don't capture it.
-    if (isEscapeSource(O1) && isNonEscapingLocalObject(O2))
+    if (isEscapeSource(O1) && liberty::isNonEscapingLocalObject(O2))
       return NoAlias;
-    if (isEscapeSource(O2) && isNonEscapingLocalObject(O1))
+    if (isEscapeSource(O2) && liberty::isNonEscapingLocalObject(O1))
       return NoAlias;
   }
 

@@ -6,7 +6,7 @@
 namespace liberty {
 using namespace llvm;
 
-typedef std::vector<CallBase> CallBaseList;
+typedef std::vector<const CallBase *> CallBaseList;
 
 /// Attempt to assemble a list of all callsites
 /// which call the supplied function.  Return

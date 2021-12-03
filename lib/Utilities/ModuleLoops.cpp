@@ -17,7 +17,7 @@ GimmeLoops &ModuleLoops::compute(const Function *fcn) {
     // errs() << "Computing loops for " << fcn->getName() << '\n';
 
     results[fcn] = new GimmeLoops();
-    results[fcn]->init(td, tli, non_const_function, true);
+    results[fcn]->init(td, non_const_function, true);
   }
 
   return *results[fcn];

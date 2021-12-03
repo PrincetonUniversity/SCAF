@@ -216,10 +216,10 @@ private:
 
       const Value *use = *j;
 
-      CallBase cs = getCallBase(use);
+      const CallBase *cs = getCallBase(use);
 
-      if (cs.getInstruction()) {
-        Function *fcn = cs.getCalledFunction();
+      if (cs) {
+        Function *fcn = cs->getCalledFunction();
 
         if (!fcn) {
           LLVM_DEBUG(errs() << "Passed to indirect call: " << *use << '\n');
@@ -230,7 +230,7 @@ private:
         else if (!fcn->isDeclaration()) {
           Function::arg_iterator j = fcn->arg_begin(), z = fcn->arg_end();
 
-          for (CallBase::arg_iterator i = cs.arg_begin(), e = cs.arg_end();
+          for (auto i = cs->arg_begin(), e = cs->arg_end();
                i != e; ++i, ++j) {
             if (j == z) {
               // In the case of variadic functions, there may be
@@ -355,12 +355,12 @@ private:
       AccessPath *uniqueActualPath = 0;
       for (CallBaseList::const_iterator i = callers.begin(), e = callers.end();
            i != e; ++i) {
-        const CallBase &callsite = *i;
+        const CallBase *callsite = *i;
         const Function *caller =
-            callsite.getInstruction()->getParent()->getParent();
+            callsite->getParent()->getParent();
 
         analyzeFunction(caller);
-        const Value *actual = callsite.getArgument(arg->getArgNo());
+        const Value *actual = callsite->getArgOperand(arg->getArgNo());
         if (actual == arg)
           continue;
 

@@ -11,7 +11,7 @@ void liberty::printInstDebugInfo(Instruction *I) {
   if (debugLoc) {
     DIScope *scope = dyn_cast<DIScope>(debugLoc->getScope());
     if (scope) {
-      std::string filename = scope->getFilename();
+      std::string filename = scope->getFilename().str();
       errs() << " (filename:" << filename << ", line:";
     } else
       errs() << " (line:";

@@ -9,16 +9,16 @@ using namespace llvm::noelle;
 using namespace liberty;
 
 /// May not call down the LoopAA stack, but may top
-LoopAA::ModRefResult ClassicLoopAA::getModRefInfo(CallBase CS1,
+LoopAA::ModRefResult ClassicLoopAA::getModRefInfo(const CallBase &CS1,
                                                   TemporalRelation Rel,
-                                                  CallBase CS2, const Loop *L,
+                                                  const CallBase &CS2, const Loop *L,
                                                   Remedies &R) {
   return ModRef;
 }
 
 /// V is never a CallBase
 /// May not call down the LoopAA stack, but may top
-LoopAA::ModRefResult ClassicLoopAA::getModRefInfo(CallBase CS,
+LoopAA::ModRefResult ClassicLoopAA::getModRefInfo(const CallBase &CS,
                                                   TemporalRelation Rel,
                                                   const Pointer &P,
                                                   const Loop *L, Remedies &R) {
@@ -47,13 +47,13 @@ LoopAA::ModRefResult ClassicLoopAA::modref(const Instruction *I1,
   if (!I2->mayReadFromMemory() && !I2->mayWriteToMemory())
     return NoModRef;
 
-  CallBase CS1 = getCallBase(const_cast<Instruction *>(I1));
-  CallBase CS2 = getCallBase(const_cast<Instruction *>(I2));
+  const CallBase *CS1 = getCallBase(const_cast<Instruction *>(I1));
+  const CallBase *CS2 = getCallBase(const_cast<Instruction *>(I2));
 
   ModRefResult MR = ModRef;
   Remedies tmpR;
 
-  if (!CS2.getInstruction() && !liberty::isVolatile(I2)) {
+  if (!CS2 && !liberty::isVolatile(I2)) {
     const Value *V = liberty::getMemOper(I2);
     // corner case: be conservative
     if (!V) {
@@ -61,12 +61,12 @@ LoopAA::ModRefResult ClassicLoopAA::modref(const Instruction *I1,
     } else {
       unsigned Size = liberty::getTargetSize(V, getDataLayout());
       const Pointer P(I2, V, Size);
-      if (CS1.getInstruction())
-        MR = ModRefResult(MR & getModRefInfo(CS1, Rel, P, L, tmpR));
+      if (CS1)
+        MR = ModRefResult(MR & getModRefInfo(*CS1, Rel, P, L, tmpR));
       else
         MR = ModRefResult(MR & modrefSimple(I1, Rel, P, L, tmpR));
     }
-  } else if (!CS1.getInstruction() && CS2.getInstruction()) {
+  } else if (!CS1 && CS2) {
     // corner case: be conservative
     const Value *V = liberty::getMemOper(I1);
     if (!V) {
@@ -74,12 +74,12 @@ LoopAA::ModRefResult ClassicLoopAA::modref(const Instruction *I1,
     } else {
       unsigned Size = liberty::getTargetSize(V, getDataLayout());
       const Pointer P(I1, V, Size);
-      ModRefResult inverse = getModRefInfo(CS2, Rev(Rel), P, L, tmpR);
+      ModRefResult inverse = getModRefInfo(*CS2, Rev(Rel), P, L, tmpR);
       if (inverse == NoModRef)
         MR = NoModRef;
     }
-  } else if (CS1.getInstruction() && CS2.getInstruction()) {
-    MR = ModRefResult(MR & getModRefInfo(CS1, Rel, CS2, L, tmpR));
+  } else if (CS1 && CS2) {
+    MR = ModRefResult(MR & getModRefInfo(*CS1, Rel, *CS2, L, tmpR));
   }
 
   return LoopAA::chain(R, I1, Rel, I2, L, MR, tmpR);
@@ -90,13 +90,13 @@ LoopAA::ModRefResult ClassicLoopAA::modref(const Instruction *I,
                                            unsigned Size, const Loop *L,
                                            Remedies &R) {
 
-  CallBase CS = getCallBase(const_cast<Instruction *>(I));
+  const CallBase *CS = getCallBase(const_cast<Instruction *>(I));
   ModRefResult MR;
   Remedies tmpR;
   Remedies chainRemeds;
 
-  if (CS.getInstruction())
-    MR = getModRefInfo(CS, Rel, Pointer(V, Size), L, tmpR);
+  if (CS)
+    MR = getModRefInfo(*CS, Rel, Pointer(V, Size), L, tmpR);
   else
     MR = modrefSimple(I, Rel, Pointer(V, Size), L, tmpR);
 

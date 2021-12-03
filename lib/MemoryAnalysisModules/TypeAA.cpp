@@ -115,11 +115,11 @@ bool TypeSanityAnalysis::runOnModule(Module &mod) {
 }
 
 static bool isCallToMalloc(Value *src) {
-  CallBase cs = getCallBase(src);
-  if (!cs.getInstruction())
+  const CallBase *cs = getCallBase(src);
+  if (!cs)
     return false;
 
-  Function *f = cs.getCalledFunction();
+  Function *f = cs->getCalledFunction();
   if (!f)
     return false;
 
@@ -140,11 +140,11 @@ static bool isCallToMalloc(Value *src) {
 }
 
 static bool isCallToFree(Value *use) {
-  CallBase cs = getCallBase(use);
-  if (!cs.getInstruction())
+  const CallBase *cs = getCallBase(use);
+  if (!cs)
     return false;
 
-  Function *f = cs.getCalledFunction();
+  Function *f = cs->getCalledFunction();
   if (!f)
     return false;
 
@@ -345,16 +345,22 @@ bool TypeSanityAnalysis::addInsane(Type *t) {
   if (ptrty)
     addInsane(ptrty->getElementType());
 
-  // Sequential types (array, pointer, vector)
-  SequentialType *seq = dyn_cast<SequentialType>(t);
-  if (seq)
-    addInsane(seq->getElementType());
+  // Sequential types (array, vector)
+  auto *vec= dyn_cast<VectorType>(t);
+  if (vec)
+    addInsane(vec->getElementType());
+
+  auto *arr = dyn_cast<ArrayType>(t);
+  if (arr)
+    addInsane(arr->getElementType());
 
   // Composite type (including struct, union)
-  CompositeType *composite = dyn_cast<CompositeType>(t);
-  if (composite && !seq)
+  auto *composite = dyn_cast<StructType>(t);
+  if (composite)
     for (unsigned idx = 0; composite->indexValid(idx); ++idx)
       addInsane(composite->getTypeAtIndex(idx));
+
+  // FIXME: handle union? or is it removed by using bitcast
 
   // Function type
   FunctionType *function = dyn_cast<FunctionType>(t);
@@ -429,7 +435,7 @@ bool TypeSanityAnalysis::runOnFunction(Function &fcn) {
 
   for (inst_iterator i = inst_begin(fcn), e = inst_end(fcn); i != e; ++i) {
     Instruction *inst = &*i;
-    CallBase cs = getCallBase(inst);
+    const CallBase *cs = getCallBase(inst);
 
     if (isCastInst(inst)) // isa<CastInst>( inst ) )
     {
@@ -470,18 +476,18 @@ bool TypeSanityAnalysis::runOnFunction(Function &fcn) {
       addInsane(inst->getType());
     }
 
-    else if (cs.getInstruction() && cs.getCalledFunction() &&
-             cs.getCalledFunction()->isVarArg()) {
-      FunctionType *fty = cs.getCalledFunction()->getFunctionType();
+    else if (cs&& cs->getCalledFunction() &&
+             cs->getCalledFunction()->isVarArg()) {
+      FunctionType *fty = cs->getCalledFunction()->getFunctionType();
 
-      for (unsigned j = fty->getNumParams(); j < cs.arg_size(); ++j) {
+      for (unsigned j = fty->getNumParams(); j < cs->arg_size(); ++j) {
         LLVM_DEBUG(errs() << "Variadic call: " << *inst << '\n');
-        Type *pty = cs.getArgument(j)->getType();
+        Type *pty = cs->getArgOperand(j)->getType();
         if (addInsane(pty)) {
           DEBUG_WITH_TYPE("recommendation",
-                          errs() << "Passing argument " << *cs.getArgument(j)
+                          errs() << "Passing argument " << *cs->getArgOperand(j)
                                  << " to the variadic function "
-                                 << cs.getCalledFunction()->getName();
+                                 << cs->getCalledFunction()->getName();
                           const DebugLoc &loc = inst->getDebugLoc();
                           if (loc) errs()
                           << " (at line " << loc.getLine() << ')';
@@ -504,8 +510,10 @@ bool TypeSanityAnalysis::isSane(Type *t) const {
 
 // flatten arrays-of/pointers-to/vectors-of to the element types, recursively.
 Type *TypeSanityAnalysis::getBaseType(Type *t) {
-  if (SequentialType *seq = dyn_cast<SequentialType>(t))
-    return getBaseType(seq->getElementType());
+  if (auto *arr = dyn_cast<ArrayType>(t))
+    return getBaseType(arr->getElementType());
+  if (auto *vec = dyn_cast<VectorType>(t))
+    return getBaseType(vec->getElementType());
   else if (PointerType *ptr = dyn_cast<PointerType>(t))
     return getBaseType(ptr->getElementType());
   else
@@ -570,11 +578,14 @@ bool TypeSanityAnalysis::typeContainedWithin(Type *container,
   // in contiguous memory.
   //  (i.e. access to type int[] may access all of the
   //   elements of the array)
-  SequentialType *seqty = dyn_cast<SequentialType>(container);
-  if (seqty)
-    if (isa<ArrayType>(seqty) || isa<VectorType>(seqty))
-      if (typeContainedWithin(seqty->getElementType(), element))
-        return true;
+  if (auto *arrty = dyn_cast<ArrayType>(container)) {
+    if (typeContainedWithin(arrty->getElementType(), element))
+      return true;
+  }
+  if (auto *vecty= dyn_cast<VectorType>(container)) {
+    if (typeContainedWithin(vecty->getElementType(), element))
+      return true;
+  }
 
   return false;
 }

@@ -44,7 +44,7 @@ class FieldMallocAA : public ModulePass, public liberty::ClassicLoopAA {
 
     const Module *M = store->getParent()->getParent()->getParent();
     const DataLayout &td = M->getDataLayout();
-    const Value *O = GetUnderlyingObject(store->getValueOperand(), td);
+    const Value *O = getUnderlyingObject(store->getValueOperand());
     if (!isAllocSrc(O))
       return false;
 
@@ -137,8 +137,8 @@ public:
     if (dAliasRes == DMustAlias)
       return MayAlias;
 
-    const Value *O1 = GetUnderlyingObject(P1.ptr, *DL);
-    const Value *O2 = GetUnderlyingObject(P2.ptr, *DL);
+    const Value *O1 = getUnderlyingObject(P1.ptr);
+    const Value *O2 = getUnderlyingObject(P2.ptr);
 
     const LoadInst *L1 = dyn_cast<LoadInst>(O1);
     const LoadInst *L2 = dyn_cast<LoadInst>(O2);

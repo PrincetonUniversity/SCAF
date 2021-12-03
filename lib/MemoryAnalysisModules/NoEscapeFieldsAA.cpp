@@ -130,7 +130,7 @@ void NonCapturedFieldsAnalysis::collectDefsFromGlobalVariable(
                                     initor->getAggregateElement(i));
 
   else if (VectorType *vecty = dyn_cast<VectorType>(ty))
-    for (unsigned i = 0, N = vecty->getNumElements(); i < N; ++i)
+    for (unsigned i = 0, N = vecty->getArrayNumElements(); i < N; ++i)
       collectDefsFromGlobalVariable(gv, vecty->getElementType(),
                                     initor->getAggregateElement(i));
 }
@@ -453,7 +453,7 @@ bool NonCapturedFieldsAnalysis::captured(StructType *ty, uint64_t field) const {
 }
 
 LoopAA::ModRefResult NoEscapeFieldsAA::callsiteTouchesNonEscapingField(
-    CallBase cs, const Pointer &p2, StructType *struct2,
+    const CallBase &cs, const Pointer &p2, StructType *struct2,
     const ConstantInt *field2, Remedies &R) {
   LoopAA *top = getTopAA();
   NonCapturedFieldsAnalysis &ncfa = getAnalysis<NonCapturedFieldsAnalysis>();
@@ -464,23 +464,23 @@ LoopAA::ModRefResult NoEscapeFieldsAA::callsiteTouchesNonEscapingField(
 
   // Don't repeat work.
   CallsiteTouches::iterator cacheline =
-      callsiteTouches.find(cs.getInstruction());
+      callsiteTouches.find(&cs);
   if (cacheline != callsiteTouches.end())
     return cacheline->second;
 
   // Avoid infinite recursion.
   // We will update this value before we return.
-  callsiteTouches[cs.getInstruction()] = NoModRef;
+  callsiteTouches[&cs] = NoModRef;
 
   LLVM_DEBUG(errs() << "callsiteTouchesNonEscapingField("
-                    << *cs.getInstruction() << ", " << *struct2 << "->"
+                    << cs << ", " << *struct2 << "->"
                     << *field2 << '\n');
 
   // Determine if any of the actuals at this callsite
   // may alias with the field.
   std::vector<Argument *> aliasArgs;
   Function::arg_iterator j = callee->arg_begin();
-  for (CallBase::arg_iterator i = cs.arg_begin(), e = cs.arg_end(); i != e;
+  for (auto i = cs.arg_begin(), e = cs.arg_end(); i != e;
        ++i, ++j) {
     StructType *actual_struct = 0;
     const ConstantInt *actual_field = 0;
@@ -502,7 +502,7 @@ LoopAA::ModRefResult NoEscapeFieldsAA::callsiteTouchesNonEscapingField(
   ModRefResult lowerBound = NoModRef;
 
   if (callee->isDeclaration()) {
-    lowerBound = top->modref(cs.getInstruction(), Same, p2.ptr, p2.size, 0, R);
+    lowerBound = top->modref(&cs, Same, p2.ptr, p2.size, 0, R);
   }
 
   else {
@@ -519,11 +519,11 @@ LoopAA::ModRefResult NoEscapeFieldsAA::callsiteTouchesNonEscapingField(
       // or it is another operation which reads/writes memory.
 
       // Case 1: callsite
-      CallBase cs3 = getCallBase(inst);
-      if (cs3.getInstruction()) {
+      const CallBase *cs3 = getCallBase(inst);
+      if (cs3) {
         // recur.
         ModRefResult r =
-            callsiteTouchesNonEscapingField(cs3, p2, struct2, field2, R);
+            callsiteTouchesNonEscapingField(*cs3, p2, struct2, field2, R);
         lowerBound = ModRefResult(lowerBound | r);
       }
 
@@ -570,24 +570,24 @@ LoopAA::ModRefResult NoEscapeFieldsAA::callsiteTouchesNonEscapingField(
   }
 
   // update the cache.
-  callsiteTouches[cs.getInstruction()] = lowerBound;
+  callsiteTouches[&cs] = lowerBound;
 
   LLVM_DEBUG(errs() << "/callsiteTouchesNonEscapingField("
-                    << *cs.getInstruction() << ", " << *struct2 << " # "
+                    << cs << ", " << *struct2 << " # "
                     << *field2 << " => " << lowerBound << '\n');
 
   return lowerBound;
 }
 
 LoopAA::ModRefResult
-NoEscapeFieldsAA::getModRefInfo(CallBase cs, TemporalRelation rel, CallBase cs2,
+NoEscapeFieldsAA::getModRefInfo(const CallBase &cs, TemporalRelation rel, const CallBase &cs2,
                                 const Loop *L, Remedies &R) {
   // I don't handle this case.
   return ModRef;
 }
 
 LoopAA::ModRefResult
-NoEscapeFieldsAA::getModRefInfo(CallBase cs, TemporalRelation rel,
+NoEscapeFieldsAA::getModRefInfo(const CallBase &cs, TemporalRelation rel,
                                 const Pointer &p2, const Loop *L, Remedies &R) {
   DEBUG_WITH_TYPE("loopaa", errs() << "NoEscapeFieldsAA\n");
 

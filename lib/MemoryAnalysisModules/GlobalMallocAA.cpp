@@ -134,7 +134,10 @@ public:
     DL = &M.getDataLayout();
     InitializeLoopAA(this, *DL);
 
-    tli = &getAnalysis<TargetLibraryInfoWrapperPass>().getTLI();
+    // FIXME: get a random function
+    assert(M.getFunctionList().size() > 0 && "Have to have at least one function");
+    auto &fcn = *M.getFunctionList().begin();
+    tli = &getAnalysis<TargetLibraryInfoWrapperPass>().getTLI(fcn);
 
     nonMalloc.clear();
     nonMallocSrcs.clear();
@@ -269,9 +272,9 @@ public:
     }
 
     const GlobalValue *V1Global =
-        dyn_cast<GlobalValue>(GetUnderlyingObject(V1, *DL));
+        dyn_cast<GlobalValue>(getUnderlyingObject(V1));
     const GlobalValue *V2Global =
-        dyn_cast<GlobalValue>(GetUnderlyingObject(V2, *DL));
+        dyn_cast<GlobalValue>(getUnderlyingObject(V2));
 
     if (V1GlobalSrc && V2Global && V1MallocOnly)
       return NoAlias;

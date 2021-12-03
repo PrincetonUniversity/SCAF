@@ -1,6 +1,7 @@
 #ifndef LLVM_LIBERTY_SEMI_LOCAL_FUN_AA_H
 #define LLVM_LIBERTY_SEMI_LOCAL_FUN_AA_H
 
+#include "scaf/MemoryAnalysisModules/PureFunAA.h"
 #include "llvm/ADT/DenseSet.h"
 #include "llvm/IR/GlobalVariable.h"
 #include "llvm/Pass.h"
@@ -70,10 +71,10 @@ class SemiLocalFunAA : public ModulePass, public liberty::ClassicLoopAA {
   static void initGlobalMod(const Function *fun, GlobalSet &mods,
                             GlobalSet &refs, FuncSet &funcs);
 
-  static ModRefResult getModRefInfo(const ImmutableCallBase CS,
+  static ModRefResult getModRefInfo(const CallBase &CS,
                                     const unsigned argNo);
 
-  ModRefResult aliasedArgumentsModRef(const ImmutableCallBase CS,
+  ModRefResult aliasedArgumentsModRef(const CallBase &CS,
                                       const Value *P, const unsigned Size,
                                       Remedies &R) const;
 
@@ -102,10 +103,10 @@ public:
 
   static bool writeOnlyFormalArg(const Function *fcn, unsigned argno);
 
-  ModRefResult getModRefInfo(CallBase CS1, TemporalRelation Rel, CallBase CS2,
+  ModRefResult getModRefInfo(const CallBase &CS1, TemporalRelation Rel, const CallBase &CS2,
                              const Loop *L, Remedies &R);
 
-  ModRefResult getModRefInfo(CallBase CS, TemporalRelation Rel,
+  ModRefResult getModRefInfo(const CallBase &CS, TemporalRelation Rel,
                              const Pointer &P, const Loop *L, Remedies &R);
 
   StringRef getLoopAAName() const { return "semi-local-fun-aa"; }

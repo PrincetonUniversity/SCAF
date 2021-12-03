@@ -93,13 +93,13 @@ bool NoCaptureFcn::onlyUsedAsCallTarget(Value *v, ValueSet &already) const {
         continue;
       }
 
-    CallBase cs = getCallBase(user);
-    if (!cs.getInstruction())
+    const CallBase* cs = getCallBase(user);
+    if (!cs)
       return false; // used by something other than call, invoke
 
     // Ensure that 'fcn' is not used by this callsite as a
     // parameter.
-    for (CallBase::arg_iterator j = cs.arg_begin(), z = cs.arg_end(); j != z;
+    for (auto j = cs->arg_begin(), z = cs->arg_end(); j != z;
          ++j)
       if (v == *j)
         return false; // address of function escapes.

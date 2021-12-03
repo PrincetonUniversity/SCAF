@@ -2,6 +2,7 @@
 
 #include "llvm/ADT/Statistic.h"
 
+#include "llvm/Analysis/AliasAnalysis.h"
 #include "scaf/MemoryAnalysisModules/LLVMAAResults.h"
 #include "scaf/Utilities/CallBaseFactory.h"
 #include "scaf/Utilities/GetMemOper.h"
@@ -75,16 +76,16 @@ LoopAA::AliasResult LLVMAAResults::alias(const Value *ptrA, unsigned sizeA,
 
   LocationSize sA = sizeA, sB = sizeB;
   if (sizeA == UnknownSize) {
-    sA = LocationSize::unknown();
+    sA = LocationSize::beforeOrAfterPointer();
   }
 
   if (sizeB == UnknownSize) {
-    sB = LocationSize::unknown();
+    sB = LocationSize::beforeOrAfterPointer();
   }
 
   auto aaRes = aa->alias(ptrA, sA, ptrB, sB);
 
-  if (aaRes == llvm::NoAlias) {
+  if (aaRes == llvm::AliasResult::NoAlias) {
     ++numNoAlias;
     return LoopAA::NoAlias;
   }
@@ -92,7 +93,7 @@ LoopAA::AliasResult LLVMAAResults::alias(const Value *ptrA, unsigned sizeA,
   LoopAA::AliasResult aaLoopAARes;
   // Ziyang: the definition of MustAlias is not the same
   //         Be really conservative here
-  if (aaRes == llvm::MustAlias)
+  if (aaRes == llvm::AliasResult::MustAlias)
     aaLoopAARes = LoopAA::MayAlias;
   else // aaRes == llvm::PartialAlias || aaRes == llvm::MayAlias
     aaLoopAARes = LoopAA::MayAlias;
@@ -121,7 +122,7 @@ LoopAA::ModRefResult LLVMAAResults::modref(const Instruction *A,
 
   LocationSize sB = sizeB;
   if (sizeB == UnknownSize) {
-    sB = LocationSize::unknown();
+    sB = LocationSize::beforeOrAfterPointer();
   }
   auto aaRes = aa->getModRefInfo(A, ptrB, sB);
 

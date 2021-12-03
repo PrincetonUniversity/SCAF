@@ -20,10 +20,10 @@ bool getCallers(const Function *fcn, CallBaseList &callsitesOut) {
     //         We can't unless we keep looking into another layer; this
     //         case seems rare, so we assume it's captured conservatively.
 
-    CallBase cs = getCallBase(v);
+    const CallBase * cs = getCallBase(v);
 
-    if (cs.getInstruction()) {
-      if (cs.getCalledFunction() == fcn) {
+    if (cs) {
+      if (cs->getCalledFunction() == fcn) {
         callsitesOut.push_back(cs);
         continue;
       }
@@ -32,8 +32,8 @@ bool getCallers(const Function *fcn, CallBaseList &callsitesOut) {
     if (const ConstantExpr *cexp = dyn_cast<ConstantExpr>(v))
       if (cexp->isCast() && cexp->hasOneUse()) {
         cs = getCallBase(*cexp->user_begin());
-        if (cs.getInstruction()) {
-          if (cs.getCalledFunction() == fcn) {
+        if (cs) {
+          if (cs->getCalledFunction() == fcn) {
             callsitesOut.push_back(cs);
             continue;
           }

@@ -100,10 +100,10 @@ bool Tracer::traceConcreteIntegerValues(Value *expr, IntSet &output,
       for (Value::user_iterator i = context->user_begin(),
                                 e = context->user_end();
            i != e; ++i) {
-        CallBase cs = getCallBase(&**i);
-        assert(cs.getInstruction() && "WTF--all uses should be callsites (2)");
+        const CallBase *cs = getCallBase(&**i);
+        assert(cs && "WTF--all uses should be callsites (2)");
 
-        if (!traceConcreteIntegerValues(cs.getArgument(argno), output, already))
+        if (!traceConcreteIntegerValues(cs->getArgOperand(argno), output, already))
           return false;
       }
       return true;
@@ -275,10 +275,10 @@ bool Tracer::traceConcreteFunctionPointers(Value *fcn_ptr, FcnList &output,
       for (Value::user_iterator i = context->user_begin(),
                                 e = context->user_end();
            i != e; ++i) {
-        CallBase cs = getCallBase(&**i);
-        assert(cs.getInstruction() && "WTF--all uses should be callsites");
+        const CallBase *cs = getCallBase(&**i);
+        assert(cs && "WTF--all uses should be callsites");
 
-        if (!traceConcreteFunctionPointers(cs.getArgument(argno), output,
+        if (!traceConcreteFunctionPointers(cs->getArgOperand(argno), output,
                                            already, DL))
           return false;
       }
@@ -341,10 +341,10 @@ bool Tracer::traceConcreteFunctionPointersLoadedFrom(
       for (Value::user_iterator i = context->user_begin(),
                                 e = context->user_end();
            i != e; ++i) {
-        CallBase cs = getCallBase(&**i);
-        assert(cs.getInstruction() && "WTF--all uses should be callsites (2)");
+        const CallBase *cs = getCallBase(&**i);
+        assert(cs && "WTF--all uses should be callsites (2)");
 
-        if (!traceConcreteFunctionPointersLoadedFrom(cs.getArgument(argno),
+        if (!traceConcreteFunctionPointersLoadedFrom(cs->getArgOperand(argno),
                                                      output, already, DL))
           return false;
       }

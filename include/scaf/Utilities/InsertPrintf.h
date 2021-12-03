@@ -36,18 +36,18 @@ Value *insertPrintf(InstInsertPt &where, const std::string &format,
   FunctionType *sig_printf = FunctionType::get(intty, formals, true);
 
   FunctionCallee wrapper = module->getOrInsertFunction("printf", sig_printf);
-  Constant *fcn_printf = cast<Constant>(wrapper.getCallee());
+  //Constant *fcn_printf = cast<Constant>(wrapper.getCallee());
 
   std::vector<Value *> actuals;
   actuals.push_back(getStringLiteralExpression(*module, format));
   actuals.insert(actuals.end(), arg_begin, arg_end);
 
-  Instruction *call = CallInst::Create(fcn_printf, actuals);
+  Instruction *call = CallInst::Create(wrapper, actuals);
   where << call;
 
   if (flush) {
     Type *filePtrType =
-        PointerType::getUnqual(module->getTypeByName("struct._IO_FILE"));
+        PointerType::getUnqual( StructType::getTypeByName(module->getContext(), "struct._IO_FILE"));
     Value *gv_stdout = module->getOrInsertGlobal("stdout", filePtrType);
 
     formals.resize(1);
@@ -55,13 +55,13 @@ Value *insertPrintf(InstInsertPt &where, const std::string &format,
     FunctionType *sig_fflush = FunctionType::get(intty, formals, false);
 
     FunctionCallee wrapper = module->getOrInsertFunction("fflush", sig_fflush);
-    Constant *fcn_fflush = cast<Constant>(wrapper.getCallee());
+    //Constant *fcn_fflush = cast<Constant>(wrapper.getCallee());
 
-    Instruction *load = new LoadInst(gv_stdout);
+    Instruction *load = new LoadInst(gv_stdout->getType(), gv_stdout, "", (Instruction *) nullptr);
     actuals.resize(1);
     actuals[0] = load;
 
-    where << load << CallInst::Create(fcn_fflush, actuals);
+    where << load << CallInst::Create(wrapper, actuals);
   }
 
   return call;

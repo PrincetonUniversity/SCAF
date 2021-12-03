@@ -128,9 +128,9 @@ bool KillFlow::instMustKill(const Instruction *inst, const Value *ptr,
     }
   }
 
-  CallBase cs = getCallBase(inst);
-  if (cs.getInstruction() && cs.getCalledFunction()) {
-    Function *f = cs.getCalledFunction();
+  const CallBase *cs = getCallBase(inst);
+  if (cs && cs->getCalledFunction()) {
+    Function *f = cs->getCalledFunction();
 
     if (f->isDeclaration())
       return false;
@@ -756,7 +756,7 @@ bool KillFlow::blockMustKill(const BasicBlock *bb, const Value *ptr,
 }
 
 std::set<Instruction *> instList;
-bool KillFlow::allLoadsAreKilledBefore(const Loop *L, CallBase &cs,
+bool KillFlow::allLoadsAreKilledBefore(const Loop *L, const CallBase &cs,
                                        time_t queryStart, unsigned Timeout) {
   Function *fcn = cs.getCalledFunction();
 
@@ -768,16 +768,16 @@ bool KillFlow::allLoadsAreKilledBefore(const Loop *L, CallBase &cs,
     if (LoadInst *load = dyn_cast<LoadInst>(inst))
       if (pointerKilledBefore(0, load->getPointerOperand(), load) ||
           pointerKilledBefore(L, load->getPointerOperand(),
-                              cs.getInstruction()))
+                              &cs))
         continue;
 
-    CallBase cs2 = getCallBase(inst);
-    if (cs2.getInstruction())
-      if (Function *f2 = cs2.getCalledFunction())
+    const CallBase *cs2 = getCallBase(inst);
+    if (cs2)
+      if (Function *f2 = cs2->getCalledFunction())
         if (!f2->isDeclaration()) {
           if (instList.count(inst) == 0) {
             instList.insert(inst);
-            if (allLoadsAreKilledBefore(L, cs2, queryStart, Timeout)) {
+            if (allLoadsAreKilledBefore(L, *cs2, queryStart, Timeout)) {
               instList.erase(inst);
               continue;
             }
@@ -1068,10 +1068,10 @@ bool KillFlow::instMustKillAggregate(const Instruction *inst,
     }
   }
 
-  CallBase cs = getCallBase(inst);
-  if (cs.getInstruction()) {
+  const CallBase * cs = getCallBase(inst);
+  if (cs) {
     if (const MemIntrinsic *mi = dyn_cast<MemIntrinsic>(inst)) {
-      const Value *killed = GetUnderlyingObject(mi->getRawDest(), *DL, 0);
+      const Value *killed = getUnderlyingObject(mi->getRawDest(), 0);
       if (mustAlias(killed, aggregate)) {
         // TODO did we kill the whole aggregate?
         return true;
@@ -1080,7 +1080,7 @@ bool KillFlow::instMustKillAggregate(const Instruction *inst,
       return false;
     }
 
-    if (Function *f = cs.getCalledFunction()) {
+    if (Function *f = cs->getCalledFunction()) {
       if (f->isDeclaration())
         return false;
 
@@ -1188,7 +1188,7 @@ bool KillFlow::pointerKilledBefore(const Loop *L, const Value *ptr,
 
   // Not killed; maybe this is part of an aggregate!
   if (alsoCheckAggregate) {
-    const Value *aggregate = GetUnderlyingObject(ptr, *DL, 0);
+    const Value *aggregate = getUnderlyingObject(ptr,  0);
     if (!aggregate || aggregate == ptr)
       return false;
 
@@ -1250,7 +1250,7 @@ bool KillFlow::pointerKilledBetween(const Loop *L, const Value *ptr,
 
   // Not killed; maybe this is part of an aggregate!
   if (alsoCheckAggregate) {
-    const Value *aggregate = GetUnderlyingObject(ptr, *DL, 0);
+    const Value *aggregate = getUnderlyingObject(ptr, 0);
     if (!aggregate || aggregate == ptr)
       return false;
 
@@ -1352,7 +1352,7 @@ bool KillFlow::pointerKilledAfter(const Loop *L, const Value *ptr,
   }
 
   if (alsoCheckAggregate) {
-    const Value *aggregate = GetUnderlyingObject(ptr, *DL, 0);
+    const Value *aggregate = getUnderlyingObject(ptr, 0);
     if (!aggregate || aggregate == ptr)
       return false;
 

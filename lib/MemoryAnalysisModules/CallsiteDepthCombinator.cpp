@@ -60,11 +60,11 @@ bool CallsiteDepthCombinator::runOnModule(Module &mod) {
 }
 
 bool CallsiteDepthCombinator::isEligible(const Instruction *i) const {
-  CallBase cs = getCallBase(i);
-  if (!cs.getInstruction())
+  const CallBase *cs = getCallBase(i);
+  if (!cs)
     return false;
 
-  const Function *f = cs.getCalledFunction();
+  const Function *f = cs->getCalledFunction();
   if (!f)
     return false;
 
@@ -491,21 +491,21 @@ LoopAA::ModRefResult CallsiteDepthCombinator::modref(const Instruction *inst1,
   // Maybe turn-on introspection
   bool introspect = false;
   if (WatchCallsitePair) {
-    CallBase cs1 = getCallBase(inst1), cs2 = getCallBase(inst2);
-    if (cs1.getInstruction() && cs2.getInstruction())
-      if (const Function *f1 = cs1.getCalledFunction())
-        if (const Function *f2 = cs2.getCalledFunction())
+    const CallBase *cs1 = getCallBase(inst1), *cs2 = getCallBase(inst2);
+    if (cs1 && cs2)
+      if (const Function *f1 = cs1->getCalledFunction())
+        if (const Function *f2 = cs2->getCalledFunction())
           if (f1->getName() == FirstCallee)
             if (f2->getName() == SecondCallee)
               introspect = true;
   }
 
   else if (WatchCallsite2Store) {
-    CallBase cs1 = getCallBase(inst1);
+    const CallBase *cs1 = getCallBase(inst1);
     const StoreInst *st2 = dyn_cast<StoreInst>(inst2);
 
-    if (cs1.getInstruction() && st2)
-      if (const Function *f1 = cs1.getCalledFunction())
+    if (cs1 && st2)
+      if (const Function *f1 = cs1->getCalledFunction())
         if (f1->getName() == FirstCallee)
           if (st2->getPointerOperand()->getName() == StorePtrName)
             introspect = true;
@@ -513,10 +513,10 @@ LoopAA::ModRefResult CallsiteDepthCombinator::modref(const Instruction *inst1,
 
   else if (WatchStore2Callsite) {
     const StoreInst *st1 = dyn_cast<StoreInst>(inst1);
-    CallBase cs2 = getCallBase(inst2);
+    const CallBase *cs2 = getCallBase(inst2);
 
-    if (cs2.getInstruction() && st1)
-      if (const Function *f2 = cs2.getCalledFunction())
+    if (cs2 && st1)
+      if (const Function *f2 = cs2->getCalledFunction())
         if (f2->getName() == SecondCallee)
           if (st1->getPointerOperand()->getName() == StorePtrName)
             introspect = true;

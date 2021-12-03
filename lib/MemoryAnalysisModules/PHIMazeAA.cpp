@@ -96,8 +96,8 @@ public:
     const bool sameFun =
         P1.inst && P2.inst && P1.inst->getParent() == P2.inst->getParent();
 
-    const Value *UO1 = GetUnderlyingObject(V1, *DL);
-    const Value *UO2 = GetUnderlyingObject(V2, *DL);
+    const Value *UO1 = getUnderlyingObject(V1);
+    const Value *UO2 = getUnderlyingObject(V2);
 
     if (isValid1 && isa<GlobalVariable>(UO2))
       return NoAlias;
