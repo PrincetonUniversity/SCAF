@@ -99,15 +99,15 @@ LoopAA::AliasResult StdInOutErr::aliasCheck(const Pointer &P1,
 }
 
 /// May not call down the LoopAA stack, but may top
-LoopAA::ModRefResult StdInOutErr::getModRefInfo(CallBase CS1,
+LoopAA::ModRefResult StdInOutErr::getModRefInfo(const CallBase &CS1,
                                                 TemporalRelation Rel,
-                                                CallBase CS2, const Loop *L,
+                                                const CallBase &CS2, const Loop *L,
                                                 Remedies &R) {
   return ModRef;
 }
 
 /// May not call down the LoopAA stack, but may top
-LoopAA::ModRefResult StdInOutErr::getModRefInfo(CallBase CS1,
+LoopAA::ModRefResult StdInOutErr::getModRefInfo(const CallBase &CS1,
                                                 TemporalRelation Rel,
                                                 const Pointer &P, const Loop *L,
                                                 Remedies &R) {

@@ -57,6 +57,7 @@ Value *insertPrintf(InstInsertPt &where, const std::string &format,
     FunctionCallee wrapper = module->getOrInsertFunction("fflush", sig_fflush);
     //Constant *fcn_fflush = cast<Constant>(wrapper.getCallee());
 
+    // Critical FIXME: can't use nullptr for the last one?
     Instruction *load = new LoadInst(gv_stdout->getType(), gv_stdout, "", (Instruction *) nullptr);
     actuals.resize(1);
     actuals[0] = load;
