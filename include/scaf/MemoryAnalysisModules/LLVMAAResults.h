@@ -2,6 +2,7 @@
 #define LLVM_LIBERTY_LLVM_AA_RESULTS_H
 
 #include "llvm/Analysis/AliasAnalysis.h"
+#include "llvm/Analysis/AssumptionCache.h"
 #include "llvm/Analysis/BasicAliasAnalysis.h"
 #include "llvm/IR/DataLayout.h"
 #include "llvm/IR/Dominators.h"
@@ -40,7 +41,7 @@ public:
   void getAnalysisUsage(AnalysisUsage &AU) const {
     LoopAA::getAnalysisUsage(AU);
     // AU.addRequired<AAResultsWrapperPass>();
-    //AU.addRequired<AssumptionCache>();
+    AU.addRequired<AssumptionCacheTracker>();
     AU.addRequired<DominatorTreeWrapperPass>();
     getAAResultsAnalysisUsage(AU);
     AU.setPreservesAll();
