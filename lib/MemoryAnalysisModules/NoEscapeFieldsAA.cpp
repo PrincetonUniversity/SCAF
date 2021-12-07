@@ -632,6 +632,7 @@ LoopAA::AliasResult NoEscapeFieldsAA::aliasCheck(const Pointer &P1,
   DEBUG_WITH_TYPE("loopaa", errs() << "NoEscapeFieldsAA\n");
 
   NonCapturedFieldsAnalysis &ncfa = getAnalysis<NonCapturedFieldsAnalysis>();
+  TypeSanityAnalysis &typeaa = getAnalysis<TypeSanityAnalysis>();
 
   StructType *struct1 = 0;
   const ConstantInt *field1 = 0;
@@ -680,13 +681,28 @@ LoopAA::AliasResult NoEscapeFieldsAA::aliasCheck(const Pointer &P1,
   }
 
   else if (fp1 && !fp2) {
-    if (!ncfa.captured(struct1, field1))
+    // Need to prove the base pointer don't alias
+
+    // P2 can be the base pointer, check if base pointers alias
+    if (!isa<GetElementPtrInst>(P1.ptr))
+      return MayAlias;
+    const Value *parent1 = cast<GetElementPtrInst>(P1.ptr)->getPointerOperand();
+    const unsigned s1 = getDataLayout()->getTypeSizeInBits(struct1) / 8;
+
+    if (!ncfa.captured(struct1, field1) && getTopAA()->alias(parent1, s1, rel, P2.ptr, P2.size, L, R) == NoAlias) {
       return NoAlias;
+    }
   }
 
   else if (!fp1 && fp2) {
-    if (!ncfa.captured(struct2, field2))
+    // P1 can be the base pointer, check if base pointers alias
+    if (!isa<GetElementPtrInst>(P2.ptr))
+      return MayAlias;
+    const Value *parent2 = cast<GetElementPtrInst>(P2.ptr)->getPointerOperand();
+    const unsigned s2 = getDataLayout()->getTypeSizeInBits(struct2) / 8;
+    if (!ncfa.captured(struct2, field2) && getTopAA()->alias(P1.ptr, P1.size, rel, parent2, s2, L, R) == NoAlias) {
       return NoAlias;
+    }
   }
 
   // chain to lower analyses
