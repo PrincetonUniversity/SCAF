@@ -4,6 +4,7 @@
 #include "llvm/IR/InstIterator.h"
 #include "llvm/Support/Debug.h"
 #include "llvm/Support/raw_ostream.h"
+#include "llvm/IR/IntrinsicInst.h"
 
 #include "scaf/MemoryAnalysisModules/PureFunAA.h"
 #include "scaf/MemoryAnalysisModules/SemiLocalFunAA.h"
@@ -107,6 +108,31 @@ LoopAA::ModRefResult SemiLocalFunAA::getModRefInfo(const CallBase &CS,
   return ModRef;
 }
 
+static unsigned getArgSize(const CallBase &CS) {
+  const IntrinsicInst *II = dyn_cast<IntrinsicInst>(&CS);
+  unsigned Len = ClassicLoopAA::UnknownSize;
+  if (II != 0)
+    switch (II->getIntrinsicID()) {
+    default:
+      break;
+    case Intrinsic::memcpy:
+    case Intrinsic::memmove: {
+      if (ConstantInt *LenCI = dyn_cast<ConstantInt>(II->getArgOperand(2)))
+        Len = LenCI->getZExtValue();
+      break;
+    }
+    case Intrinsic::memset:
+      // Since memset is 'accesses arguments' only, the LoopAA base class
+      // will handle it for the variable length case.
+      if (ConstantInt *LenCI = dyn_cast<ConstantInt>(II->getArgOperand(2))) {
+        Len = LenCI->getZExtValue();
+      }
+      break;
+    }
+
+  return Len;
+}
+
 LoopAA::ModRefResult
 SemiLocalFunAA::aliasedArgumentsModRef(const CallBase &CS,
                                        const Value *P, const unsigned Size,
@@ -127,7 +153,11 @@ SemiLocalFunAA::aliasedArgumentsModRef(const CallBase &CS,
 
     if (arg->getType()->isPointerTy()) {
 
-      const int argSize = liberty::getTargetSize(arg, TD);
+
+      unsigned argSize = getArgSize(CS);
+      if (argSize == UnknownSize)
+        argSize = liberty::getTargetSize(arg, TD);
+
       if (!fun->hasParamAttribute(i, Attribute::NoAlias) &&
           aa->alias(P, Size, Same, arg, argSize, NULL, R)) {
         result = ModRefResult(result | getModRefInfo(CS, i));
@@ -285,7 +315,9 @@ LoopAA::ModRefResult SemiLocalFunAA::getModRefInfo(const CallBase &CS1,
         if (!arg1->getType()->isPointerTy())
           continue;
 
-        const unsigned s1 = liberty::getTargetSize(arg1, TD);
+        unsigned argSize1 = getArgSize(CS1);
+        if (argSize1 == UnknownSize)
+          argSize1 = liberty::getTargetSize(arg1, TD);
 
         // For each actual parameter of callsite 2 which is a pointer
         for (auto j = CS2.arg_begin(), f = CS2.arg_end(); j != f; ++j) {
@@ -293,10 +325,12 @@ LoopAA::ModRefResult SemiLocalFunAA::getModRefInfo(const CallBase &CS1,
           if (!arg2->getType()->isPointerTy())
             continue;
 
-          const unsigned s2 = liberty::getTargetSize(arg2, TD);
+          unsigned argSize2 = getArgSize(CS2);
+          if (argSize2 == UnknownSize)
+            argSize2 = liberty::getTargetSize(arg2, TD);
 
           // Do these pointers alias?
-          if (aa->alias(arg1, s1, Rel, arg2, s2, L, tmpR)) {
+          if (aa->alias(arg1, argSize1, Rel, arg2, argSize2, L, tmpR)) {
             // Yes.  What does this mean?
             Formal formal1 = {CS1.getCalledFunction()->getName(), arg1no};
 
