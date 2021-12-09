@@ -587,7 +587,7 @@ void AcyclicAA::accumulateRecursiveTypes(Types &recTysOut) const {
 bool AcyclicAA::runOnModule(Module &mod) {
   LLVM_DEBUG(errs() << "Begin AcyclicAA::runOnModule()\n");
   const DataLayout &DL = mod.getDataLayout();
-  InitializeLoopAA(this, DL);
+  InitializeLoopAA(this, mod, DL);
   currentModule = &mod;
 
   TargetLibraryInfoWrapperPass &tliw =

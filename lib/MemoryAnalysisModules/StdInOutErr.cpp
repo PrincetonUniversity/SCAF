@@ -21,7 +21,7 @@ StdInOutErr::StdInOutErr() : ModulePass(ID) {}
 bool StdInOutErr::runOnModule(Module &M) {
   Mod = &M;
   const DataLayout &DL = M.getDataLayout();
-  InitializeLoopAA(this, DL);
+  InitializeLoopAA(this, M, DL);
   return false;
 }
 

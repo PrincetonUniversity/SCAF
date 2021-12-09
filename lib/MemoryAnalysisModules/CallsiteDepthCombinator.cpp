@@ -43,7 +43,7 @@ STATISTIC(numKillAggregateStore, "Num flows killed: store to killed aggregate");
 
 bool CallsiteDepthCombinator::runOnModule(Module &mod) {
   const DataLayout &DL = mod.getDataLayout();
-  InitializeLoopAA(this, DL);
+  InitializeLoopAA(this, mod, DL);
 
   killflow = getAnalysisIfAvailable<KillFlow>();
   if (!killflow) {

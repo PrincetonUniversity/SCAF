@@ -441,7 +441,7 @@ public:
   virtual bool runOnModule(Module &M) {
     const DataLayout &DL = M.getDataLayout();
     Mod = &M;
-    InitializeLoopAA(this, DL);
+    InitializeLoopAA(this, M, DL);
 
     ValueSet visited;
     for (GlobalIt i = M.global_begin(), e = M.global_end(); i != e; ++i) {

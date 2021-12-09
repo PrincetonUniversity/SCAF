@@ -189,7 +189,7 @@ SemiLocalFunAA::SemiLocalFunAA() : ModulePass(ID) {
 
 bool SemiLocalFunAA::runOnModule(Module &M) {
   const DataLayout &DL = M.getDataLayout();
-  InitializeLoopAA(this, DL);
+  InitializeLoopAA(this, M, DL);
 
   PureFunAA &pureFun = getAnalysis<PureFunAA>();
 

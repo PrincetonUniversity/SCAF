@@ -386,7 +386,7 @@ public:
                       << " " << FirstCallee << " " << SecondCallee << "\n");
 
     DL = &M.getDataLayout();
-    InitializeLoopAA(this, *DL);
+    InitializeLoopAA(this, M, *DL);
     return false;
   }
 

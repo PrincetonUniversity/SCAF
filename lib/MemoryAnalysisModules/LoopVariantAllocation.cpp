@@ -26,7 +26,7 @@ bool LoopVariantAllocation::runOnModule(Module &M) {
   auto &fcn = *M.getFunctionList().begin();
   tli = &getAnalysis<TargetLibraryInfoWrapperPass>().getTLI(fcn);
   DL = &M.getDataLayout();
-  InitializeLoopAA(this, *DL);
+  InitializeLoopAA(this, M, *DL);
   return false;
 }
 

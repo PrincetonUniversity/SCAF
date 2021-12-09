@@ -59,13 +59,15 @@ LoopAA::~LoopAA() {
   getRealTopAA()->stackHasChanged();
 }
 
-void LoopAA::InitializeLoopAA(Pass *P, const DataLayout &t) {
+void LoopAA::InitializeLoopAA(Pass *P, Module &M, const DataLayout &t) {
   TargetLibraryInfoWrapperPass *tliWrap =
       &P->getAnalysis<TargetLibraryInfoWrapperPass>();
-  // CRITICAL FIXME: force ignore here
-  TargetLibraryInfo * ti = nullptr;
-  LoopAA *naa = P->getAnalysis<LoopAA>().getRealTopAA();
+  // FIXME: get a random function
+  assert(M.getFunctionList().size() > 0 && "Have to have at least one function");
+  auto &fcn = *M.getFunctionList().begin();
+  TargetLibraryInfo *ti = &tliWrap->getTLI(fcn);
 
+  LoopAA *naa = P->getAnalysis<LoopAA>().getRealTopAA();
   InitializeLoopAA(&t, ti, naa);
 
   getRealTopAA()->stackHasChanged();
@@ -595,7 +597,7 @@ void AAToLoopAA::getAnalysisUsage(AnalysisUsage &au) const {
 
 bool AAToLoopAA::runOnFunction(Function &fcn) {
   const DataLayout &DL = fcn.getParent()->getDataLayout();
-  InitializeLoopAA(this, DL);
+  InitializeLoopAA(this, *fcn.getParent(), DL);
   AAResultsWrapperPass &aliasWrap = getAnalysis<AAResultsWrapperPass>();
   AA = &aliasWrap.getAAResults();
   return false;

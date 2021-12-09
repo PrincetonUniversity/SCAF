@@ -27,7 +27,7 @@ public:
 
   bool runOnModule(Module &M) {
     DL = &M.getDataLayout();
-    InitializeLoopAA(this, *DL);
+    InitializeLoopAA(this, M, *DL);
     wpa = &getAnalysis<WPAPass>();
     return false;
   }

@@ -84,7 +84,7 @@ STATISTIC(numQueries, "Number of AA queries passed to TypeAA.");
 
 bool TypeAA::runOnModule(Module &mod) {
   const DataLayout &DL = mod.getDataLayout();
-  InitializeLoopAA(this, DL);
+  InitializeLoopAA(this, mod, DL);
   return false;
 }
 

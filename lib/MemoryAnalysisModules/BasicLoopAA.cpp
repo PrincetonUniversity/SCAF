@@ -439,7 +439,7 @@ struct BasicLoopAA : public liberty::ClassicLoopAA, public ModulePass {
 
   bool runOnModule(Module &M) {
     currentMod = &M;
-    InitializeLoopAA(this, M.getDataLayout());
+    InitializeLoopAA(this, M, M.getDataLayout());
     return false;
   }
 

@@ -147,7 +147,7 @@ public:
 
   bool runOnModule(Module &M) {
     const DataLayout &DL = M.getDataLayout();
-    InitializeLoopAA(this, DL);
+    InitializeLoopAA(this, M, DL);
 
     // Recursive functions taint
     CallGraph &CG = getAnalysis<CallGraphWrapperPass>().getCallGraph();

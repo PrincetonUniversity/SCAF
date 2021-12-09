@@ -287,7 +287,7 @@ public:
 
   /// Subclasses must call this method at the beginning
   /// of runOnWhatever() to initalize the the LoopAA interface.
-  void InitializeLoopAA(Pass *P, const DataLayout &);
+  void InitializeLoopAA(Pass *P, Module &tli, const DataLayout &);
 
   /// Alternatively, send this.
   /// Subclasses must call this method at the beginning

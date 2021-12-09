@@ -88,7 +88,7 @@ public:
 
   bool runOnModule(Module &M) {
     DL = &M.getDataLayout();
-    InitializeLoopAA(this, *DL);
+    InitializeLoopAA(this, M, *DL);
     setModuleLoops(&getAnalysis<ModuleLoops>());
     // FIXME: get a random function
     assert(M.getFunctionList().size() > 0 && "Have to have at least one function");

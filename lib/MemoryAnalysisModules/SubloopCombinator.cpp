@@ -52,7 +52,7 @@ struct SubloopCombinatorAA : public ModulePass, public LoopAA {
 
   virtual bool runOnModule(Module &M) {
     const DataLayout &DL = M.getDataLayout();
-    InitializeLoopAA(this, DL);
+    InitializeLoopAA(this, M, DL);
     return false;
   }
 

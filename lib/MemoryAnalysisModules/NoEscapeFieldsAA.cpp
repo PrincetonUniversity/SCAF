@@ -382,7 +382,7 @@ void NonCapturedFieldsAnalysis::runOnFunction(Function &fcn) {
 
 bool NoEscapeFieldsAA::runOnModule(Module &mod) {
   const DataLayout *DL = &mod.getDataLayout();
-  InitializeLoopAA(this, *DL);
+  InitializeLoopAA(this, mod, *DL);
   return false;
 }
 

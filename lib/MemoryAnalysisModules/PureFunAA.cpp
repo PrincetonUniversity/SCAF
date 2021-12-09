@@ -264,7 +264,7 @@ PureFunAA::PureFunAA() : ModulePass(ID), sccCount(0) {
 
 bool PureFunAA::runOnModule(Module &M) {
   const DataLayout &DL = M.getDataLayout();
-  InitializeLoopAA(this, DL);
+  InitializeLoopAA(this, M, DL);
 
   CallGraph &CG = getAnalysis<CallGraphWrapperPass>().getCallGraph();
   for (scc_iterator<CallGraph *> CGI = scc_begin(&CG), E = scc_end(&CG);
