@@ -80,7 +80,61 @@ static bool isLocalProp(const Instruction *inst) {
       return false;
     }
   }
+
+  if (PureFunAA::isBadDeref(inst)) {
+    return false;
+  }
+
   return true;
+}
+
+bool PureFunAA::isBadDeref(const Instruction *inst) {
+  // %p1 = gep arg xxx
+  // %0 = load %p1 ;load a pointer
+  // %p2 = gep %0 xxx
+  // load %p2 ; this load is not within %p1
+  // FIXME: this is too conservative
+  const Function *fcn = inst->getParent()->getParent();
+  // load and store; the memory address comes from out of arg
+  const Value *basePtr = nullptr;
+  if (auto *load = dyn_cast<LoadInst>(inst)) {
+    basePtr = load->getPointerOperand()->stripInBoundsOffsets();
+  }
+  if (auto *store = dyn_cast<StoreInst>(inst)) {
+    basePtr = store->getPointerOperand()->stripInBoundsOffsets();
+  }
+
+  if (basePtr) {
+    for (auto &&arg : fcn->args()) {
+      if (basePtr == &arg) {
+        return false;
+      }
+    }
+    // all others are bad
+    return true;
+  }
+
+  // check all args for a callsite
+  if (auto *cb = dyn_cast<CallBase>(inst)) {
+    for (auto &&arg2 : cb->args()) {
+      if (!arg2->getType()->isPointerTy()) {
+        continue;
+      }
+
+      bool argBad = true;
+      for (auto &&arg : fcn->args()) {
+        if (arg2->stripInBoundsOffsets() == &arg) {
+          argBad = false;
+          break;
+        }
+      }
+      if (argBad) {
+        return true;
+      }
+    }
+  }
+
+  return false;
 }
 
 PureFunAA::SCCNum PureFunAA::getSCCNum(const SCC &scc) const {
@@ -144,6 +198,7 @@ bool PureFunAA::isRecursiveProperty(const Function *fun,
   for (const_inst_iterator inst = inst_begin(fun); inst != inst_end(fun);
        ++inst) {
 
+    // if the value is projected from the function argument
     if (!property(&*inst)) {
       return false;
     }

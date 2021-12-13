@@ -62,6 +62,7 @@ private:
   void runOnSCC(const SCC &scc);
 
 public:
+  static bool isBadDeref(const Instruction *inst);
   static bool argumentsAlias(const llvm::ImmutableCallSite CS1,
                              const llvm::ImmutableCallSite CS2,
                              liberty::LoopAA *aa, const llvm::DataLayout *TD,

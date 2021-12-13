@@ -15,7 +15,12 @@ namespace liberty {
 using namespace llvm;
 using namespace llvm::noelle;
 
-bool SemiLocalFunAA::isSemiLocalProp(const Instruction *inst) { return true; }
+bool SemiLocalFunAA::isSemiLocalProp(const Instruction *inst) {
+  if (PureFunAA::isBadDeref(inst)) {
+    return false;
+  }
+  return true;
+}
 
 bool SemiLocalFunAA::isSemiLocal(const Function *fun,
                                  const PureFunAA &pureFun) const {
