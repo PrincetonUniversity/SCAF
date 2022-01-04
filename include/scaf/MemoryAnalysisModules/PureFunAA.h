@@ -64,6 +64,7 @@ private:
 public:
   static bool argumentsAlias(const llvm::CallBase &CS1,
                              const llvm::CallBase &CS2,
+  static bool isBadDeref(const Instruction *inst);
                              liberty::LoopAA *aa, const llvm::DataLayout *TD,
                              Remedies &R);
 
