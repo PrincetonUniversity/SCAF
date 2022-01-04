@@ -318,6 +318,7 @@ static bool isSingleCastToIntrinsic(const Instruction *inst) {
   const Value *use = *inst->user_begin();
 
   // TODO: Ziyang: what about other intrinsics (llvm.debug...)
+  // FIXME: this is wrong
   if (!isa<MemIntrinsic>(use))
     return false;
 
