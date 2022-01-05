@@ -4,7 +4,7 @@
 #include "scaf/Utilities/FindUnderlyingObjects.h"
 
 #include "scaf/SpeculationModules/TXIOAA.h"
-#include "scaf/Utilities/CallSiteFactory.h"
+#include "scaf/Utilities/CallBaseFactory.h"
 #include "scaf/Utilities/GetMemOper.h"
 
 #ifndef DEFAULT_TXIO_REMED_COST
@@ -25,7 +25,7 @@ bool TXIORemedy::compare(const Remedy_ptr rhs) const {
 }
 
 bool TXIOAA::isTXIOFcn(const Instruction *inst) {
-  CallSite cs = getCallSite(inst);
+  CallBase cs = getCallBase(inst);
   if (!cs.getInstruction())
     return false;
 

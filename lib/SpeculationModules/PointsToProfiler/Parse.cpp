@@ -6,7 +6,7 @@
 #include "llvm/Support/Debug.h"
 
 #include "scaf/SpeculationModules/PointsToProfiler/Parse.h"
-#include "scaf/Utilities/CallSiteFactory.h"
+#include "scaf/Utilities/CallBaseFactory.h"
 #include "scaf/Utilities/FindUnderlyingObjects.h"
 #include "scaf/Utilities/GetMemOper.h"
 

@@ -61,7 +61,7 @@ public:
 
   LocalityRemedType type;
 
-  void apply(Task *task);
+  //void apply(Task *task);
   bool compare(const Remedy_ptr rhs) const;
   void setCost(PerformanceEstimator *perf);
   StringRef getRemedyName() const { return "locality-remedy"; };

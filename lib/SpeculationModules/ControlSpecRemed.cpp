@@ -26,9 +26,11 @@ STATISTIC(numCtrlQueries,      "Num ctrl queries in cntr spec remediator");
 STATISTIC(numCtrlDepRem,       "Num removed ctrl dep with cntr spec remediator");
 STATISTIC(numRegDepRem,        "Num removed reg dep with cntr spec remediator");
 
-void ControlSpecRemedy::apply(Task *task) {
-  // TODO: transfer the code for application of control spec here.
-}
+/*
+ *void ControlSpecRemedy::apply(Task *task) {
+ *  // TODO: transfer the code for application of control spec here.
+ *}
+ */
 
 bool ControlSpecRemedy::compare(const Remedy_ptr rhs) const {
   std::shared_ptr<ControlSpecRemedy> ctrlSpecRhs =

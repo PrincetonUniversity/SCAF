@@ -40,7 +40,9 @@ STATISTIC(numReusedPriv,      "Num avoid extra private inst");
 STATISTIC(numUnclassifiedPtrs,"Num of unclassified pointers");
 STATISTIC(numSubSep,          "Num separated via subheaps");
 
-void LocalityRemedy::apply(Task *task) {}
+/*
+ *void LocalityRemedy::apply(Task *task) {}
+ */
 
 bool LocalityRemedy::compare(const Remedy_ptr rhs) const {
   std::shared_ptr<LocalityRemedy> sepRhs =

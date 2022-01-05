@@ -81,7 +81,7 @@ namespace SpecPriv
 
   static bool intrinsicMayRead(const Instruction *inst)
   {
-    ImmutableCallSite cs(inst);
+    ImmutableCallBase cs(inst);
     StringRef  name = cs.getCalledFunction()->getName();
     if( name == "llvm.memset.p0i8.i32"
     ||  name == "llvm.memset.p0i8.i64" )

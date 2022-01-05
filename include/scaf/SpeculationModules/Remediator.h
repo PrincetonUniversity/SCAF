@@ -1,9 +1,9 @@
 #ifndef LLVM_LIBERTY_REMEDIATOR_H
 #define LLVM_LIBERTY_REMEDIATOR_H
 
-#include "PDG.hpp"
+//#include "PDG.hpp"
 #include "llvm/Pass.h"
-#include "llvm/IR/CallSite.h"
+#include "llvm/IR/Instructions.h"
 #include "llvm/Support/CommandLine.h"
 #include "llvm/IR/DataLayout.h"
 #include "llvm/Analysis/AliasAnalysis.h"
@@ -18,9 +18,9 @@
 #include "scaf/Utilities/InsertPrintf.h"
 #include "scaf/Utilities/InstInsertPt.h"
 
-#include "PDG.hpp"
+////#include "PDG.hpp"
 //#include "LoopDependenceInfo.hpp"
-#include "Task.hpp"
+//#include "Task.hpp"
 
 #include <set>
 #include <unordered_set>

@@ -17,9 +17,11 @@ using namespace llvm::noelle;
 STATISTIC(numQueries, "Num queries");
 STATISTIC(numNoFlow, "Num no-flow results");
 
-void MemSpecAARemedy::apply(Task *task) {
-  // TODO: transfer the code for application of mem-spec-aa here.
-}
+/*
+ *void MemSpecAARemedy::apply(Task *task) {
+ *  // TODO: transfer the code for application of mem-spec-aa here.
+ *}
+ */
 
 bool MemSpecAARemedy::compare(const Remedy_ptr rhs) const {
   std::shared_ptr<MemSpecAARemedy> memSpecAARhs =

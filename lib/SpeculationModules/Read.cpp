@@ -10,7 +10,7 @@
 #include "scaf/MemoryAnalysisModules/PureFunAA.h"
 #include "scaf/MemoryAnalysisModules/SemiLocalFunAA.h"
 #include "scaf/SpeculationModules/Read.h"
-#include "scaf/Utilities/CallSiteFactory.h"
+#include "scaf/Utilities/CallBaseFactory.h"
 #include "scaf/Utilities/FindUnderlyingObjects.h"
 #include "scaf/Utilities/GetMemOper.h"
 
@@ -289,7 +289,7 @@ static const BasicBlock *BlockPtr(const BasicBlock *i) { return i; }
 static const BasicBlock *BlockPtr(const BasicBlock &i) { return &i; }
 
 template <class BlockIterator>
-bool Read::getFootprint(const BlockIterator &begin, const BlockIterator &end, const Ctx *exec_ctx, AUs &reads, AUs &writes, ReduxAUs &reductions, CallSiteSet &already) const
+bool Read::getFootprint(const BlockIterator &begin, const BlockIterator &end, const Ctx *exec_ctx, AUs &reads, AUs &writes, ReduxAUs &reductions, CallBaseSet &already) const
 {
   for(BlockIterator i=begin; i!=end; ++i)
   {
@@ -324,7 +324,7 @@ static bool isDeferrableIO(const Instruction *inst)
 {
   return false; // no more deferrable IO
   /*
-  CallSite cs = getCallSite(inst);
+  CallBase cs = getCallBase(inst);
   if( !cs.getInstruction() )
     return false;
 
@@ -358,12 +358,12 @@ static bool isMallocLikeOrFree(const Function* fn)
 
 bool Read::getFootprint(const Instruction *op, const Ctx *exec_ctx, AUs &reads, AUs &writes, ReduxAUs &reductions) const
 {
-  CallSiteSet already;
+  CallBaseSet already;
   return getFootprint(op,exec_ctx,reads,writes,reductions, already);
 }
 
 // Get a set of AUs which were written by this instruction
-bool Read::getFootprint(const Instruction *op, const Ctx *exec_ctx, AUs &reads, AUs &writes, ReduxAUs &reductions, CallSiteSet &already) const
+bool Read::getFootprint(const Instruction *op, const Ctx *exec_ctx, AUs &reads, AUs &writes, ReduxAUs &reductions, CallBaseSet &already) const
 {
   const BasicBlock *parent = op->getParent();
   if( ctrlspec->isSpeculativelyDead(parent) )
@@ -431,7 +431,7 @@ bool Read::getFootprint(const Instruction *op, const Ctx *exec_ctx, AUs &reads, 
     return true;
   }
 
-  CallSite cs = getCallSite(op);
+  CallBase cs = getCallBase(op);
   if( !cs.getInstruction() )
   {
     // Not Store, MemIntrinsic or call.
@@ -456,7 +456,7 @@ bool Read::getFootprint(const Instruction *op, const Ctx *exec_ctx, AUs &reads, 
 
   else if (!callee->isDeclaration() && !pure->isReadOnly(callee) &&
            !pure->isLocal(callee)) {
-    std::pair<CallSiteSet::iterator,bool> res = already.insert(op);
+    std::pair<CallBaseSet::iterator,bool> res = already.insert(op);
     if( !res.second )
       return true; // already in there.
 
@@ -484,7 +484,7 @@ bool Read::getFootprint(const Instruction *op, const Ctx *exec_ctx, AUs &reads, 
   else if( pure->isLocal(callee) )
   {
     // footprint == the actual parameters
-    for(CallSite::arg_iterator i=cs.arg_begin(),  e=cs.arg_end(); i!=e; ++i)
+    for(CallBase::arg_iterator i=cs.arg_begin(),  e=cs.arg_end(); i!=e; ++i)
     {
       const Value *actual = *i;
 
@@ -516,7 +516,7 @@ bool Read::getFootprint(const Instruction *op, const Ctx *exec_ctx, AUs &reads, 
   {
     // footprint == the actual parameters + hidden state
     unsigned argno = 0;
-    for(CallSite::arg_iterator i=cs.arg_begin(),  e=cs.arg_end(); i!=e; ++i, ++argno)
+    for(CallBase::arg_iterator i=cs.arg_begin(),  e=cs.arg_end(); i!=e; ++i, ++argno)
     {
       const Value *actual = *i;
       if( actual->getType()->isPointerTy() )
@@ -566,7 +566,7 @@ bool Read::getFootprint(const Instruction *op, const Ctx *exec_ctx, AUs &reads, 
 bool Read::getFootprint(const Loop *loop, const Ctx *ctx, AUs &reads, AUs &writes, ReduxAUs &reductions) const
 {
   Loop::block_iterator begin = loop->block_begin(), end = loop->block_end();
-  CallSiteSet already;
+  CallBaseSet already;
   return getFootprint(begin, end, ctx, reads, writes, reductions, already);
 }
 
@@ -818,7 +818,7 @@ bool Read::missingAUs(const Value *uo, const Ctx *ctx, Ptrs &aus) const
   }
   else
   {
-    CallSite cs = getCallSite(uo);
+    CallBase cs = getCallBase(uo);
     if( cs.getInstruction() )
     {
       Function *callee = cs.getCalledFunction();

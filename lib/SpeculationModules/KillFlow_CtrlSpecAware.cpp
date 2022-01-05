@@ -10,7 +10,7 @@
 #include "scaf/MemoryAnalysisModules/Introspection.h"
 #include "scaf/SpeculationModules/ControlSpecRemed.h"
 #include "scaf/SpeculationModules/KillFlow_CtrlSpecAware.h"
-#include "scaf/Utilities/CallSiteFactory.h"
+#include "scaf/Utilities/CallBaseFactory.h"
 #include "scaf/Utilities/FindUnderlyingObjects.h"
 #include "scaf/Utilities/GepRange.h"
 #include "scaf/Utilities/GetMemOper.h"
@@ -141,7 +141,7 @@ STATISTIC(numBBSummaryHits,                "Number of block summary hits");
       }
     }
 
-    CallSite cs = getCallSite(inst);
+    CallBase cs = getCallBase(inst);
     if( cs.getInstruction() && cs.getCalledFunction() )
     {
       Function *f = cs.getCalledFunction();
@@ -798,7 +798,7 @@ STATISTIC(numBBSummaryHits,                "Number of block summary hits");
 
 
   std::set<Instruction *> instLis;
-  bool KillFlow_CtrlSpecAware::allLoadsAreKilledBefore(const Loop *L, CallSite &cs, time_t queryStart, unsigned Timeout)
+  bool KillFlow_CtrlSpecAware::allLoadsAreKilledBefore(const Loop *L, CallBase &cs, time_t queryStart, unsigned Timeout)
   {
     Function *fcn = cs.getCalledFunction();
 
@@ -813,7 +813,7 @@ STATISTIC(numBBSummaryHits,                "Number of block summary hits");
         ||  pointerKilledBefore(L, load->getPointerOperand(), cs.getInstruction() ) )
           continue;
 
-      CallSite cs2 = getCallSite(inst);
+      CallBase cs2 = getCallBase(inst);
       if( cs2.getInstruction() )
         if( Function *f2 = cs2.getCalledFunction() )
           if( !f2->isDeclaration() )
@@ -1021,7 +1021,7 @@ STATISTIC(numBBSummaryHits,                "Number of block summary hits");
       }
 
 
-      CallSite cs = getCallSite(later);
+      CallBase cs = getCallBase(later);
       if( cs.getInstruction() )
         if( Function *f = cs.getCalledFunction() )
           if( !f->isDeclaration() )
@@ -1100,7 +1100,7 @@ STATISTIC(numBBSummaryHits,                "Number of block summary hits");
       }
 
 
-      CallSite cs = getCallSite(earlier);
+      CallBase cs = getCallBase(earlier);
       if( cs.getInstruction() )
         if( Function *f = cs.getCalledFunction() )
           if( !f->isDeclaration() )
@@ -1180,7 +1180,7 @@ STATISTIC(numBBSummaryHits,                "Number of block summary hits");
       }
     }
 
-    CallSite cs = getCallSite(inst);
+    CallBase cs = getCallBase(inst);
     if( cs.getInstruction() )
     {
       if( const MemIntrinsic *mi = dyn_cast< MemIntrinsic >(inst) )

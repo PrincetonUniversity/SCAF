@@ -18,8 +18,10 @@ using namespace llvm::noelle;
 STATISTIC(numNoRegDep, "Number of reg deps removed by counted IV remed");
 STATISTIC(numNoCtrlDep, "Number of ctrl deps removed by counted IV remed");
 
-void CountedIVRemedy::apply(Task *task) {
-}
+/*
+ *void CountedIVRemedy::apply(Task *task) {
+ *}
+ */
 
 bool CountedIVRemedy::compare(const Remedy_ptr rhs) const {
   std::shared_ptr<CountedIVRemedy> countedIVRhs =

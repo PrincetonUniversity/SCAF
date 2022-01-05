@@ -129,7 +129,7 @@ private:
   typedef std::map<const Value*,Ctx2Ptrs> Value2Ctx2Ptrs;
   typedef std::map<const Value*,Ctx2Residual> Value2Ctx2Residual;
 
-  typedef std::set<const Instruction*> CallSiteSet;
+  typedef std::set<const Instruction*> CallBaseSet;
 
   // Manage AU and Ctx objects
   // It's a pointer, so that we can update it within
@@ -154,10 +154,10 @@ private:
   Value2Ctx2Residual pointerResiduals;
 
   template <class BlockIterator>
-  bool getFootprint(const BlockIterator &begin, const BlockIterator &end, const Ctx *exec_ctx, AUs &reads, AUs &writes, ReduxAUs &reductions, CallSiteSet &already) const;
+  bool getFootprint(const BlockIterator &begin, const BlockIterator &end, const Ctx *exec_ctx, AUs &reads, AUs &writes, ReduxAUs &reductions, CallBaseSet &already) const;
 
   // Get a set of AUs which were written/read by this instruction
-  bool getFootprint(const Instruction *op, const Ctx *exec_ctx, AUs &reads, AUs &writes, ReduxAUs &reductions, CallSiteSet &already) const;
+  bool getFootprint(const Instruction *op, const Ctx *exec_ctx, AUs &reads, AUs &writes, ReduxAUs &reductions, CallBaseSet &already) const;
 
   // Do the right thing when profiling info is incomplete
   // due to limited profile coverage.

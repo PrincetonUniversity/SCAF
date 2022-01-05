@@ -9,7 +9,7 @@
 #include "scaf/MemoryAnalysisModules/ClassicLoopAA.h"
 #include "scaf/MemoryAnalysisModules/LoopAA.h"
 #include "scaf/SpeculationModules/Remediator.h"
-#include "scaf/Utilities/CallSiteFactory.h"
+#include "scaf/Utilities/CallBaseFactory.h"
 #include "scaf/Utilities/GetMemOper.h"
 #include "scaf/Utilities/ReportDump.h"
 

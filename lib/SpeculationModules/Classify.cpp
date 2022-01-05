@@ -27,7 +27,7 @@
 #include "scaf/SpeculationModules/PredictionSpeculator.h"
 #include "scaf/SpeculationModules/Read.h"
 #include "scaf/SpeculationModules/ProfilePerformanceEstimator.h"
-#include "scaf/Utilities/CallSiteFactory.h"
+#include "scaf/Utilities/CallBaseFactory.h"
 #include "scaf/Utilities/GepRange.h"
 #include "scaf/Utilities/GetMemOper.h"
 #include "scaf/Utilities/GlobalMalloc.h"

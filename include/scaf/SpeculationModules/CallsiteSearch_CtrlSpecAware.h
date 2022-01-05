@@ -23,7 +23,7 @@
 #define LLVM_LIBERTY_CALLSITE_SEARCH_CTRL_SPEC_H
 
 #include "llvm/IR/Dominators.h"
-#include "llvm/IR/CallSite.h"
+#include "llvm/IR/Instructions.h"
 #include "llvm/IR/DataLayout.h"
 #include "llvm/Analysis/PostDominators.h"
 
@@ -33,7 +33,7 @@
 
 namespace llvm
 {
-  class CallSite;
+  class CallBase;
 }
 
 namespace liberty
@@ -48,14 +48,16 @@ namespace liberty
   /// a list of nested callsites.
   struct CallsiteContext_CtrlSpecAware
   {
-    CallsiteContext_CtrlSpecAware(const CallSite &call, CallsiteContext_CtrlSpecAware *within);
+    CallsiteContext_CtrlSpecAware(const CallBase &call, CallsiteContext_CtrlSpecAware *within);
 
     void incref() { ++refcount; }
     void decref() { if( --refcount<1 ) delete this; }
 
-    const Instruction *getLocationWithinParent() const { return cs.getInstruction(); }
-    const CallSite &getCallSite() const { return cs; }
-    const Function *getFunction() const { return cs.getCalledFunction(); }
+    const Instruction *getLocationWithinParent() const {
+      return cs;
+    }
+    const CallBase &getCallBase() const { return *cs; }
+    const Function *getFunction() const { return cs->getCalledFunction(); }
     CallsiteContext_CtrlSpecAware *getParent() const { return parent; }
 
     void print(raw_ostream &out) const;
@@ -70,7 +72,7 @@ namespace liberty
     CallsiteContext_CtrlSpecAware(const CallsiteContext_CtrlSpecAware &) { assert(false); }
     CallsiteContext_CtrlSpecAware &operator=(const CallsiteContext_CtrlSpecAware &) { assert(false); return *this; }
 
-    const CallSite cs;
+    const CallBase* cs;
     CallsiteContext_CtrlSpecAware *parent;
     unsigned refcount;
   };
@@ -84,7 +86,7 @@ namespace liberty
     Context_CtrlSpecAware &operator=(const Context_CtrlSpecAware &other);
     ~Context_CtrlSpecAware();
 
-    Context_CtrlSpecAware getSubContext_CtrlSpecAware(const CallSite &cs) const;
+    Context_CtrlSpecAware getSubContext_CtrlSpecAware(const CallBase &cs) const;
 
     void print(raw_ostream &out) const;
     const CallsiteContext_CtrlSpecAware *front() const { return first; }

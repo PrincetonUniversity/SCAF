@@ -3,7 +3,7 @@
 
 #include "llvm/IR/Instructions.h"
 
-#include "PDG.hpp"
+////#include "PDG.hpp"
 #include "scaf/Utilities/ControlSpeculation.h"
 #include "scaf/MemoryAnalysisModules/LoopAA.h"
 #include "scaf/SpeculationModules/Remediator.h"
@@ -23,7 +23,7 @@ class ControlSpecRemedy : public Remedy {
 public:
   const Instruction *brI;
 
-  void apply(Task *task);
+  //void apply(Task *task);
   bool compare(const Remedy_ptr rhs) const;
   StringRef getRemedyName() const { return "ctrl-spec-remedy"; };
 };

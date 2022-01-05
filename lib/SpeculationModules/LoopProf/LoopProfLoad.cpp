@@ -2,7 +2,7 @@
 
 #include "llvm/IR/LLVMContext.h"
 #include "llvm/IR/DebugInfo.h"
-#include "llvm/IR/CallSite.h"
+#include "llvm/IR/Instructions.h"
 
 #include "llvm/ADT/Statistic.h"
 #include "llvm/Analysis/LoopInfo.h"
@@ -199,7 +199,7 @@ bool LoopProfLoad::runOnModule(Module& M)
       inFile >> curLoopNum >> exTime;
       assert(curLoopNum == numLoops);
 
-      std::string callsitename = getCallSiteName(inst);
+      std::string callsitename = getCallBaseName(inst);
       numToLoopName[curLoopNum] = callsitename;
       loopTimesMap[callsitename] = exTime;
     }
@@ -217,7 +217,7 @@ bool LoopProfLoad::runOnModule(Module& M)
   return false;
 }
 
-std::string LoopProfLoad::getCallSiteName(const Instruction *inst) const
+std::string LoopProfLoad::getCallBaseName(const Instruction *inst) const
 {
   const BasicBlock *bb = inst->getParent();
   const Function *fcn = bb->getParent();

@@ -39,7 +39,7 @@ public:
   // could also be cmpInst based
   const CmpInst *cmpInst;
 
-  void apply(Task *task);
+  //void apply(Task *task);
   bool compare(const Remedy_ptr rhs) const;
   StringRef getRemedyName() const { return "redux-remedy"; };
 };

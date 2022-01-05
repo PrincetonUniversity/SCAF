@@ -15,7 +15,7 @@ class MemVerRemedy : public Remedy {
 public:
   bool waw;
 
-  void apply(Task *task);
+  //void apply(Task *task);
   bool compare(const Remedy_ptr rhs) const;
   unsigned long getCost(PerformanceEstimator *perf) const;
   StringRef getRemedyName() const { return "mem-ver-remedy"; };

@@ -86,15 +86,15 @@ using namespace llvm;
         i->second = t;
       }
 
-      unsigned long getCallSiteTime(const Instruction *cs) const
+      unsigned long getCallBaseTime(const Instruction *cs) const
       {
-        std::string name = getCallSiteName(cs);
+        std::string name = getCallBaseName(cs);
         return getLoopTime(name);
       }
 
-      void setCallSiteTime(const Instruction *cs, unsigned long t)
+      void setCallBaseTime(const Instruction *cs, unsigned long t)
       {
-        std::string name = getCallSiteName(cs);
+        std::string name = getCallBaseName(cs);
         setLoopTime(name,t);
       }
 
@@ -130,9 +130,9 @@ using namespace llvm;
         loopTimesMap[ name ] = 0;
       }
 
-      void addCallSite(const Instruction *cs)
+      void addCallBase(const Instruction *cs)
       {
-        std::string name = getCallSiteName(cs);
+        std::string name = getCallBaseName(cs);
         ++numLoops;
         numToLoopName[ numLoops ] = name;
         loopTimesMap[ name ] = 0;
@@ -142,7 +142,7 @@ using namespace llvm;
 
       std::string getLoopName(const BasicBlock *loop_header) const;
       std::string getLoopName(const Loop *loop) const;
-      std::string getCallSiteName(const Instruction *inst) const;
+      std::string getCallBaseName(const Instruction *inst) const;
 
       Loop2Times loopTimesMap;
       std::map<int, std::string> numToLoopName;

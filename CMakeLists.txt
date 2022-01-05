@@ -11,12 +11,12 @@ message(STATUS "Found LLVM ${LLVM_PACKAGE_VERSION}")
 message(STATUS "Using LLVMConfig.cmake in: ${LLVM_DIR}")
 
 # Find and set NOELLE
-if(DEFINED ENV{NOELLE_INSTALL_DIR})
-    set(NOELLE_INSTALL_DIR $ENV{NOELLE_INSTALL_DIR})
-    message(STATUS "Found NOELLE at ${NOELLE_INSTALL_DIR}")
-else()
-    message(FATAL_ERROR "Cannot find NOELLE, did you export $NOELLE_INSTALL_DIR?")
-endif()
+#if(DEFINED ENV{NOELLE_INSTALL_DIR})
+    #set(NOELLE_INSTALL_DIR $ENV{NOELLE_INSTALL_DIR})
+    #message(STATUS "Found NOELLE at ${NOELLE_INSTALL_DIR}")
+#else()
+    #message(FATAL_ERROR "Cannot find NOELLE, did you export $NOELLE_INSTALL_DIR?")
+#endif()
 
 #set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -O0 -g -Weverything")
 #set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -O3 -Weverything")
@@ -39,7 +39,7 @@ include(AddLLVM)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include
                     ${CMAKE_CURRENT_BINARY_DIR}/include
                     ${CMAKE_INSTALL_PREFIX}/include
-                    ${NOELLE_INSTALL_DIR}/include
+                    #${NOELLE_INSTALL_DIR}/include
                     )
 
 IF(${SVF_AVAILABLE})

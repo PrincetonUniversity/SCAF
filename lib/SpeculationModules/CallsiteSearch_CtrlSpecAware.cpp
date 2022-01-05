@@ -8,7 +8,7 @@
 #include "scaf/MemoryAnalysisModules/SemiLocalFunAA.h"
 #include "scaf/SpeculationModules/CallsiteSearch_CtrlSpecAware.h"
 #include "scaf/SpeculationModules/KillFlow_CtrlSpecAware.h"
-#include "scaf/Utilities/CallSiteFactory.h"
+#include "scaf/Utilities/CallBaseFactory.h"
 
 namespace liberty
 {
@@ -17,7 +17,7 @@ namespace liberty
   #define INCREF(x)   do { if(x) x->incref(); } while(0)
   #define DECREF(x)   do { if(x) x->decref(); } while(0)
 
-  CallsiteContext_CtrlSpecAware::CallsiteContext_CtrlSpecAware(const CallSite &call, CallsiteContext_CtrlSpecAware *within)
+  CallsiteContext_CtrlSpecAware::CallsiteContext_CtrlSpecAware(const CallBase &call, CallsiteContext_CtrlSpecAware *within)
     : cs(call), parent(within), refcount(0) { INCREF(parent); }
 
   void CallsiteContext_CtrlSpecAware::print(raw_ostream &out) const
@@ -60,7 +60,7 @@ namespace liberty
     return *this;
   }
 
-  Context_CtrlSpecAware Context_CtrlSpecAware::getSubContext_CtrlSpecAware(const CallSite &cs) const
+  Context_CtrlSpecAware Context_CtrlSpecAware::getSubContext_CtrlSpecAware(const CallBase &cs) const
   {
     CallsiteContext_CtrlSpecAware *ctx = new CallsiteContext_CtrlSpecAware(cs,first);
     return Context_CtrlSpecAware(ctx);
@@ -161,11 +161,11 @@ namespace liberty
     if( PointerIsLocalToContext_CtrlSpecAware )
     {
       if( const Argument *arg = dyn_cast< Argument >(ptr) )
-        if( arg->getParent() == ctx->getCallSite().getCalledFunction() )
-          ptr = ctx->getCallSite().getArgument( arg->getArgNo() );
+        if( arg->getParent() == ctx->getCallBase().getCalledFunction() )
+          ptr = ctx->getCallBase().getArgument( arg->getArgNo() );
       if( const Argument *arg = dyn_cast< Argument >(obj) )
-        if( arg->getParent() == ctx->getCallSite().getCalledFunction() )
-          obj = ctx->getCallSite().getArgument( arg->getArgNo() );
+        if( arg->getParent() == ctx->getCallBase().getCalledFunction() )
+          obj = ctx->getCallBase().getArgument( arg->getArgNo() );
     }
 
     // Before recurring, check for timeout.
@@ -224,8 +224,8 @@ namespace liberty
 
       // Substitute formal parameters
       if( const Argument *arg = dyn_cast< Argument >(obj) )
-        if( arg->getParent() == ctx->getCallSite().getCalledFunction() )
-          obj = ctx->getCallSite().getArgument( arg->getArgNo() );
+        if( arg->getParent() == ctx->getCallBase().getCalledFunction() )
+          obj = ctx->getCallBase().getArgument( arg->getArgNo() );
 
       // And recur.
       getUnderlyingObjects(
@@ -345,7 +345,7 @@ namespace liberty
     }
     else
     {
-      CallSite cs = getCallSite(inst);
+      CallBase cs = getCallBase(inst);
       assert( cs.getInstruction() && "WTF");
 
       Function *f = cs.getCalledFunction();
@@ -430,7 +430,7 @@ namespace liberty
         return false;
     }
 
-    CallSite cs = getCallSite(inst);
+    CallBase cs = getCallBase(inst);
     if( cs.getInstruction() )
     {
       if( isa< DbgInfoIntrinsic >(inst) )
@@ -478,7 +478,7 @@ namespace liberty
         return false;
     }
 
-    CallSite cs = getCallSite(inst);
+    CallBase cs = getCallBase(inst);
     if( cs.getInstruction() )
     {
       if( isa< DbgInfoIntrinsic >(inst) )
@@ -564,7 +564,7 @@ namespace liberty
   bool ForwardSearch_CtrlSpecAware::isGoalState(const CtxInst_CtrlSpecAware &n)
   {
     const Instruction *inst = n.getInst();
-    CallSite cs = getCallSite(inst);
+    CallBase cs = getCallBase(inst);
     if( cs.getInstruction() )
     {
       const Function *callee = cs.getCalledFunction();
@@ -680,7 +680,7 @@ namespace liberty
   bool ReverseSearch_CtrlSpecAware::isGoalState(const CtxInst_CtrlSpecAware &n)
   {
     const Instruction *inst = n.getInst();
-    CallSite cs = getCallSite(inst);
+    CallBase cs = getCallBase(inst);
     if( cs.getInstruction() )
     {
       const Function *callee = cs.getCalledFunction();

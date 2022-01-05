@@ -35,35 +35,35 @@ struct Indeterminate
   static bool isCalloc(const Value *inst);
   static bool isRealloc(const Value *inst);
 
-  static bool isMallocOrCalloc(const CallSite &cs);
-  static bool isMalloc(const CallSite &cs);
-  static bool isNewNoThrow(const CallSite &cs);
-  static bool isCalloc(const CallSite &cs);
-  static bool isRealloc(const CallSite &cs);
+  static bool isMallocOrCalloc(const CallBase &cs);
+  static bool isMalloc(const CallBase &cs);
+  static bool isNewNoThrow(const CallBase &cs);
+  static bool isCalloc(const CallBase &cs);
+  static bool isRealloc(const CallBase &cs);
 
   // Functions which free memory
   static bool isFree(const Value *inst);
-  static bool isFree(const CallSite &cs);
+  static bool isFree(const CallBase &cs);
 
   // Functions which allocate a FILE*
   static bool isFopen(const Value *inst);
-  static bool isFopen(const CallSite &cs);
-  static bool isFdopen(const CallSite &cs);
-  static bool isFreopen(const CallSite &cs);
-  static bool isPopen(const CallSite &cs);
-  static bool isTmpfile(const CallSite &cs);
-  static bool isOpendir(const CallSite &cs);
-  static bool returnsNewFilePointer(const CallSite &cs);
+  static bool isFopen(const CallBase &cs);
+  static bool isFdopen(const CallBase &cs);
+  static bool isFreopen(const CallBase &cs);
+  static bool isPopen(const CallBase &cs);
+  static bool isTmpfile(const CallBase &cs);
+  static bool isOpendir(const CallBase &cs);
+  static bool returnsNewFilePointer(const CallBase &cs);
 
   // Functions which free a FILE*
   static bool isFclose(const Value *inst);
-  static bool isFclose(const CallSite &cs);
-  static bool isClosedir(const CallSite &cs);
-  static bool closesFilePointer(const CallSite &cs);
+  static bool isFclose(const CallBase &cs);
+  static bool isClosedir(const CallBase &cs);
+  static bool closesFilePointer(const CallBase &cs);
 
   // Functions which return a pointer to a constant, null-terminated
   // buffer located inside of a library.
-  static bool returnsLibraryConstantString(const CallSite &cs);
+  static bool returnsLibraryConstantString(const CallBase &cs);
 };
 
 }

@@ -62,7 +62,7 @@ using namespace llvm::noelle;
     /// If <after> belongs to this block and <before> is is not null, only consider operations BEFORE <before>
     bool blockMustKillAggregate(const BasicBlock *bb, const Value *aggregate, const Instruction *after, const Instruction *before, time_t queryStart, unsigned Timeout);
 
-    bool allLoadsAreKilledBefore(const Loop *L, CallSite &cs, time_t queryStart, unsigned Timeout);
+    bool allLoadsAreKilledBefore(const Loop *L, CallBase &cs, time_t queryStart, unsigned Timeout);
 
     BasicBlock *getLoopEntryBB(const Loop *loop);
     bool aliasBasePointer(const Value *gepptr, const Value *killgepptr,

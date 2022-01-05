@@ -105,7 +105,7 @@ double ProfilePerformanceEstimator::estimate_weight(const Instruction *inst)
   {
     LoopProfLoad &lprof = getAnalysis< LoopProfLoad >();
     // errs() << "Assume call or invoke\n";
-    return lprof.getCallSiteTime(inst);
+    return lprof.getCallBaseTime(inst);
   }
 
   const BasicBlock *bb = inst->getParent();
@@ -269,7 +269,7 @@ void ProfilePerformanceEstimator::visit(const Function *fcn, const Loop *loop, c
 
       // Do we have a time measurement for this?
       if( isa<CallInst>(inst) || isa<InvokeInst>(inst) )
-        sum_nested_callsites += lprof.getCallSiteTime(inst);
+        sum_nested_callsites += lprof.getCallBaseTime(inst);
 
       else
         sum_relative_weights_of_locals += relative_weight(inst);

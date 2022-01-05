@@ -3,8 +3,8 @@
 
 #include "llvm/IR/Instructions.h"
 
-#include "Noelle.hpp"
-#include "PDG.hpp"
+//#include "Noelle.hpp"
+////#include "PDG.hpp"
 #include "scaf/MemoryAnalysisModules/LoopAA.h"
 #include "scaf/SpeculationModules/Remediator.h"
 #include "scaf/Utilities/ModuleLoops.h"
@@ -17,7 +17,7 @@ class CountedIVRemedy : public Remedy {
 public:
   const PHINode *ivPHI;
 
-  void apply(Task *task);
+  //void apply(Task *task);
   bool compare(const Remedy_ptr rhs) const;
   StringRef getRemedyName() const { return "counted-iv-remedy"; };
 };

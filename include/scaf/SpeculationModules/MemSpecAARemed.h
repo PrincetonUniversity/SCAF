@@ -38,7 +38,7 @@ public:
 
   Remedies subR;
 
-  void apply(Task *task);
+  //void apply(Task *task);
   bool compare(const Remedy_ptr rhs) const;
   StringRef getRemedyName() const { return "mem-spec-aa-remedy"; };
 

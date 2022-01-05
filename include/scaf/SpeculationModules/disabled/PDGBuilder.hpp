@@ -26,7 +26,7 @@
 #include "scaf/SpeculationModules/TXIOAA.h"
 #include "scaf/SpeculationModules/CommutativeLibsAA.h"
 
-#include "PDG.hpp"
+//#include "PDG.hpp"
 
 #include <unordered_set>
 #include <unordered_map>

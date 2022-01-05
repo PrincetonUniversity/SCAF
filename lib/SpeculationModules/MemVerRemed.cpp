@@ -15,9 +15,11 @@ using namespace llvm::noelle;
 STATISTIC(numNoMemDep,
           "Number of false mem deps removed with memory versioning");
 
-void MemVerRemedy::apply(Task *task) {
-  // doing process-based parallelization suffices
-}
+/*
+ *void MemVerRemedy::apply(Task *task) {
+ *  // doing process-based parallelization suffices
+ *}
+ */
 
 bool MemVerRemedy::compare(const Remedy_ptr rhs) const {
   std::shared_ptr<MemVerRemedy> memVerRhs =
