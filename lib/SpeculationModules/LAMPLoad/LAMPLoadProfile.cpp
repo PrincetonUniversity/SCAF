@@ -92,6 +92,7 @@ void purgeList();
 
 static std::map<unsigned int, BasicBlock*> IdToLoopMap_global;
 static std::map<BasicBlock*, unsigned int> LoopToIdMap_global;
+static bool IdInitFlag = false; 
 
 inline unsigned int str_to_int(std::string& s)
 {
@@ -230,8 +231,7 @@ void LAMPBuildLoopMap::getAnalysisUsage(AnalysisUsage &AU) const {
 
 char LAMPBuildLoopMap::ID = 0;
 unsigned int LAMPBuildLoopMap::loop_id = 0;
-bool LAMPBuildLoopMap::IdInitFlag = false;
-namespace { static RegisterPass<LAMPBuildLoopMap> RP2("lamp-map-loop","Build the map of LAMP Id and Loop", false, false); }
+namespace { static RegisterPass<LAMPBuildLoopMap> RP2("lamp-map-loop","Build the map of LAMP Id and Loop", false, true); }
 LoopPass *llvm::createLAMPBuildLoopMapPass() { return new LAMPBuildLoopMap(); }
 
 bool LAMPBuildLoopMap::runOnLoop(Loop* L, LPPassManager &LPM)
@@ -266,6 +266,7 @@ namespace { static RegisterPass<LAMPLoadProfile> RP3(
 
 bool LAMPLoadProfile::runOnModule(Module& M)
 {
+  assert(IdInitFlag && "Need to run lamp-map-loop pass first!");
   std::map<BasicBlock*, InstPairSet > LoopToDepSetMap;
   //int id;
 

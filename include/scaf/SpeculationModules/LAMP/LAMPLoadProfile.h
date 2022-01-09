@@ -75,7 +75,6 @@ namespace llvm {
 
   class LAMPBuildLoopMap : public LoopPass {
     static unsigned int loop_id;
-    static bool IdInitFlag;
 
     public:
     static char ID;
