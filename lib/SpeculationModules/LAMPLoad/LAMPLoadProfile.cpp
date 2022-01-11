@@ -225,13 +225,13 @@ namespace { static RegisterPass<LdStCallCounter> RP1(
  */
 
 void LAMPBuildLoopMap::getAnalysisUsage(AnalysisUsage &AU) const {
-  AU.setPreservesAll();
   AU.addRequired<LdStCallCounter>();
+  AU.setPreservesAll();
 }
 
 char LAMPBuildLoopMap::ID = 0;
 unsigned int LAMPBuildLoopMap::loop_id = 0;
-namespace { static RegisterPass<LAMPBuildLoopMap> RP2("lamp-map-loop","Build the map of LAMP Id and Loop", false, true); }
+namespace { static RegisterPass<LAMPBuildLoopMap> RP2("lamp-map-loop","Build the map of LAMP Id and Loop", false, false); }
 LoopPass *llvm::createLAMPBuildLoopMapPass() { return new LAMPBuildLoopMap(); }
 
 bool LAMPBuildLoopMap::runOnLoop(Loop* L, LPPassManager &LPM)
@@ -247,7 +247,7 @@ bool LAMPBuildLoopMap::runOnLoop(Loop* L, LPPassManager &LPM)
   LoopToIdMap_global[BB] = loop_id;
   LLVM_DEBUG(errs() << loop_id << " " << L << " " << BB << '\n');
 
-  return true;
+  return false;
 }
 
 
