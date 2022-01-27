@@ -26,7 +26,7 @@
 #include "scaf/SpeculationModules/LoopProf/Targets.h"
 #include "scaf/Utilities/Metadata.h"
 
-#include "PDGPrinter.hpp"
+#include "noelle/core/PDGPrinter.hpp"
 #include "Assumptions.h"
 
 using namespace llvm;

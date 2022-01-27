@@ -1,7 +1,7 @@
 #ifndef LLVM_LIBERTY_REMEDIATOR_H
 #define LLVM_LIBERTY_REMEDIATOR_H
 
-#include "PDG.hpp"
+#include "noelle/core/PDG.hpp"
 #include "llvm/Pass.h"
 #include "llvm/IR/CallSite.h"
 #include "llvm/Support/CommandLine.h"
@@ -18,9 +18,9 @@
 #include "scaf/Utilities/InsertPrintf.h"
 #include "scaf/Utilities/InstInsertPt.h"
 
-#include "PDG.hpp"
-//#include "LoopDependenceInfo.hpp"
-#include "Task.hpp"
+#include "noelle/core/PDG.hpp"
+//#include "noelle/core/LoopDependenceInfo.hpp"
+#include "noelle/core/Task.hpp"
 
 #include <set>
 #include <unordered_set>

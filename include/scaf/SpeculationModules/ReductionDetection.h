@@ -6,7 +6,7 @@
 
 #include "scaf/SpeculationModules/Reduction.h"
 
-#include "PDG.hpp"
+#include "noelle/core/PDG.hpp"
 
 #include<unordered_set>
 
