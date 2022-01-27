@@ -181,9 +181,9 @@ double ProfilePerformanceEstimator::estimate_parallelization_weight(const Instru
   const double bbcnt = bfi.getBlockProfileCount(bb).getValue();
 
   // FIXME: get the headercnt of the target loop; this might not be other client want
-  const double headerCntOuter = bfi.getBlockProfileCount(target_loop->getHeader()).getValue();
-  if (headerCntOuter == 0) return 0.0;
-  return (bbcnt * 1.0) / headerCntOuter; // the probability of inst executed in the closest loop
+  //const double headerCntOuter = bfi.getBlockProfileCount(target_loop->getHeader()).getValue();
+  //if (headerCntOuter == 0) return 0.0;
+  //return (bbcnt * 1.0) / headerCntOuter; // the probability of inst executed in the closest loop
 
   const double headercnt = bfi.getBlockProfileCount(header).getValue();
 
