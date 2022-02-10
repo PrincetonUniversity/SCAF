@@ -1,10 +1,11 @@
-#include "llvm/Support/Casting.h"
 #define DEBUG_TYPE "smtx-aa"
 
 #define LAMP_COLLECTS_OUTPUT_DEPENDENCES  (0)
 
-#include "scaf/SpeculationModules/SmtxAA.h"
+#include <memory>
 
+#include "scaf/SpeculationModules/SmtxAA.h"
+#include "llvm/Support/Casting.h"
 #include "llvm/ADT/Statistic.h"
 #include "llvm/IR/IntrinsicInst.h"
 
@@ -12,9 +13,7 @@
 #define DEFAULT_LAMP_REMED_COST 999
 #endif
 
-namespace liberty
-{
-namespace SpecPriv
+namespace liberty::SpecPriv
 {
 
   using namespace llvm;
@@ -110,9 +109,9 @@ namespace SpecPriv
     LAMPLoadProfile &lamp = smtxMan->getLampResult();
 
     std::shared_ptr<SmtxLampRemedy> remedyA =
-        std::shared_ptr<SmtxLampRemedy>(new SmtxLampRemedy());
+        std::make_shared<SmtxLampRemedy>();
     std::shared_ptr<SmtxLampRemedy> remedyB =
-        std::shared_ptr<SmtxLampRemedy>(new SmtxLampRemedy());
+        std::make_shared<SmtxLampRemedy>();
     //remedy->cost = DEFAULT_LAMP_REMED_COST;
 
     //remedy->writeI = A;
@@ -130,7 +129,7 @@ namespace SpecPriv
       if (!EnableExternalCall)
         return false;
       else {
-        const CallBase *callee = dyn_cast<CallBase>(A);
+        const auto *callee = dyn_cast<CallBase>(A);
 
         if (callee) {
           auto *fn = callee->getCalledFunction();
@@ -327,6 +326,5 @@ namespace SpecPriv
     //return result;
   }
 
-}
 }
 

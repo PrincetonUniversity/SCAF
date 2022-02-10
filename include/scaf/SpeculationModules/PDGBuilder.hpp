@@ -5,23 +5,24 @@
 #include "llvm/IR/Instructions.h"
 #include "llvm/IR/Module.h"
 
-#include "scaf/Utilities/ControlSpecIterators.h"
-#include "scaf/Utilities/ControlSpeculation.h"
 #include "scaf/MemoryAnalysisModules/LoopAA.h"
 #include "scaf/MemoryAnalysisModules/SimpleAA.h"
-#include "scaf/SpeculationModules/EdgeCountOracleAA.h"
-#include "scaf/SpeculationModules/PointsToAA.h"
-#include "scaf/SpeculationModules/PredictionSpeculation.h"
-#include "scaf/SpeculationModules/PtrResidueAA.h"
-#include "scaf/SpeculationModules/ReadOnlyAA.h"
-#include "scaf/SpeculationModules/ShortLivedAA.h"
-#include "scaf/SpeculationModules/SmtxAA.h"
 #include "scaf/SpeculationModules/CallsiteDepthCombinator_CtrlSpecAware.h"
 #include "scaf/SpeculationModules/Classify.h"
+#include "scaf/SpeculationModules/EdgeCountOracleAA.h"
 #include "scaf/SpeculationModules/KillFlow_CtrlSpecAware.h"
-#include "scaf/Utilities/LoopDominators.h"
+#include "scaf/SpeculationModules/PointsToAA.h"
+#include "scaf/SpeculationModules/PredictionSpeculation.h"
 #include "scaf/SpeculationModules/PredictionSpeculator.h"
+#include "scaf/SpeculationModules/PtrResidueAA.h"
 #include "scaf/SpeculationModules/Read.h"
+#include "scaf/SpeculationModules/ReadOnlyAA.h"
+#include "scaf/SpeculationModules/ShortLivedAA.h"
+#include "scaf/SpeculationModules/SlampOracleAA.h"
+#include "scaf/SpeculationModules/SmtxAA.h"
+#include "scaf/Utilities/ControlSpecIterators.h"
+#include "scaf/Utilities/ControlSpeculation.h"
+#include "scaf/Utilities/LoopDominators.h"
 
 #include "scaf/SpeculationModules/TXIOAA.h"
 #include "scaf/SpeculationModules/CommutativeLibsAA.h"
@@ -40,6 +41,7 @@ struct PDGBuilder : public ModulePass {
 public:
   static char ID;
   PDGBuilder() : ModulePass(ID) {
+    slampaa = 0;
     smtxaa = 0;
     edgeaa = 0;
     predaa = 0;
@@ -66,6 +68,7 @@ private:
   const DataLayout *DL;
   NoControlSpeculation noctrlspec;
   SmtxAA *smtxaa;
+  SlampOracleAA *slampaa;
   EdgeCountOracle *edgeaa;
   PredictionAA *predaa;
   ControlSpeculation *ctrlspec;

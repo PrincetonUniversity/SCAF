@@ -25,6 +25,8 @@
 #include "scaf/Utilities/ReportDump.h"
 #include "scaf/SpeculationModules/LoopProf/Targets.h"
 #include "scaf/Utilities/Metadata.h"
+#include "scaf/SpeculationModules/SLAMPLoad.h"
+#include "scaf/SpeculationModules/SlampOracleAA.h"
 
 #include "noelle/core/PDGPrinter.hpp"
 #include "Assumptions.h"
@@ -53,6 +55,11 @@ cl::opt<bool> EnableLamp = cl::opt<bool> ( "enable-lamp",
     cl::NotHidden,
     cl::desc("Enable LAMP and mem spec modules"));
 
+cl::opt<bool> EnableSlamp = cl::opt<bool> ( "enable-slamp",
+    cl::init(false),
+    cl::NotHidden,
+    cl::desc("Enable SLAMP and mem spec modules"));
+
 cl::opt<bool> EnableSpecPriv = cl::opt<bool> ( "enable-specpriv",
     cl::init(false),
     cl::NotHidden,
@@ -78,6 +85,11 @@ void llvm::PDGBuilder::getAnalysisUsage(AnalysisUsage &AU) const {
 
   if (EnableLamp) {
     AU.addRequired<SmtxSpeculationManager>();
+  }
+
+  if (EnableSlamp) {
+    AU.addRequired<SLAMPLoadProfile>();
+    AU.addRequired<SlampOracleAA>();
   }
 
   if (EnableSpecPriv) {
@@ -191,9 +203,15 @@ void llvm::PDGBuilder::addSpecModulesToLoopAA() {
   PerformanceEstimator *perf = &getAnalysis<ProfilePerformanceEstimator>();
 
   if (EnableLamp) {
-    SmtxSpeculationManager &smtxMan = getAnalysis<SmtxSpeculationManager>();
+    auto &smtxMan = getAnalysis<SmtxSpeculationManager>();
     smtxaa = new SmtxAA(&smtxMan, perf); // LAMP
     smtxaa->InitializeLoopAA(this, *DL);
+  }
+
+  if (EnableSlamp) {
+    auto &slamp = getAnalysis<SLAMPLoadProfile>();
+    slampaa = new SlampOracleAA(&slamp);
+    slampaa->InitializeLoopAA(this, *DL);
   }
 
   if (EnableEdgeProf) {
@@ -266,6 +284,7 @@ void llvm::PDGBuilder::specModulesLoopSetup(Loop *loop) {
 
 void llvm::PDGBuilder::removeSpecModulesFromLoopAA() {
   // c++ guarantee that if null nothing bad will happen
+  delete slampaa;
   delete smtxaa;
   delete edgeaa;
   delete predaa;
