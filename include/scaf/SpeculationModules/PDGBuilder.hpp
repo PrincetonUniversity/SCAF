@@ -1,0 +1,109 @@
+#pragma once
+
+#include "llvm/Pass.h"
+#include "llvm/IR/BasicBlock.h"
+#include "llvm/IR/Instructions.h"
+#include "llvm/IR/Module.h"
+
+#include "scaf/MemoryAnalysisModules/LoopAA.h"
+#include "scaf/MemoryAnalysisModules/SimpleAA.h"
+#include "scaf/SpeculationModules/CallsiteDepthCombinator_CtrlSpecAware.h"
+#include "scaf/SpeculationModules/Classify.h"
+#include "scaf/SpeculationModules/EdgeCountOracleAA.h"
+#include "scaf/SpeculationModules/KillFlow_CtrlSpecAware.h"
+#include "scaf/SpeculationModules/PointsToAA.h"
+#include "scaf/SpeculationModules/PredictionSpeculation.h"
+#include "scaf/SpeculationModules/PredictionSpeculator.h"
+#include "scaf/SpeculationModules/PtrResidueAA.h"
+#include "scaf/SpeculationModules/Read.h"
+#include "scaf/SpeculationModules/ReadOnlyAA.h"
+#include "scaf/SpeculationModules/ShortLivedAA.h"
+#include "scaf/SpeculationModules/SlampOracleAA.h"
+#include "scaf/SpeculationModules/SmtxAA.h"
+#include "scaf/Utilities/ControlSpecIterators.h"
+#include "scaf/Utilities/ControlSpeculation.h"
+#include "scaf/Utilities/LoopDominators.h"
+
+#include "scaf/SpeculationModules/TXIOAA.h"
+#include "scaf/SpeculationModules/CommutativeLibsAA.h"
+
+#include "noelle/core/PDG.hpp"
+
+#include <unordered_set>
+#include <unordered_map>
+
+using namespace llvm;
+using namespace llvm::noelle;
+using namespace liberty;
+
+namespace llvm {
+struct PDGBuilder : public ModulePass {
+public:
+  static char ID;
+  PDGBuilder() : ModulePass(ID) {
+    slampaa = 0;
+    smtxaa = 0;
+    edgeaa = 0;
+    predaa = 0;
+    ptrresaa = 0;
+    pointstoaa = 0;
+    roaa = 0;
+    localaa = 0;
+    simpleaa = 0;
+    killflow_aware = 0;
+    callsite_aware = 0;
+    txioaa = 0;
+    commlibsaa = 0;
+  }
+  virtual ~PDGBuilder() {}
+
+  // bool doInitialization (Module &M) override ;
+  void getAnalysisUsage(AnalysisUsage &AU) const override;
+  bool runOnModule(Module &M) override;
+
+  std::unique_ptr<PDG> getLoopPDG(Loop *loop);
+
+private:
+  unsigned loopCount = 0;
+  const DataLayout *DL;
+  NoControlSpeculation noctrlspec;
+  SmtxAA *smtxaa;
+  SlampOracleAA *slampaa;
+  EdgeCountOracle *edgeaa;
+  PredictionAA *predaa;
+  ControlSpeculation *ctrlspec;
+  PredictionSpeculation *predspec;
+  PtrResidueAA *ptrresaa;
+  PointsToAA *pointstoaa;
+  ReadOnlyAA *roaa;
+  ShortLivedAA *localaa;
+
+  TXIOAA *txioaa;
+  CommutativeLibsAA *commlibsaa;
+
+  SimpleAA *simpleaa;
+  Read *spresults;
+  Classify *classify;
+  KillFlow_CtrlSpecAware *killflow_aware;
+  CallsiteDepthCombinator_CtrlSpecAware *callsite_aware;
+
+  void addSpecModulesToLoopAA();
+  void specModulesLoopSetup(Loop *loop);
+  void removeSpecModulesFromLoopAA();
+  void constructEdgesFromUseDefs(PDG &pdg, Loop *loop);
+  void constructEdgesFromMemory(PDG &pdg, Loop *loop, LoopAA *aa);
+  void constructEdgesFromControl(PDG &pdg, Loop *loop);
+
+  void queryMemoryDep(Instruction *src, Instruction *dst,
+                      LoopAA::TemporalRelation FW, LoopAA::TemporalRelation RV,
+                      Loop *loop, LoopAA *aa, PDG &pdg);
+
+  void queryLoopCarriedMemoryDep(Instruction *src, Instruction *dst, Loop *loop,
+                                 LoopAA *aa, PDG &pdg);
+
+  void queryIntraIterationMemoryDep(Instruction *src, Instruction *dst,
+                                    Loop *loop, LoopAA *aa, PDG &pdg);
+
+  void annotateMemDepsWithRemedies(PDG &pdg, Loop *loop, LoopAA *aa);
+};
+} // namespace llvm

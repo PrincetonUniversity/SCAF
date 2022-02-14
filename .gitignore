@@ -1,4 +1,5 @@
 .clangd
+.cache
 
 ### macOS ###
 # General
@@ -50,5 +51,6 @@ autoconf/autom4te.cache
 /scaf-install-debug
 /scaf-install-release
 /build
+/build-release
 /scaf-build-debug
 /scaf-build-release
