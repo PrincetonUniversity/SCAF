@@ -6,11 +6,10 @@
 #define DEBUG_TYPE "pipeline"
 #endif
 
-//#include "liberty/Strategy/PipelineStrategy.h"
 #include "llvm/IR/Instruction.h"
 #include "llvm/Analysis/LoopInfo.h"
 #include "scaf/Utilities/MakePtr.h"
-#include "scaf/Utilities/PipelineStrategy.h"
+#include "scaf/SpeculationModules/PipelineStrategy.h"
 #include "llvm/Support/Format.h"
 #include "llvm/Support/Debug.h"
 
