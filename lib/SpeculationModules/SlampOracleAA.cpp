@@ -246,18 +246,22 @@ LoopAA::ModRefResult SlampOracleAA::modref(
     // Chain.
     LoopAA::ModRefResult chainresult = LoopAA::modref(A,rel,B,L,R);
 
-    if ( result > ( result & chainresult ) )
-    {
-      errs() << "result " << result << "\n";
-      errs() << "chainresult " << chainresult << "\n";
-      errs() << A->getParent()->getParent()->getName() << "::" << A->getParent()->getName();
-      A->dump();
-      errs() << B->getParent()->getParent()->getName() << "::" << B->getParent()->getName();
-      B->dump();
-      errs() << "rel: " << rel << "\n";
-      assert( false );
-    }
-    result = ModRefResult(result & LoopAA::modref(A,rel,B,L,R) );
+    /*
+     * // FIXME: Very intersting conflict check
+     * if ( result > ( result & chainresult ) )
+     * {
+     *   errs() << "result " << result << "\n";
+     *   errs() << "chainresult " << chainresult << "\n";
+     *   errs() << A->getParent()->getParent()->getName() << "::" << A->getParent()->getName();
+     *   A->dump();
+     *   errs() << B->getParent()->getParent()->getName() << "::" << B->getParent()->getName();
+     *   B->dump();
+     *   errs() << "rel: " << rel << "\n";
+     *   assert( false );
+     * }
+     * result = ModRefResult(result & LoopAA::modref(A,rel,B,L,R) );
+     */
+    result = ModRefResult(result & chainresult);
   }
 
   return result;
