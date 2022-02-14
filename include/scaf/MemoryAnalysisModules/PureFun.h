@@ -362,9 +362,3 @@
 
 // unistd.h
   "isatty",
-
-// FIXME: temporarily add malloc back
-// Try to get malloc back
-  "malloc",
-  "calloc",
-  "free",
