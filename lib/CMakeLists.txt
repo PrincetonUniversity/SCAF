@@ -1,3 +1,5 @@
 add_subdirectory(Utilities)
 add_subdirectory(MemoryAnalysisModules)
-add_subdirectory(SpeculationModules)
+if (ENABLE_SPECULATION)
+    add_subdirectory(SpeculationModules)
+endif (ENABLE_SPECULATION)
