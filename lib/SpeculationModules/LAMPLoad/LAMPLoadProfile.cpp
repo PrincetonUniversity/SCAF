@@ -40,7 +40,7 @@
 
 #include "llvm/Support/raw_ostream.h"
 #include "llvm/Support/Debug.h"
-#include "Metadata.h"
+#include "scaf/Utilities/Metadata.h"
 
 
 #define LCOUTFILE "lcout.out"
