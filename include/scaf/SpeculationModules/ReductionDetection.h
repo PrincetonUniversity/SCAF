@@ -14,6 +14,7 @@ namespace liberty
 {
 using namespace llvm;
 using namespace SpecPriv;
+using namespace llvm::noelle;
 
 struct MinMaxReductionInfo {
   const CmpInst *cmpInst;
@@ -37,7 +38,7 @@ struct MinMaxReductionInfo {
   std::vector<Value*> reductionLiveOuts;
 
   /// List of edges affected by this reduction.
-  typedef std::vector<DGEdge<Value *> *> Edges;
+  using Edges = std::vector<DGEdge<Value *> *>;
   Edges edges;
 };
 
