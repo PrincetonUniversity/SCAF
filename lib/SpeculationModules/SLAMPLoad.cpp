@@ -139,19 +139,27 @@ bool SLAMPLoadProfile::runOnModule(Module &m) {
     // double   da = string_to<double>(tokens[13]);
     // double   db = string_to<double>(tokens[14]);
 
-    assert(src && dst);
+    // assert(src && dst);
 
     // get loop header
     BasicBlock *header = sid->getBBWithID(loopid);
     assert(header);
 
-    Function *fcn = header->getParent();
-    LoopInfo &li = mloops.getAnalysis_LoopInfo(fcn);
-    Loop *loop = li.getLoopFor(header);
-    if (loop->getHeader() != header) {
-      errs() << "Error: sid mismatch, " << loop->getHeader()->getName()
-             << " != " << header->getName() << "\n";
-      assert(false);
+    // this is just a fake dep
+    if (src == 0 && dst == 0) {
+      if (DebugFlag && isCurrentDebugType(DEBUG_TYPE)) {
+        errs() << "Counting loop: " <<  loopid << "\n";
+      }
+    }
+    else {
+      Function *fcn = header->getParent();
+      LoopInfo &li = mloops.getAnalysis_LoopInfo(fcn);
+      Loop *loop = li.getLoopFor(header);
+      if (loop->getHeader() != header) {
+        errs() << "Error: sid mismatch, " << loop->getHeader()->getName()
+          << " != " << header->getName() << "\n";
+        assert(false);
+      }
     }
 
     DepEdge edge(src, dst, iscross);
