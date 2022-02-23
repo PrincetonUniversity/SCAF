@@ -4,8 +4,6 @@
 #include "llvm/Analysis/LoopInfo.h"
 #include "llvm/Pass.h"
 
-#include "scaf/Utilities/StaticID.h"
-
 #include <map>
 #include <set>
 
@@ -46,6 +44,7 @@ public:
   bool runOnModule(Module &m);
 
   bool isTargetLoop(const Loop *loop);
+  void createNamerMaps(Module &M);
 
   uint64_t numObsInterIterDep(BasicBlock *header, const Instruction *dst,
                               const Instruction *src);
@@ -57,6 +56,27 @@ public:
                                  const Instruction *src);
   PredMap getPredictions(BasicBlock *header, const Instruction *dst,
                          const Instruction *src, bool isLC);
+
+  template<class T>
+  T *getTwithId(unsigned int id, std::map<int, T*> m) {
+    if (m.count(id) == 0) {
+      return nullptr;
+    } else {
+      return m[id];
+    }
+  }
+
+  Instruction *getInstructionWithID(unsigned int id) {
+    return getTwithId(id, instMap);
+  }
+
+  Function *getFuncWithID(unsigned int id) {
+    return getTwithId(id, functionMap);
+  }
+
+  BasicBlock *getBBWithID(unsigned int id) {
+    return getTwithId(id, bbMap);
+  }
 
 private:
   class DepEdge {
@@ -89,8 +109,6 @@ private:
     double dval;
   };
 
-  StaticID *sid;
-
   using DepEdgeMap = map<DepEdge, uint64_t, DepEdgeComp>;
   map<uint32_t, DepEdgeMap> edges;
 
@@ -102,6 +120,10 @@ private:
   bool isLinearPredictionDoubleApplicable(LoadInst *li);
   uint64_t numObsDep(BasicBlock *header, const Instruction *dst,
                      const Instruction *src, bool crossIter);
+
+  std::map<int, Function*> functionMap;
+  std::map<int, BasicBlock*> bbMap;
+  std::map<int, Instruction*> instMap;
 };
 
 } // namespace liberty::slamp

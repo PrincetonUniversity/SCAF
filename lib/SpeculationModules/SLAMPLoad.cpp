@@ -1,8 +1,10 @@
+#include "llvm/IR/Instructions.h"
 #define DEBUG_TYPE "slamp-load"
 
 #include "scaf/Utilities/PrintDebugInfo.h"
 #include "scaf/Utilities/ModuleLoops.h"
 #include "scaf/SpeculationModules/SLAMPLoad.h"
+#include "scaf/Utilities/Metadata.h"
 
 #include "llvm/IR/DataLayout.h"
 #include "llvm/Support/CommandLine.h"
@@ -52,7 +54,7 @@ static size_t split(const string s, vector<string> &tokens, char delim) {
 }
 
 void SLAMPLoadProfile::getAnalysisUsage(AnalysisUsage &au) const {
-  au.addRequired<StaticID>();
+  // au.addRequired<StaticID>();
   au.addRequired<ModuleLoops>();
   au.setPreservesAll();
 }
@@ -100,12 +102,37 @@ bool SLAMPLoadProfile::isLinearPredictionDoubleApplicable(LoadInst *li) {
   return true;
 }
 
+void SLAMPLoadProfile::createNamerMaps(Module &M) {
+
+  for (auto &F: M) {
+    int id = Namer::getFuncId(&F);
+    if (id != -1)
+      functionMap[id] = &F;
+    for (auto &BB: F) {
+      int id = Namer::getBlkId(&BB);
+      if (id != -1)
+        bbMap[id] = &BB;
+
+      for (auto &inst : BB) {
+        if (isa<LoadInst>(inst) || isa<StoreInst>(inst) || isa<CallBase>(inst)) {
+          int id = Namer::getInstrId(&inst);
+          instMap[id] = &inst;
+        }
+      }
+    }
+  }
+
+}
+
 bool SLAMPLoadProfile::runOnModule(Module &m) {
-  sid = &getAnalysis<StaticID>();
+  // sid = &getAnalysis<StaticID>();
 
   auto &mloops = getAnalysis<ModuleLoops>();
 
   ifstream ifs(outfile.c_str());
+
+  // create the map from id to function/bb/inst
+  createNamerMaps(m);
 
   if (!ifs.is_open()) {
     errs() << "SLAMP output file " << outfile.c_str() << " cannot be opened\n";
@@ -142,7 +169,7 @@ bool SLAMPLoadProfile::runOnModule(Module &m) {
     // assert(src && dst);
 
     // get loop header
-    BasicBlock *header = sid->getBBWithID(loopid);
+    BasicBlock *header = getBBWithID(loopid);
     assert(header);
 
     // this is just a fake dep
@@ -210,8 +237,8 @@ bool SLAMPLoadProfile::runOnModule(Module &m) {
 
     // debug
     if (DebugFlag && isCurrentDebugType(DEBUG_TYPE)) {
-      Instruction *srcinst = sid->getInstructionWithID(src);
-      Instruction *dstinst = sid->getInstructionWithID(dst);
+      Instruction *srcinst = getInstructionWithID(src);
+      Instruction *dstinst = getInstructionWithID(dst);
 
       errs() << (iscross ? ">> Inter\n" : ">> Intra\n");
       errs() << src << " " << *srcinst;
@@ -227,14 +254,14 @@ bool SLAMPLoadProfile::runOnModule(Module &m) {
 }
 
 bool SLAMPLoadProfile::isTargetLoop(const Loop *loop) {
-  return ((this->edges).count(sid->getID(loop->getHeader())));
+  return ((this->edges).count(Namer::getBlkId(loop->getHeader())));
 }
 
 uint64_t SLAMPLoadProfile::numObsDep(BasicBlock *header, const Instruction *dst,
                                      const Instruction *src, bool crossIter) {
-  uint32_t loopid = sid->getID(header);
-  uint32_t srcid = sid->getID(src);
-  uint32_t dstid = sid->getID(dst);
+  uint32_t loopid = Namer::getBlkId(header);
+  uint32_t srcid = Namer::getInstrId(src);
+  uint32_t dstid = Namer::getInstrId(dst);
 
   DepEdge edge(srcid, dstid, crossIter);
   if ((this->edges)[loopid].count(edge))
@@ -259,9 +286,9 @@ bool SLAMPLoadProfile::isPredictableInterIterDep(BasicBlock *header,
                                                  const Instruction *dst,
                                                  const Instruction *src) {
   assert(false && "Currently disabled\n");
-  uint32_t loopid = sid->getID(header);
-  uint32_t srcid = sid->getID(src);
-  uint32_t dstid = sid->getID(dst);
+  uint32_t loopid = Namer::getBlkId(header);
+  uint32_t srcid = Namer::getInstrId(src);
+  uint32_t dstid = Namer::getInstrId(dst);
 
   DepEdge edge(srcid, dstid, 1);
 
@@ -283,9 +310,11 @@ bool SLAMPLoadProfile::isPredictableIntraIterDep(BasicBlock *header,
                                                  const Instruction *dst,
                                                  const Instruction *src) {
   assert(false && "Currently disabled\n");
-  uint32_t loopid = sid->getID(header);
-  uint32_t srcid = sid->getID(src);
-  uint32_t dstid = sid->getID(dst);
+  return false;
+
+  uint32_t loopid = Namer::getBlkId(header);
+  uint32_t srcid = Namer::getInstrId(src);
+  uint32_t dstid = Namer::getInstrId(dst);
 
   DepEdge edge(srcid, dstid, 0);
 
@@ -309,9 +338,10 @@ PredMap SLAMPLoadProfile::getPredictions(BasicBlock *header,
                                          const Instruction *dst,
                                          const Instruction *src, bool isLC) {
   assert(false && "Currently disabled\n");
-  uint32_t loopid = sid->getID(header);
-  uint32_t srcid = sid->getID(src);
-  uint32_t dstid = sid->getID(dst);
+
+  uint32_t loopid = Namer::getBlkId(header);
+  uint32_t srcid = Namer::getInstrId(src);
+  uint32_t dstid = Namer::getInstrId(dst);
 
   DepEdge edge(srcid, dstid, isLC ? 1 : 0);
 
