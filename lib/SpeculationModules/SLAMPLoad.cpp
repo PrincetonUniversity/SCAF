@@ -168,9 +168,6 @@ bool SLAMPLoadProfile::runOnModule(Module &m) {
 
     // assert(src && dst);
 
-    // get loop header
-    BasicBlock *header = getBBWithID(loopid);
-    assert(header);
 
     // this is just a fake dep
     if (src == 0 && dst == 0) {
@@ -179,6 +176,10 @@ bool SLAMPLoadProfile::runOnModule(Module &m) {
       }
     }
     else {
+      // get loop header
+      BasicBlock *header = getBBWithID(loopid);
+      assert(header);
+
       Function *fcn = header->getParent();
       LoopInfo &li = mloops.getAnalysis_LoopInfo(fcn);
       Loop *loop = li.getLoopFor(header);
