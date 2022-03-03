@@ -75,7 +75,7 @@ void llvm::PDGBuilder::getAnalysisUsage(AnalysisUsage &AU) const {
   AU.addRequired<LoopInfoWrapperPass>();
   AU.addRequired< LoopAA >();
   AU.addRequired<PostDominatorTreeWrapperPass>();
-  AU.addRequired<LLVMAAResults>();
+  // AU.addRequired<LLVMAAResults>();
 
   if (EnableEdgeProf) {
     AU.addRequired<ProfileGuidedControlSpeculator>();
@@ -152,7 +152,10 @@ bool llvm::PDGBuilder::runOnModule (Module &M){
       //errs() << "Control Dep (LC): ";
       errs() << "Deps between instr \n" << *src << "\n -> \n" << *dst << "\n";
 
-      getAnalysis<LLVMAAResults>().computeAAResults(loop->getHeader()->getParent());
+      auto llvmaa = getAnalysisIfAvailable<LLVMAAResults>();
+      if (llvmaa) {
+        llvmaa->computeAAResults(loop->getHeader()->getParent());
+      }
       LoopAA *aa = getAnalysis< LoopAA >().getTopAA();
 
       auto pdg = std::make_unique<llvm::noelle::PDG>(loop);
@@ -177,7 +180,10 @@ std::unique_ptr<llvm::noelle::PDG> llvm::PDGBuilder::getLoopPDG(Loop *loop) {
   auto pdg = std::make_unique<llvm::noelle::PDG>(loop);
 
   REPORT_DUMP(errs() << "constructEdgesFromMemory with CAF ...\n");
-  getAnalysis<LLVMAAResults>().computeAAResults(loop->getHeader()->getParent());
+  auto llvmaa = getAnalysisIfAvailable<LLVMAAResults>();
+  if (llvmaa) {
+    llvmaa->computeAAResults(loop->getHeader()->getParent());
+  }
   LoopAA *aa = getAnalysis< LoopAA >().getTopAA();
   aa->dump();
   constructEdgesFromMemory(*pdg, loop, aa);

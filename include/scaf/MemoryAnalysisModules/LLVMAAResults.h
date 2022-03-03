@@ -31,7 +31,7 @@ public:
     return false;
   }
 
-  StringRef getLoopAAName() const { return "llvm-results-aa"; }
+  StringRef getLoopAAName() const { return "llvm-aa-results"; }
 
   virtual SchedulingPreference getSchedulingPreference() const {
     return SchedulingPreference(Normal - 5);
