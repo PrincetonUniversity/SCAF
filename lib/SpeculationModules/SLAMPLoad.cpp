@@ -145,7 +145,7 @@ bool SLAMPLoadProfile::runOnModule(Module &m) {
     vector<string> tokens;
     split(line, tokens, ' ');
 
-    assert(tokens.size() == 6);
+    // assert(tokens.size() == 6);
     // assert( tokens.size() == 15 );
 
     auto loopid = string_to<uint32_t>(tokens[0]);
