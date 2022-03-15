@@ -721,4 +721,4 @@ void llvm::PDGBuilder::annotateMemDepsWithRemedies(PDG &pdg, Loop *loop,
 }
 
 char PDGBuilder::ID = 0;
-static RegisterPass< PDGBuilder > rp("pdgbuilder", "PDGBuilder");
+static RegisterPass< PDGBuilder > rp("pdgbuilder", "PDGBuilder", false, true);

@@ -26,7 +26,6 @@ static RegisterPass<SLAMPLoadProfile>
        "(SLAMPLoad) Load back profile data and generate dependency information",
        false, false);
 
-string outfile = "result.slamp.profile"; // defined in SLAMP.cpp
 
 template <class T> static T string_to(string s) {
   T ret;
@@ -129,6 +128,7 @@ bool SLAMPLoadProfile::runOnModule(Module &m) {
 
   auto &mloops = getAnalysis<ModuleLoops>();
 
+  string outfile = "result.slamp.profile"; // defined in SLAMP.cpp
   ifstream ifs(outfile.c_str());
 
   // create the map from id to function/bb/inst
