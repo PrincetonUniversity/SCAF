@@ -17,11 +17,12 @@ public:
   StringRef getRemedyName() const { return "comm-libs-remedy"; };
 };
 
-struct CommutativeLibsAA : public LoopAA // Not a pass!
+struct CommutativeLibsAA : public LoopAA, Remediator // Not a pass!
 {
   CommutativeLibsAA() : LoopAA() {}
 
   StringRef getLoopAAName() const { return "comm-libs-aa"; }
+  StringRef getRemediatorName() const override { return "comm-libs-remed"; }
 
   LoopAA::ModRefResult modref(const Instruction *A, TemporalRelation rel,
                               const Value *ptrB, unsigned sizeB, const Loop *L,
@@ -29,10 +30,12 @@ struct CommutativeLibsAA : public LoopAA // Not a pass!
 
   LoopAA::ModRefResult modref(const Instruction *A, TemporalRelation rel,
                               const Instruction *B, const Loop *L, Remedies &R);
-
+  
   LoopAA::SchedulingPreference getSchedulingPreference() const {
     return SchedulingPreference(Low - 10);
   }
+
+  RemedResp memdep(const Instruction *A, const Instruction *B, bool loopCarried, DataDepType dataDepTy, const Loop *L) override;
 
 private:
   // functions that are usually considered commutative

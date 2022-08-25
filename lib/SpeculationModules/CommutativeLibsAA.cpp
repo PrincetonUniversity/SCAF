@@ -1,3 +1,4 @@
+#include "llvm/IR/Instruction.h"
 #define DEBUG_TYPE "commlib"
 
 #include "llvm/IR/IntrinsicInst.h"
@@ -47,12 +48,9 @@ bool isProbCommFun (Function *CalledFun) {
 
 Function *CommutativeLibsAA::getCalledFun(const Instruction *A) {
   Function *FunA;
-  const CallInst *call = dyn_cast<CallInst>(A);
-  const InvokeInst *invoke = dyn_cast<InvokeInst>(A);
+  const auto *call = dyn_cast<CallBase>(A);
   if (call)
     FunA = call->getCalledFunction();
-  else if (invoke)
-    FunA = invoke->getCalledFunction();
   else
     FunA = nullptr;
   return FunA;
@@ -131,6 +129,40 @@ LoopAA::ModRefResult CommutativeLibsAA::modref(const Instruction *A,
     }
   }
   return LoopAA::modref(A, rel, B, L, R);
+}
+
+Remediator::RemedResp CommutativeLibsAA::memdep(const Instruction *A,
+                                                const Instruction *B,
+                                                bool loopCarried,
+                                                DataDepType dataDepTy,
+                                                const Loop *L) {
+  ++numQueries;
+  RemedResp resp;
+  resp.depRes = Dep;
+
+  Function *CalledFunA = getCalledFun(A);
+  Function *CalledFunB = getCalledFun(B);
+
+  auto isCommFn = [this](Function *CalledFun) {
+    if (CalledFun && CommFunNamesSet.count(CalledFun->getName().str()))
+      return true;
+    return false;
+  };
+
+  std::shared_ptr<CommutativeLibsRemedy> remedy =
+      std::make_shared<CommutativeLibsRemedy>();
+  remedy->cost = DEFAULT_COMM_LIBS_REMED_COST;
+
+  if (loopCarried) {
+    if (CalledFunA && CalledFunA == CalledFunB && isCommFn(CalledFunA)) {
+      ++numMemDepRemoved;
+      remedy->functionName = CalledFunA->getName();
+      resp.remedy = remedy;
+      resp.depRes = NoDep;
+    }
+  }
+
+  return resp;
 }
 
 } // namespace liberty

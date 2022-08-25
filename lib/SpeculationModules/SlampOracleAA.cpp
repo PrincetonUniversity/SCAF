@@ -1,9 +1,13 @@
+#include <memory>
 #define DEBUG_TYPE "slamp-oracle-aa"
 
 #include "scaf/SpeculationModules/SlampOracleAA.h"
+#include "scaf/SpeculationModules/Remediator.h"
 
 #include "llvm/ADT/Statistic.h"
 #include "llvm/IR/IntrinsicInst.h"
+
+#define DEFAULT_SLAMP_REMED_COST 1500
 
 namespace liberty
 {
@@ -15,8 +19,8 @@ STATISTIC(numEligible,      "Num eligible queries");
 STATISTIC(numNoForwardFlow, "Num forward no-flow results");
 STATISTIC(numNoReverseFlow, "Num reverse no-flow results");
 
-static cl::opt<unsigned> Threshhold(
-  "slamp-oracle-threshhold", cl::init(0),
+static cl::opt<unsigned> Threshold(
+  "slamp-oracle-threshold", cl::init(0),
   cl::NotHidden,
   cl::desc("Maximum number of observed flows to report NoModRef"));
 
@@ -26,6 +30,33 @@ LoopAA::AliasResult SlampOracleAA::alias(const Value *ptrA, unsigned sizeA,
                                        Remedies &R,
                                        DesiredAliasResult dAliasRes) {
   return LoopAA::alias(ptrA, sizeA, rel, ptrB, sizeB, L, R, dAliasRes);
+}
+
+// FIXME: shouldn't remedies be comparied against other remedies?
+bool SlampRemedy::compare(const Remedy_ptr rhs) const {
+  std::shared_ptr<SlampRemedy> slamp_rhs =
+    std::static_pointer_cast<SlampRemedy>(rhs);
+
+  if (this->srcI == slamp_rhs->srcI) {
+    return this->dstI < slamp_rhs->dstI;
+  }
+  return this->srcI < slamp_rhs->srcI;
+}
+
+void SlampRemedy::setCost(PerformanceEstimator *perf) {
+  assert(this->srcI && this->dstI && "no srcI or dstI in SLAMP remedy???");
+
+  auto addCost = [this, &perf](const Instruction *memI) {
+    // FIXME: what is this hardcoded constant doing
+    double validation_weight = 0.0000738;
+    if (isa<LoadInst>(memI))
+      validation_weight = 0.0000276;
+    this->cost += perf->weight_with_gravity(memI, validation_weight);
+  };
+
+  // multiply validation cost time with number of estimated invocations
+  addCost(this->srcI);
+  addCost(this->dstI);
 }
 
 LoopAA::ModRefResult SlampOracleAA::modref(
@@ -53,6 +84,37 @@ bool intrinsicMayRead(const Instruction *inst)
     return false;
 
   return true;
+}
+
+Remediator::RemedResp SlampOracleAA::memdep(const Instruction *A, const Instruction *B,
+                           bool loopCarried, DataDepType dataDepTy,
+                           const Loop *L) {
+  RemedResp resp;
+  resp.depRes = Dep;
+
+  // SLAMP only targets the loops it recognizes and only RAW deps
+  if (!L || !slamp->isTargetLoop(L) || dataDepTy!=RAW) {
+    return resp;
+  }
+
+  if ((loopCarried && slamp->numObsInterIterDep(L->getHeader(), B, A) <= Threshold)
+    || (!loopCarried && slamp->numObsIntraIterDep(L->getHeader(), B, A) <= Threshold)) {
+    resp.depRes = NoDep;
+
+    auto remedy = make_shared<SlampRemedy>();
+    remedy->srcI = A;
+    remedy->dstI = B;
+    if (perf) {
+      remedy->setCost(perf);
+    } else {
+      remedy->cost = DEFAULT_SLAMP_REMED_COST;
+    }
+    resp.remedy = remedy;
+
+    return resp;
+  }
+
+  return resp;
 }
 
 LoopAA::ModRefResult SlampOracleAA::modref(
@@ -153,7 +215,7 @@ LoopAA::ModRefResult SlampOracleAA::modref(
     {
       ++numEligible;
       // Query profile data
-      if( slamp->numObsInterIterDep(L->getHeader(), B, A) <= Threshhold )
+      if( slamp->numObsInterIterDep(L->getHeader(), B, A) <= Threshold )
       {
         // No flow.
         result = ModRefResult(result & ~Mod);
@@ -165,7 +227,7 @@ LoopAA::ModRefResult SlampOracleAA::modref(
     {
       ++numEligible;
       // Query profile data
-      if( slamp->numObsIntraIterDep(L->getHeader(), B, A) <= Threshhold )
+      if( slamp->numObsIntraIterDep(L->getHeader(), B, A) <= Threshold )
       {
         // No flow
         result = ModRefResult(result & ~Mod);
@@ -232,7 +294,7 @@ LoopAA::ModRefResult SlampOracleAA::modref(
 
     ++numEligible;
     // Query profile data.
-    if( slamp->numObsInterIterDep(L->getHeader(), A, B) <= Threshhold )
+    if( slamp->numObsInterIterDep(L->getHeader(), A, B) <= Threshold )
     {
       result = ModRefResult(result & ~Mod);
       ++numNoReverseFlow;

@@ -67,6 +67,8 @@ LoopAA::AliasResult TXIOAA::alias(const Value *ptrA, unsigned sizeA,
   return LoopAA::alias(ptrA, sizeA, rel, ptrB, sizeB, L, R, dAliasRes);
 }
 
+
+
 LoopAA::ModRefResult TXIOAA::modref(const Instruction *A, TemporalRelation rel,
                                     const Value *ptrB, unsigned sizeB,
                                     const Loop *L, Remedies &R) {
@@ -116,5 +118,36 @@ LoopAA::ModRefResult TXIOAA::modref(const Instruction *A, TemporalRelation rel,
 
   return LoopAA::modref(A, rel, B, L, R);
 }
+
+Remediator::RemedResp TXIOAA::memdep(const Instruction *A, const Instruction *B,
+                                     bool loopCarried,
+                                     DataDepType /*dataDepTy*/,
+                                     const Loop * /*L*/) {
+  RemedResp resp;
+  resp.depRes = Dep;
+
+  if (!loopCarried) {
+    return resp;
+  }
+
+  std::shared_ptr<TXIORemedy> remedy = std::make_shared<TXIORemedy>();
+  remedy->cost = DEFAULT_TXIO_REMED_COST;
+  if (isTXIOFcn(A)) {
+    ++numTXIO;
+    remedy->printI = A;
+    resp.depRes = NoDep;
+    resp.remedy = remedy;
+  }
+
+  if (isTXIOFcn(B)) {
+    ++numTXIO;
+    remedy->printI = B;
+    resp.depRes = NoDep;
+    resp.remedy = remedy;
+  }
+
+  return resp;
 }
+
+} // namespace liberty
 
