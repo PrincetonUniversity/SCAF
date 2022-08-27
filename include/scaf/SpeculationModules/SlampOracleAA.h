@@ -24,11 +24,11 @@ public:
   bool isExpensive() override { return true; }
 };
 
-class SlampOracleAA : public LoopAA, Remediator
+struct SlampOracleAA : public LoopAA, public Remediator
 {
 public:
   //SlampOracle(SLAMPLoadProfile *l) : slamp(l) {}
-  SlampOracleAA(SLAMPLoadProfile *l) : LoopAA(), slamp(l) {}
+  SlampOracleAA(SLAMPLoadProfile *l) : LoopAA(), slamp(l) {perf = nullptr;}
   //~SlampOracle() {}
 
   StringRef getLoopAAName() const { return "slamp-oracle-aa"; }

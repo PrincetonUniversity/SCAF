@@ -20,6 +20,7 @@ public:
 struct TXIOAA : public LoopAA, Remediator // Not a pass!
 {
   TXIOAA() : LoopAA() {}
+  ~TXIOAA() = default;
 
   StringRef getLoopAAName() const override { return "txio-aa"; }
   StringRef getRemediatorName() const override { return "txio-remed"; }
