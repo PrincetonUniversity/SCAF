@@ -15,7 +15,7 @@
 #include "llvm/IR/Instruction.h"
 #include "llvm/IR/Function.h"
 
-#define PROF_FILE "loopProf.out"
+#define PROF_FILE "benchmark.loopProf.out"
 
 namespace llvm {
   class Loop;

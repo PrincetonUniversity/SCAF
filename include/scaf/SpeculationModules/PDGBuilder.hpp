@@ -62,6 +62,7 @@ public:
   bool runOnModule(Module &M) override;
 
   std::unique_ptr<PDG> getLoopPDG(Loop *loop);
+    
 
 private:
   unsigned loopCount = 0;

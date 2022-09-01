@@ -61,7 +61,9 @@ namespace liberty::SpecPriv
                                     TemporalRelation rel, const Value *ptrB,
                                     unsigned sizeB, const Loop *L, Remedies &R,
                                     DesiredAliasResult dAliasRes) {
-    return LoopAA::alias(ptrA, sizeA, rel, ptrB, sizeB, L, R, dAliasRes);
+    //return LoopAA::alias(ptrA, sizeA, rel, ptrB, sizeB, L, R, dAliasRes);
+    //YEBIN: hack
+    return MayAlias;
   }
 
   LoopAA::ModRefResult SmtxAA::modref(
@@ -70,7 +72,9 @@ namespace liberty::SpecPriv
     const Value *ptrB, unsigned sizeB,
     const Loop *L, Remedies &R)
   {
-    return LoopAA::modref(A, rel, ptrB, sizeB, L, R);
+    //return LoopAA::modref(A, rel, ptrB, sizeB, L, R);
+    //YEBIN: hack
+    return ModRef;
   }
 
   static bool isMemIntrinsic(const Instruction *inst)
@@ -101,7 +105,9 @@ namespace liberty::SpecPriv
     // Lamp profile data is loop sensitive.
     if( !L )
       // Inapplicable
-      return LoopAA::modref(A,rel,B,L,R);
+      //return LoopAA::modref(A,rel,B,L,R);
+      //YEBIN: hack
+      return ModRef;
 
     ModRefResult result = ModRef;
     Remedies tmpR;
@@ -171,7 +177,7 @@ namespace liberty::SpecPriv
       else
       {
         // Callsites, etc: inapplicable
-        result = LoopAA::modref(A,rel,B,L,R);
+        result = ModRef;//LoopAA::modref(A,rel,B,L,R);
         return result;
       }
 
@@ -193,7 +199,7 @@ namespace liberty::SpecPriv
         if( ! (LAMP_COLLECTS_OUTPUT_DEPENDENCES && isa<StoreInst>(B)) )
         {
           // inapplicable
-          result = ModRefResult(result & LoopAA::modref(A,rel,B,L,R) );
+          result = ModRef;//ModRefResult(result & LoopAA::modref(A,rel,B,L,R) );
           return result;
         }
       }
@@ -268,7 +274,7 @@ namespace liberty::SpecPriv
       else
       {
         // Callsites, etc: inapplicable
-        result = LoopAA::modref(A,rel,B,L,R);
+        result = ModRef;// LoopAA::modref(A,rel,B,L,R);
         return result;
       }
 
@@ -289,7 +295,7 @@ namespace liberty::SpecPriv
       else
       {
         // inapplicable
-        result = ModRefResult(result & LoopAA::modref(A,rel,B,L,R));
+        result = ModRef;//ModRefResult(result & LoopAA::modref(A,rel,B,L,R));
         return result;
       }
 
@@ -317,7 +323,9 @@ namespace liberty::SpecPriv
     }
 
     // Chain.
-    return LoopAA::chain(R, A, rel, B, L, result, tmpR);
+    //return LoopAA::chain(R, A, rel, B, L, result, tmpR);
+    //YEBIN: hack
+    return ModRef;
 
     //if( result != NoModRef )
     //  // Chain.

@@ -35,6 +35,7 @@ public:
     const Instruction *B,
     const Loop *L, Remedies &R);
 
+
 private:
   SLAMPLoadProfile *slamp;
 };

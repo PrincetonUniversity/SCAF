@@ -153,7 +153,9 @@ Value *Namer::getBlkIdValue(Instruction *I) {
   char name[] = "namer";
   MDNode *md = I->getMetadata((const char *)name);
   if (md == NULL)
+  {
     return NULL;
+  }
   // Unpack block from (f,b)
 
   // sot
@@ -163,6 +165,7 @@ Value *Namer::getBlkIdValue(Instruction *I) {
   // ConstantInt *vFB = cast< ConstantInt >(  md->getOperand(0)  );
   const int f_v = vFB->getSExtValue();
   const int b = f_v & ((1 << PACKING_FACTOR) - 1);
+
   return ConstantInt::get(vFB->getType(), b);
 }
 
@@ -197,10 +200,14 @@ int Namer::getFuncId(Function *F) {
   //
 
   if (!F || F->isDeclaration())
+  {
     return -1;
+  }
 
   if (F->getInstructionCount() == 0)
+  {
     return -1;
+  }
 
   
   auto inst = F->getEntryBlock().getFirstNonPHI();
@@ -218,16 +225,18 @@ int Namer::getFuncId(Instruction *I) {
 
 int Namer::getBlkId(BasicBlock *B) {
   if (!B)
+  {
     return -1;
-
+  }
   auto inst = B->getFirstNonPHI();
   return getBlkId(inst);
 }
 
 int Namer::getBlkId(Instruction *I) {
   Value *v = getBlkIdValue(I);
-  if (v == NULL)
+  if (v == NULL) {
     return -1;
+  }
   ConstantInt *cv = (ConstantInt *)v;
   return (int)cv->getSExtValue();
 }
