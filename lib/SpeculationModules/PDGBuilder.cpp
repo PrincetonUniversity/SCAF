@@ -768,6 +768,7 @@ void llvm::PDGBuilder::annotateMemDepsWithRemedies(PDG &pdg, Loop *loop,
       RV = LoopAA::After;
     }
 
+    //YEBIN: check that LAMP and SLAMP give the same PDG
     bool removableEdge =
         Remediator::noMemoryDep(src, dst, FW, RV, loop, aa, rawDep, wawDep, *R);
     bool removableEdge_lamp =
@@ -780,20 +781,6 @@ void llvm::PDGBuilder::annotateMemDepsWithRemedies(PDG &pdg, Loop *loop,
       errs() << removableEdge << "\n";
       errs() << "LAMP: " << removableEdge_lamp << ", SLAMP: " << removableEdge_slamp << "\n";
       errs() << "From " << *edge->getOutgoingT() << " to " << *edge->getIncomingT() << ", ";
-      //if(dyn_cast<LoadInst>(src))
-      //  errs() << "Load from: " << src->getOperand(0) << ", ";
-      //if(dyn_cast<StoreInst>(src))
-      //  errs() << "Store " << src->getOperand(0) << " to " << src->getOperand(1) << ", ";
-      //if(dyn_cast<LoadInst>(dst))
-      //  errs() << "Load from: " << dst->getOperand(0) << "\n";
-      //if(dyn_cast<StoreInst>(dst))
-      //  errs() << "Store " << dst->getOperand(0) << " to " << dst->getOperand(1) << "\n";
-      if(rawDep)
-        errs() << "is a RAW, ";
-      if(wawDep)
-        errs() << "is a WAW, ";
-      if(warDep)
-        errs() << "is a WAR, ";
       if(FW == LoopAA::Before)
         errs() << "is a Loop Carried Dep, ";
 
@@ -804,6 +791,7 @@ void llvm::PDGBuilder::annotateMemDepsWithRemedies(PDG &pdg, Loop *loop,
       edge_count++;
       same_count++;
     }
+    // Quit at the first error, comment out to print out full list
     assert(removableEdge_slamp == removableEdge_lamp && "SLAMP and LAMP results do not match!!!");
 
     // annotate edge if removable
