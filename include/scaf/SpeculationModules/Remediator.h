@@ -43,6 +43,7 @@ enum DataDepType { RAW = 0, WAW = 1, WAR = 2 };
 class Remediator {
 public:
   virtual Remedies satisfy(const PDG &pdg, Loop *loop, const Criticisms &criticisms);
+  virtual ~Remediator() = default;
 
   struct RemedResp {
     DepResult depRes;

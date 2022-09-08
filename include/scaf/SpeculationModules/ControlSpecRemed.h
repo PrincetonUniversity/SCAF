@@ -12,7 +12,8 @@
 #include <unordered_map>
 #include <unordered_set>
 
-#define DEFAULT_CTRL_REMED_COST 45
+// #define DEFAULT_CTRL_REMED_COST 45
+#define DEFAULT_CTRL_REMED_COST 0
 #define EXPENSIVE_CTRL_REMED_COST 48
 
 namespace liberty {

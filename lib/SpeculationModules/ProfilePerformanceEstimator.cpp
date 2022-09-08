@@ -276,13 +276,17 @@ void ProfilePerformanceEstimator::visit(const Function *fcn, const Loop *loop, c
       const Instruction *inst = &*j;
 
       // Do we have a time measurement for this?
-      if( isa<CallInst>(inst) || isa<InvokeInst>(inst) )
-        sum_nested_callsites += lprof.getCallSiteTime(inst);
+      if( isa<CallInst>(inst) || isa<InvokeInst>(inst) ) {
+        auto weight = lprof.getCallSiteTime(inst);
+        // errs() << "CallSite: " << *inst << " weight: " << weight << "\n";
+        sum_nested_callsites += weight;
+      }
 
       else
         sum_relative_weights_of_locals += relative_weight(inst);
     }
   }
+  assert(outside_weight >= sum_nested_loops + sum_nested_callsites && "Weight of loop is less than sum of nested loops and callsites");
 
   const unsigned long local_time = outside_weight - sum_nested_loops - sum_nested_callsites;
 

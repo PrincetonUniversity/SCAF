@@ -90,10 +90,17 @@ Remedies MemSpecAARemediator::satisfy(const PDG &pdg, Loop *loop,
   ctrlspec->setLoopOfInterest(loop->getHeader());
   predaa->setLoopOfInterest(loop);
 
-  killflow_aware->setLoopOfInterest(ctrlspec, loop);
-  callsite_aware->setLoopOfInterest(ctrlspec, loop);
+  if (killflow_aware) {
+    killflow_aware->setLoopOfInterest(ctrlspec, loop);
+    killflow_aware->InitializeLoopAA(&proxy, DL);
+  }
 
-  //killflow_aware->getTopAA()->dump();
+  if (callsite_aware) {
+    callsite_aware->setLoopOfInterest(ctrlspec, loop);
+    callsite_aware->InitializeLoopAA(&proxy, DL);
+  }
+
+  predaa->getTopAA()->dump();
 
   Remedies remedies = Remediator::satisfy(pdg, loop, criticisms);
 
@@ -112,7 +119,10 @@ Remedies MemSpecAARemediator::satisfy(const PDG &pdg, Loop *loop,
   delete commlibsaa;
   delete simpleaa;
   delete privaa;
-  killflow_aware->setLoopOfInterest(nullptr, nullptr);
+
+  if (killflow_aware){
+    killflow_aware->setLoopOfInterest(nullptr, nullptr);
+  }
 
   //killflow_aware->getTopAA()->dump();
 
