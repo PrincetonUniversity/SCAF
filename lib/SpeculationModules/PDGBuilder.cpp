@@ -27,8 +27,6 @@
 #include "scaf/Utilities/Metadata.h"
 #include "scaf/SpeculationModules/SLAMPLoad.h"
 #include "scaf/SpeculationModules/SlampOracleAA.h"
-#include "scaf/SpeculationModules/LAMP/LAMPLoadProfile.h"
-#include "scaf/SpeculationModules/LAMP/LampOracleAA.h"
 
 #include "noelle/core/PDGPrinter.hpp"
 #include "Assumptions.h"
@@ -36,9 +34,6 @@
 using namespace llvm;
 using namespace llvm::noelle;
 using namespace liberty;
-
-unsigned int edge_count = 0;
-unsigned int same_count = 0;
 
 static cl::opt<bool> DumpPDG(
     "dump-pdg",
@@ -89,9 +84,7 @@ void llvm::PDGBuilder::getAnalysisUsage(AnalysisUsage &AU) const {
   }
 
   if (EnableLamp) {
-    //AU.addRequired<SmtxSpeculationManager>();
-    AU.addRequired<LAMPLoadProfile>();
-    AU.addRequired<LampOracle>();
+    AU.addRequired<SmtxSpeculationManager>();
   }
 
   if (EnableSlamp) {
@@ -185,8 +178,6 @@ bool llvm::PDGBuilder::runOnModule (Module &M){
 
 std::unique_ptr<llvm::noelle::PDG> llvm::PDGBuilder::getLoopPDG(Loop *loop) {
   auto pdg = std::make_unique<llvm::noelle::PDG>(loop);
-  auto slamp_pdg = std::make_unique<llvm::noelle::PDG>(loop);
-  auto lamp_pdg = std::make_unique<llvm::noelle::PDG>(loop);
 
   REPORT_DUMP(errs() << "constructEdgesFromMemory with CAF ...\n");
   auto llvmaa = getAnalysisIfAvailable<LLVMAAResults>();
@@ -194,55 +185,11 @@ std::unique_ptr<llvm::noelle::PDG> llvm::PDGBuilder::getLoopPDG(Loop *loop) {
     llvmaa->computeAAResults(loop->getHeader()->getParent());
   }
   LoopAA *aa = getAnalysis< LoopAA >().getTopAA();
-  //aa->dump();
-  //YEBIN: initiate slampaa earlier
-  addSpecModulesToLoopAA();
-  specModulesLoopSetup(loop);
-
+  aa->dump();
   constructEdgesFromMemory(*pdg, loop, aa);
-  constructEdgesFromMemory(*slamp_pdg, loop, slampaa);
-  constructEdgesFromMemory(*lamp_pdg, loop, smtxaa);
 
   REPORT_DUMP(errs() << "annotateMemDepsWithRemedies with SCAF ...\n");
   annotateMemDepsWithRemedies(*pdg,loop,aa);
-
-  //YEBIN: Compare constructed PDGs
-  for (auto nodeI : make_range(pdg->begin_nodes(), pdg->end_nodes())) {
-    Value *pdgValueI = nodeI->getT();
-    Instruction *i = dyn_cast<Instruction>(pdgValueI);
-    assert(i && "Expecting an instruction as the value of a PDG node");
-
-    if (!i->mayReadOrWriteMemory())
-      continue;
-
-    if (dyn_cast<CallBase>(i))
-      continue;
-
-    for (auto nodeJ : make_range(pdg->begin_nodes(), pdg->end_nodes())) {
-      Value *pdgValueJ = nodeJ->getT();
-      Instruction *j = dyn_cast<Instruction>(pdgValueJ);
-      assert(j && "Expecting an instruction as the value of a PDG node");
-
-      if (!j->mayReadOrWriteMemory())
-        continue;
-
-      if (dyn_cast<CallBase>(j))
-        continue;
-      
-      auto slamp_edges = slamp_pdg->fetchEdges(nodeI, nodeJ);
-      auto lamp_edges = lamp_pdg->fetchEdges(nodeI, nodeJ);
-      auto pdg_edges = pdg->fetchEdges(nodeI, nodeJ);
-      for(auto &edge : slamp_edges) {
-        assert(pdg_edges.find(edge) != pdg_edges.end() && "SLAMP is more conservative!!\n");
-        if(pdg_edges.find(edge) == pdg_edges.end())
-          errs() << "SLAMP is more conservative!!\n";
-      }
-      for(auto &edge : lamp_edges) {
-        if(pdg_edges.find(edge) == pdg_edges.end())
-          errs() << "LAMP is more conservative!!\n";
-      }
-    }
-  }
 
   REPORT_DUMP(errs() << "construct Edges From Control ...\n");
 
@@ -262,23 +209,15 @@ void llvm::PDGBuilder::addSpecModulesToLoopAA() {
   PerformanceEstimator *perf = &getAnalysis<ProfilePerformanceEstimator>();
 
   if (EnableLamp) {
-    auto &smtxMan = getAnalysis<LAMPLoadProfile>();
-    smtxaa = new LampOracle(&smtxMan);
-    //auto &smtxMan = getAnalysis<SmtxSpeculationManager>();
-    //smtxaa = new SmtxAA(&smtxMan, perf); // LAMP
-
-    //smtxaa->InitializeLoopAA(this, *DL);
-
-    //smtxaa->dump(); 
+    auto &smtxMan = getAnalysis<SmtxSpeculationManager>();
+    smtxaa = new SmtxAA(&smtxMan, perf); // LAMP
+    smtxaa->InitializeLoopAA(this, *DL);
   }
 
   if (EnableSlamp) {
     auto &slamp = getAnalysis<SLAMPLoadProfile>();
     slampaa = new SlampOracleAA(&slamp);
-    //DL: DataLayout
-    //slampaa->InitializeLoopAA(this, *DL);
-    
-    //slampaa->dump();
+    slampaa->InitializeLoopAA(this, *DL);
   }
 
   if (EnableEdgeProf) {
@@ -741,8 +680,9 @@ void llvm::PDGBuilder::queryLoopCarriedMemoryDep(Instruction *src,
 void llvm::PDGBuilder::annotateMemDepsWithRemedies(PDG &pdg, Loop *loop,
                                                    LoopAA *aa) {
   // setup SCAF (add spec modules to stack)
-  //addSpecModulesToLoopAA();
-  //specModulesLoopSetup(loop);
+  addSpecModulesToLoopAA();
+  specModulesLoopSetup(loop);
+  aa->dump();
 
   // try to annotate as removable every edge in the PDG with SCAF
   for (auto edge : make_range(pdg.begin_edges(), pdg.end_edges())) {
@@ -755,17 +695,9 @@ void llvm::PDGBuilder::annotateMemDepsWithRemedies(PDG &pdg, Loop *loop,
     Instruction *dst = dyn_cast<Instruction>(edge->getIncomingT());
     assert(src && dst && "src/dst not instructions in the PDG?");
 
-    if(dyn_cast<CallBase>(src) || dyn_cast<CallBase>(dst))
-      continue;
-
     Remedies_ptr R = std::make_shared<Remedies>();
     bool rawDep = edge->isRAWDependence();
     bool wawDep = edge->isWAWDependence();
-
-    bool warDep = edge->isWARDependence();
-
-    if(!rawDep)
-      continue;
 
     LoopAA::TemporalRelation FW = LoopAA::Same;
     LoopAA::TemporalRelation RV = LoopAA::Same;
@@ -774,31 +706,8 @@ void llvm::PDGBuilder::annotateMemDepsWithRemedies(PDG &pdg, Loop *loop,
       RV = LoopAA::After;
     }
 
-    //YEBIN: check that LAMP and SLAMP give the same PDG
     bool removableEdge =
         Remediator::noMemoryDep(src, dst, FW, RV, loop, aa, rawDep, wawDep, *R);
-    bool removableEdge_lamp =
-        Remediator::noMemoryDep(src, dst, FW, RV, loop, smtxaa, rawDep, wawDep, *R);
-    bool removableEdge_slamp =
-        Remediator::noMemoryDep(src, dst, FW, RV, loop, slampaa, rawDep, wawDep, *R);
-
-    if(removableEdge_lamp != removableEdge_slamp) {
-
-      errs() << removableEdge << "\n";
-      errs() << "LAMP: " << removableEdge_lamp << ", SLAMP: " << removableEdge_slamp << "\n";
-      errs() << "From " << *edge->getOutgoingT() << " to " << *edge->getIncomingT() << ", ";
-      if(FW == LoopAA::Before)
-        errs() << "is a Loop Carried Dep, ";
-
-      errs() << "\n";
-      edge_count++;
-    }
-    else {
-      edge_count++;
-      same_count++;
-    }
-    // Quit at the first error, comment out to print out full list
-    assert(removableEdge_slamp == removableEdge_lamp && "SLAMP and LAMP results do not match!!!");
 
     // annotate edge if removable
     if (removableEdge) {
@@ -806,7 +715,6 @@ void llvm::PDGBuilder::annotateMemDepsWithRemedies(PDG &pdg, Loop *loop,
       edge->setRemovable(true);
     }
   }
-  //errs() << "Total number of edges: " << edge_count << "\nNumber of same edges: " << same_count << "\n";
 
   // LLVM_DEBUG(errs() << "revert stack to CAF ...\n");
   removeSpecModulesFromLoopAA();
