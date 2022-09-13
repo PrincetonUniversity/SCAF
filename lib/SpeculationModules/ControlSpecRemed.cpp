@@ -272,6 +272,8 @@ Remediator::RemedResp ControlSpecRemediator::ctrldep(const Instruction *A,
   }
 
   // ctrl dep is removable by control speculation
+  ++numCtrlDepRem;
+
   remedy->brI = A;
 
   assert(A->isTerminator());

@@ -357,13 +357,6 @@ public:
                     DesiredAliasResult dAliasRes = DNoOrMustAlias);
 
 
-  //YEBIN: remove module
-  void removePass(Pass *P) {
-
-
-    getRealTopAA()->stackHasChanged();
-  }
-
 protected:
   /// Called indirectly by stackHasChanged().
   virtual void uponStackChange();

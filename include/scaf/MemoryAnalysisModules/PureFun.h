@@ -312,7 +312,6 @@
 
 // stdlib.h
   "atoi",
-  // FIXME: add back malloc
   "calloc",
   "malloc",
   "free",
@@ -367,7 +366,6 @@
 // unistd.h
   "isatty",
 
-// FIXME: temporarily put it here
   "fopen",
   "fclose",
   "strstr",

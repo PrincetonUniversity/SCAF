@@ -27,6 +27,8 @@
 #include "scaf/Utilities/Metadata.h"
 #include "scaf/SpeculationModules/SLAMPLoad.h"
 #include "scaf/SpeculationModules/SlampOracleAA.h"
+#include "scaf/SpeculationModules/LAMP/LAMPLoadProfile.h"
+#include "scaf/SpeculationModules/LAMP/LampOracleAA.h"
 
 #include "noelle/core/PDGPrinter.hpp"
 #include "Assumptions.h"
@@ -87,7 +89,9 @@ void llvm::PDGBuilder::getAnalysisUsage(AnalysisUsage &AU) const {
   }
 
   if (EnableLamp) {
-    AU.addRequired<SmtxSpeculationManager>();
+    //AU.addRequired<SmtxSpeculationManager>();
+    AU.addRequired<LAMPLoadProfile>();
+    AU.addRequired<LampOracle>();
   }
 
   if (EnableSlamp) {
@@ -258,8 +262,10 @@ void llvm::PDGBuilder::addSpecModulesToLoopAA() {
   PerformanceEstimator *perf = &getAnalysis<ProfilePerformanceEstimator>();
 
   if (EnableLamp) {
-    auto &smtxMan = getAnalysis<SmtxSpeculationManager>();
-    smtxaa = new SmtxAA(&smtxMan, perf); // LAMP
+    auto &smtxMan = getAnalysis<LAMPLoadProfile>();
+    smtxaa = new LampOracle(&smtxMan);
+    //auto &smtxMan = getAnalysis<SmtxSpeculationManager>();
+    //smtxaa = new SmtxAA(&smtxMan, perf); // LAMP
 
     //smtxaa->InitializeLoopAA(this, *DL);
 

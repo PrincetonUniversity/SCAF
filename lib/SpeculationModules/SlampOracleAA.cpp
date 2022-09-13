@@ -29,9 +29,7 @@ LoopAA::AliasResult SlampOracleAA::alias(const Value *ptrA, unsigned sizeA,
                                        unsigned sizeB, const Loop *L,
                                        Remedies &R,
                                        DesiredAliasResult dAliasRes) {
-  //return LoopAA::alias(ptrA, sizeA, rel, ptrB, sizeB, L, R, dAliasRes);
-  //YEBIN: hack
-  return MayAlias;
+  return LoopAA::alias(ptrA, sizeA, rel, ptrB, sizeB, L, R, dAliasRes);
 }
 
 // FIXME: shouldn't remedies be comparied against other remedies?
@@ -69,9 +67,7 @@ LoopAA::ModRefResult SlampOracleAA::modref(
 {
   //std::string space(getDepth()+1, ' ');
   //errs() << space << "si\n";
-  //YEBIN: hack
-  //return LoopAA::modref(A,rel,ptrB,sizeB,L,R);
-  return ModRef;
+  return LoopAA::modref(A,rel,ptrB,sizeB,L,R);
 }
 
 bool isMemIntrinsic(const Instruction *inst)
@@ -135,9 +131,7 @@ LoopAA::ModRefResult SlampOracleAA::modref(
     // Inapplicable
     //std::string space(getDepth()+1, ' ');
     //errs() << space << "si\n";
-    //return LoopAA::modref(A,rel,B,L,R);
-    //YEBIN: hack
-    return ModRef;
+    return LoopAA::modref(A,rel,B,L,R);
   }
 
   // both instructions should be included in the target loop
@@ -157,9 +151,7 @@ LoopAA::ModRefResult SlampOracleAA::modref(
     // Inapplicable
     //std::string space(getDepth()+1, ' ');
     //errs() << space << "si\n";
-    //return LoopAA::modref(A,rel,B,L,R);
-    //YEBIN: hack
-    return ModRef;
+    return LoopAA::modref(A,rel,B,L,R);
   }
 
   ModRefResult result = ModRef;
@@ -194,7 +186,7 @@ LoopAA::ModRefResult SlampOracleAA::modref(
       // inapplicable
       //std::string space(getDepth()+1, ' ');
       //errs() << space << "si\n";
-      result = ModRef;//LoopAA::modref(A,rel,B,L,R);
+      result = LoopAA::modref(A,rel,B,L,R);
       return result;
     }
 
@@ -215,7 +207,7 @@ LoopAA::ModRefResult SlampOracleAA::modref(
       // inapplicable, as Slamp does not collect output dependence
       //std::string space(getDepth()+1, ' ');
       //errs() << space << "si\n";
-      result = ModRef;//ModRefResult(result & LoopAA::modref(A,rel,B,L,R) );
+      result = ModRefResult(result & LoopAA::modref(A,rel,B,L,R) );
       return result;
     }
 
@@ -274,7 +266,7 @@ LoopAA::ModRefResult SlampOracleAA::modref(
       // inapplicable
       //std::string space(getDepth()+1, ' ');
       //errs() << space << "si\n";
-      result = ModRef;//LoopAA::modref(A,rel,B,L,R);
+      result = LoopAA::modref(A,rel,B,L,R);
       return result;
     }
 
@@ -296,7 +288,7 @@ LoopAA::ModRefResult SlampOracleAA::modref(
       // inapplicable
       //std::string space(getDepth()+1, ' ');
       //errs() << space << "si\n";
-      result = ModRef;//ModRefResult(result & LoopAA::modref(A,rel,B,L,R));
+      result = ModRefResult(result & LoopAA::modref(A,rel,B,L,R));
       return result;
     }
 
@@ -314,7 +306,7 @@ LoopAA::ModRefResult SlampOracleAA::modref(
     //std::string space(getDepth()+1, ' ');
     //errs() << space << "sr " << result << "\n";
     // Chain.
-    LoopAA::ModRefResult chainresult = ModRef;//LoopAA::modref(A,rel,B,L,R);
+    LoopAA::ModRefResult chainresult = LoopAA::modref(A,rel,B,L,R);
 
     /*
      * // FIXME: Very intersting conflict check

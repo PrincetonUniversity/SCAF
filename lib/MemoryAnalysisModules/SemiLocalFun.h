@@ -3,7 +3,7 @@
   "fflush",
   "fgets",
   "fputs",
-  // "fopen",
+  "fopen",
   "fprintf",
   "fputc",
   "fscanf",
@@ -58,5 +58,4 @@
   "lrand48",
   "drand48",
 
-// FIXME: for grep
-  "getline",
+  //"getline",

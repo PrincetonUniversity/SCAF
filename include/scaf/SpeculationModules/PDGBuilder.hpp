@@ -19,6 +19,7 @@
 #include "scaf/SpeculationModules/ReadOnlyAA.h"
 #include "scaf/SpeculationModules/ShortLivedAA.h"
 #include "scaf/SpeculationModules/SlampOracleAA.h"
+#include "scaf/SpeculationModules/LAMP/LampOracleAA.h"
 #include "scaf/SpeculationModules/SmtxAA.h"
 #include "scaf/Utilities/ControlSpecIterators.h"
 #include "scaf/Utilities/ControlSpeculation.h"
@@ -68,7 +69,7 @@ private:
   unsigned loopCount = 0;
   const DataLayout *DL;
   NoControlSpeculation noctrlspec;
-  SmtxAA *smtxaa;
+  LampOracle *smtxaa;
   SlampOracleAA *slampaa;
   EdgeCountOracle *edgeaa;
   PredictionAA *predaa;

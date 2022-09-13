@@ -4,9 +4,12 @@
 
 #include "scaf/MemoryAnalysisModules/Introspection.h"
 #include "scaf/SpeculationModules/LAMP/LampOracleAA.h"
+#include "scaf/SpeculationModules/Remediator.h"
 
 #include "llvm/ADT/Statistic.h"
 #include "llvm/IR/IntrinsicInst.h"
+
+#define DEFAULT_LAMP_REMED_COST 1500
 
 namespace liberty
 {
@@ -31,6 +34,30 @@ namespace liberty
     return LoopAA::alias(ptrA, sizeA, rel, ptrB, sizeB, L, R, dAliasRes);
   }
 
+  bool LampRemedy::compare(const Remedy_ptr rhs) const {
+    std::shared_ptr<LampRemedy> lamp_rhs = 
+      std::static_pointer_cast<LampRemedy>(rhs);
+
+    if(this->srcI == lamp_rhs->srcI) {
+      return this->dstI < lamp_rhs->dstI;
+    }
+    return this->srcI < lamp_rhs->srcI;
+  }
+
+  void LampRemedy::setCost(PerformanceEstimator *perf) {
+    assert(this->srcI && this->dstI && "no srcI or dstI in LAMP remedy???");
+
+    auto addCost = [this, &perf](const Instruction *memI) {
+      double validation_weight = 0.0000738;
+      if(isa<LoadInst>(memI))
+        validation_weight = 0.0000276;
+      this->cost += perf->weight_with_gravity(memI, validation_weight);
+    };
+
+    addCost(this->srcI);
+    addCost(this->dstI);
+  }
+
   LoopAA::ModRefResult LampOracle::modref(
     const Instruction *A,
     TemporalRelation rel,
@@ -40,12 +67,13 @@ namespace liberty
     return LoopAA::modref(A,rel,ptrB,sizeB,L,R);
   }
 
-  bool isMemIntrinsic(const Instruction *inst)
+  //FIXME: declared in both SlampOracle
+  static bool isMemIntrinsic(const Instruction *inst)
   {
     return isa< MemIntrinsic >(inst);
   }
 
-  bool intrinsicMayRead(const Instruction *inst)
+  static bool intrinsicMayRead(const Instruction *inst)
   {
     ImmutableCallSite cs(inst);
     StringRef  name = cs.getCalledFunction()->getName();
@@ -55,6 +83,35 @@ namespace liberty
 
     return true;
   }
+
+  Remediator::RemedResp LampOracle::memdep(const Instruction *A, const Instruction *B,
+                                bool loopCarried, DataDepType dataDepTy,
+                                const Loop *L) {
+    RemedResp resp;
+    resp.depRes = Dep;
+
+    if(!L)
+      return resp;
+
+    if((loopCarried && lamp->numObsInterIterDep(L->getHeader(), B, A) <= Threshhold)
+        || (!loopCarried && lamp->numObsIntraIterDep(L->getHeader(), B, A) <=Threshhold)) {
+      resp.depRes = NoDep;
+
+      auto remedy = make_shared<LampRemedy>();
+      remedy->srcI = A;
+      remedy->dstI = B;
+      if(perf) {
+        remedy->setCost(perf);
+      } else {
+        remedy->cost = DEFAULT_LAMP_REMED_COST;
+      }
+      resp.remedy = remedy;
+      return resp;
+    }
+    return resp;
+
+  }
+
 
   LoopAA::ModRefResult LampOracle::modref(
     const Instruction *A,
