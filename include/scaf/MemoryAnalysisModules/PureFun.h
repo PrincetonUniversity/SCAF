@@ -312,9 +312,10 @@
 
 // stdlib.h
   "atoi",
-  "calloc",
-  "malloc",
-  "free",
+  //FIXME: add back malloc
+//  "calloc",
+//  "malloc",
+//  "free",
 
   "__isnan",
   "__mulsc3",

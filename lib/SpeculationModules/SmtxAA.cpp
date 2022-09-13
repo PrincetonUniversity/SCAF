@@ -89,6 +89,7 @@ namespace liberty::SpecPriv
     return true;
   }
 
+  //FIXME: implement functionality
   Remediator::RemedResp SmtxAA::memdep(const Instruction *A, const Instruction *B,
                         bool loopCarried, DataDepType dataDepTy,
                         const Loop *L) {
