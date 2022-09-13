@@ -30,7 +30,7 @@ struct CommutativeLibsAA : public LoopAA, Remediator // Not a pass!
 
   LoopAA::ModRefResult modref(const Instruction *A, TemporalRelation rel,
                               const Instruction *B, const Loop *L, Remedies &R);
-  
+
   LoopAA::SchedulingPreference getSchedulingPreference() const {
     return SchedulingPreference(Low - 10);
   }

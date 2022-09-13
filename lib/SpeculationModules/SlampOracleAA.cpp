@@ -1,4 +1,3 @@
-#include <memory>
 #define DEBUG_TYPE "slamp-oracle-aa"
 
 #include "scaf/SpeculationModules/SlampOracleAA.h"

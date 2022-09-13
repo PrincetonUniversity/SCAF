@@ -73,6 +73,8 @@ namespace liberty
     return isa< MemIntrinsic >(inst);
   }
 
+
+  //FIXME: declared in both SlampOracle
   static bool intrinsicMayRead(const Instruction *inst)
   {
     ImmutableCallSite cs(inst);
