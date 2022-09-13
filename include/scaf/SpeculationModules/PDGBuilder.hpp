@@ -19,7 +19,6 @@
 #include "scaf/SpeculationModules/ReadOnlyAA.h"
 #include "scaf/SpeculationModules/ShortLivedAA.h"
 #include "scaf/SpeculationModules/SlampOracleAA.h"
-#include "scaf/SpeculationModules/LAMP/LampOracleAA.h"
 #include "scaf/SpeculationModules/SmtxAA.h"
 #include "scaf/Utilities/ControlSpecIterators.h"
 #include "scaf/Utilities/ControlSpeculation.h"
@@ -63,13 +62,12 @@ public:
   bool runOnModule(Module &M) override;
 
   std::unique_ptr<PDG> getLoopPDG(Loop *loop);
-    
 
 private:
   unsigned loopCount = 0;
   const DataLayout *DL;
   NoControlSpeculation noctrlspec;
-  LampOracle *smtxaa;
+  SmtxAA *smtxaa;
   SlampOracleAA *slampaa;
   EdgeCountOracle *edgeaa;
   PredictionAA *predaa;
