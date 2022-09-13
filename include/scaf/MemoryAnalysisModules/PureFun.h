@@ -312,6 +312,10 @@
 
 // stdlib.h
   "atoi",
+  //FIXME: add back malloc
+  //  "calloc",
+  //  "malloc",
+  //  "free",
 
   "__isnan",
   "__mulsc3",
@@ -362,3 +366,14 @@
 
 // unistd.h
   "isatty",
+
+  //FIXME: need to reconsider these
+  // "fopen",
+  // "fclose",
+  // "strstr",
+  // "getline",
+  "llvm.lifetime.start",
+  "llvm.lifetime.start.p0i8",
+  "llvm.lifetime.end",
+  "llvm.lifetime.end.p0i8",
+

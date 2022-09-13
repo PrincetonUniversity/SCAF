@@ -248,12 +248,9 @@ Remediator::RemedResp ControlSpecRemediator::ctrldep(const Instruction *A,
   // conservative answer
   remedResp.depRes = DepResult::Dep;
   std::shared_ptr<ControlSpecRemedy> remedy =
-      std::shared_ptr<ControlSpecRemedy>(new ControlSpecRemedy());
-  remedy->cost = 0;
-  //remedy->cost = DEFAULT_CTRL_REMED_COST;
+      std::make_shared<ControlSpecRemedy>();
+  remedy->cost = DEFAULT_CTRL_REMED_COST;
 
-
-  // FIXME: chek if any edge is speculatively dead
   if (speculator->isSpeculativelyDead(A)) {
     ++numCtrlDepRem;
   }
@@ -276,6 +273,7 @@ Remediator::RemedResp ControlSpecRemediator::ctrldep(const Instruction *A,
 
   // ctrl dep is removable by control speculation
   ++numCtrlDepRem;
+
   remedy->brI = A;
 
   assert(A->isTerminator());

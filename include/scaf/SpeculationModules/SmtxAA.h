@@ -26,7 +26,7 @@ public:
   bool isExpensive() { return true; }
 };
 
-struct SmtxAA : public LoopAA // Not a pass!
+struct SmtxAA : public LoopAA, public Remediator // Not a pass!
 {
   SmtxAA(SmtxSpeculationManager *man, PerformanceEstimator *pf)
       : LoopAA(), smtxMan(man), perf(pf) {}
@@ -36,6 +36,7 @@ struct SmtxAA : public LoopAA // Not a pass!
   }
 
   StringRef getLoopAAName() const { return "smtx-aa"; }
+  StringRef getRemediatorName() const override { return "smtx-remed"; }
 
   AliasResult alias(const Value *ptrA, unsigned sizeA, TemporalRelation rel,
                     const Value *ptrB, unsigned sizeB, const Loop *L,
@@ -47,6 +48,8 @@ struct SmtxAA : public LoopAA // Not a pass!
 
   ModRefResult modref(const Instruction *A, TemporalRelation rel,
                       const Instruction *B, const Loop *L, Remedies &R);
+
+  RemedResp memdep(const Instruction *A, const Instruction *B, bool loopCarried, DataDepType dataDepTy, const Loop *L) override;
 
 private:
   SmtxSpeculationManager *smtxMan;

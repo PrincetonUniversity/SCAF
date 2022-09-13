@@ -37,12 +37,20 @@ static RegisterPass<Namer>
        false, false);
 }
 
+
+static std::string NamerMeta = "namer";
+enum NamerMetaID {
+  FCN_ID = 0,
+  BB_ID = 1,
+  INST_ID = 2,
+};
+
 Namer::Namer() : ModulePass(ID) {}
 
 Namer::~Namer() { reset(); }
 
 void Namer::reset() {
-  pM = NULL;
+  pM = nullptr;
   funcId = 0;
   blkId = 0;
   instrId = 0;
@@ -58,14 +66,14 @@ bool Namer::runOnModule(Module &M) {
   pM = &M;
   LLVM_DEBUG(errs() << "\n\n\nEntering Metadata-Namer.\n");
 
-  typedef Module::FunctionListType FunList;
-  typedef FunList::iterator FunListIt;
+  using FunList = Module::FunctionListType;
+  using FunListIt = FunList::iterator;
 
   FunList &funcs = M.getFunctionList();
   bool modified = false;
 
-  for (FunListIt func = funcs.begin(); func != funcs.end(); func++) {
-    Function *f = (Function *)&*func;
+  for (auto & func : funcs) {
+    auto *f = (Function *)&func;
     modified |= runOnFunction(*f);
     funcId++;
   }
@@ -73,44 +81,30 @@ bool Namer::runOnModule(Module &M) {
   return modified;
 }
 
-const int PACKING_FACTOR = 16;
-
 bool Namer::runOnFunction(Function &F) {
   LLVM_DEBUG(errs() << "function:" << F.getName() << "\n");
   LLVMContext &context = F.getContext();
 
   bool modified = false;
 
-  for (Function::iterator bb = F.begin(), bbe = F.end(); bb != bbe; ++bb) {
+  for (auto & bb : F) {
 
-    if (bb->getName().empty()) {
-      bb->setName("bbName");
+    if (bb.getName().empty()) {
+      bb.setName("bbName");
       modified = true;
     }
 
-    for (BasicBlock::iterator I = bb->begin(), E = bb->end(); I != E; ++I) {
-      Instruction *inst = &*I;
+    for (auto & I : bb) {
+      Instruction *inst = &I;
+
+      Value *fcnV = ConstantInt::get(Type::getInt32Ty(context), funcId);
+      Value *blkV = ConstantInt::get(Type::getInt32Ty(context), blkId);
       Value *instrV = ConstantInt::get(Type::getInt32Ty(context), instrId);
 
-      // Inefficient to store funcV at every instruction, since
-      // it's redundant with block ID.  Instead, pack function
-      // and block id into one integer.
-      // -NPJ
-      //        Value* funcV =
-      //        ConstantInt::get(Type::getInt32Ty(context),funcId); Value* blkV
-      //        = ConstantInt::get(Type::getInt32Ty(context),blkId);
-      //				Value* valuesArray[] = {funcV, blkV,
-      //instrV};
-      //        ArrayRef<Value *> values(valuesArray, 3);
-      int f_b = (funcId << PACKING_FACTOR) + blkId;
-      Value *vFB = ConstantInt::get(Type::getInt32Ty(context), f_b);
-
-      // sot. Metadata changed. Not more part of the Value hierarchy
-      //  convert values to metadata with ValueAsMetadata::get
-      // Value* valuesArray[] = {vFB, instrV};
-      Metadata *valuesArray[] = {ValueAsMetadata::get(vFB),
+      Metadata *valuesArray[] = {ValueAsMetadata::get(fcnV),
+                                 ValueAsMetadata::get(blkV),
                                  ValueAsMetadata::get(instrV)};
-      ArrayRef<Metadata *> values(valuesArray, 2);
+      ArrayRef<Metadata *> values(valuesArray, 3);
       MDNode *mdNode = MDNode::get(context, values);
 
       //  The liberty.namer metadata is just a list of every metadata we insert.
@@ -120,76 +114,42 @@ bool Namer::runOnFunction(Function &F) {
       //pM->getOrInsertNamedMetadata("liberty.namer");
       //				namedMDNode->addOperand(mdNode);
 
-      char name[] = "namer";
-      inst->setMetadata((const char *)name, mdNode);
+      inst->setMetadata(NamerMeta, mdNode);
       instrId++;
     }
     blkId++;
   }
-  LLVM_DEBUG(errs() << "function:" << F.getName() << " func: " << funcId
-                    << " blkId: " << blkId << " instrId: " << instrId << "\n");
 
   return modified;
 }
 
-Value *Namer::getFuncIdValue(Instruction *I) {
-  char name[] = "namer";
-  MDNode *md = I->getMetadata((const char *)name);
-  if (md == NULL)
-    return NULL;
-  // Unpack function from (f,b)
+Value *getIdValue(const Instruction *I, NamerMetaID id) {
+  if (I == nullptr)
+    return nullptr;
 
-  // sot
-  ValueAsMetadata *vsm = dyn_cast<ValueAsMetadata>(md->getOperand(0));
-  ConstantInt *vFB = cast<ConstantInt>(vsm->getValue());
-
-  // ConstantInt *vFB = cast< ConstantInt >(  md->getOperand(0)  );
+  MDNode *md = I->getMetadata(NamerMeta);
+  if (md == nullptr)
+    return nullptr;
+  ValueAsMetadata *vsm = dyn_cast<ValueAsMetadata>(md->getOperand(id));
+  auto *vFB = cast<ConstantInt>(vsm->getValue());
   const int f_v = vFB->getSExtValue();
-  const int f = f_v >> PACKING_FACTOR;
-  return ConstantInt::get(vFB->getType(), f);
+  return ConstantInt::get(vFB->getType(), f_v);
+}
+
+Value *Namer::getFuncIdValue(Instruction *I) {
+  return getIdValue(I, FCN_ID);
 }
 
 Value *Namer::getBlkIdValue(Instruction *I) {
-  char name[] = "namer";
-  MDNode *md = I->getMetadata((const char *)name);
-  if (md == NULL)
-    return NULL;
-  // Unpack block from (f,b)
-
-  // sot
-  ValueAsMetadata *vsm = dyn_cast<ValueAsMetadata>(md->getOperand(0));
-  ConstantInt *vFB = cast<ConstantInt>(vsm->getValue());
-
-  // ConstantInt *vFB = cast< ConstantInt >(  md->getOperand(0)  );
-  const int f_v = vFB->getSExtValue();
-  const int b = f_v & ((1 << PACKING_FACTOR) - 1);
-  return ConstantInt::get(vFB->getType(), b);
+  return getIdValue(I, BB_ID);
 }
 
 Value *Namer::getInstrIdValue(Instruction *I) {
-  char name[] = "namer";
-  if (I == NULL)
-    return NULL;
-  MDNode *md = I->getMetadata((const char *)name);
-  if (md == NULL)
-    return NULL;
-
-  // sot
-  ValueAsMetadata *vsm = dyn_cast<ValueAsMetadata>(md->getOperand(1));
-  // return md->getOperand(1);
-  return vsm->getValue();
+  return getInstrIdValue((const Instruction *)I);
 }
 
 Value *Namer::getInstrIdValue(const Instruction *I) {
-  char name[] = "namer";
-  MDNode *md = I->getMetadata((const char *)name);
-  if (md == NULL)
-    return NULL;
-
-  // sot
-  ValueAsMetadata *vsm = dyn_cast<ValueAsMetadata>(md->getOperand(1));
-  // return md->getOperand(1);
-  return vsm->getValue();
+  return getIdValue(I, INST_ID);
 }
 
 int Namer::getFuncId(Function *F) {
@@ -197,10 +157,14 @@ int Namer::getFuncId(Function *F) {
   //
 
   if (!F || F->isDeclaration())
+  {
     return -1;
+  }
 
   if (F->getInstructionCount() == 0)
+  {
     return -1;
+  }
 
   
   auto inst = F->getEntryBlock().getFirstNonPHI();
@@ -218,18 +182,22 @@ int Namer::getFuncId(Instruction *I) {
 
 int Namer::getBlkId(BasicBlock *B) {
   if (!B)
+  {
     return -1;
-
+  }
   auto inst = B->getFirstNonPHI();
   return getBlkId(inst);
 }
 
 int Namer::getBlkId(Instruction *I) {
   Value *v = getBlkIdValue(I);
-  if (v == NULL)
+  if (v == NULL) {
     return -1;
+  }
   ConstantInt *cv = (ConstantInt *)v;
-  return (int)cv->getSExtValue();
+  auto blkId = cv->getSExtValue();
+  auto blkIdInt = (int)blkId;
+  return blkIdInt;
 }
 
 int Namer::getInstrId(Instruction *I) {

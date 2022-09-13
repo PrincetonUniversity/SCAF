@@ -138,6 +138,8 @@ namespace liberty
     return ptr;
   }
 
+  // FIXME:
+  // is this necessary? Shouldn't the aa stack by construct finds the cheapest?
   bool Remediator::noMemoryDep(const Instruction *src, const Instruction *dst,
                                LoopAA::TemporalRelation FW,
                                LoopAA::TemporalRelation RV, const Loop *loop,

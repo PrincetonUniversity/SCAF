@@ -93,7 +93,6 @@ bool PureFunAA::isBadDeref(const Instruction *inst) {
   // %0 = load %p1 ;load a pointer
   // %p2 = gep %0 xxx
   // load %p2 ; this load is not within %p1
-  // FIXME: this is too conservative
   const Function *fcn = inst->getParent()->getParent();
   // load and store; the memory address comes from out of arg
   const Value *basePtr = nullptr;
@@ -319,7 +318,6 @@ bool PureFunAA::argumentsAlias(const ImmutableCallSite CS, const Value *P,
 
       // add check here for argument attribute
 
-      // FIXME: only fix memset and memcpy here
 
 
       unsigned argSize = getArgSize(CS);
@@ -369,6 +367,29 @@ bool PureFunAA::runOnModule(Module &M) {
 }
 
 bool PureFunAA::isReadOnly(const Function *fun) const {
+/*
+ *   // FIXME: for serverless exps
+ *   if (fun->getName().find("Aws") != std::string::npos) {
+ *     return true;
+ *   }
+ * 
+ *   if (fun->getName().find("basic_ostream") != std::string::npos) {
+ *     return true;
+ *   }
+ * 
+ *   if (fun->getName().find("basic_string") != std::string::npos) {
+ *     return true;
+ *   }
+ * 
+ *   if (fun->getName().find("basic_ios") != std::string::npos) {
+ *     return true;
+ *   }
+ * 
+ *   if (fun->getName().find("_ZNSolsEPFRSoS_E") != std::string::npos) {
+ *     return true;
+ *   }
+ */
+  
   if (fun->hasFnAttribute(Attribute::ReadOnly))
     return true;
   return isRecursiveProperty(fun, readOnlySet, writeSet, pureFunSet,
@@ -376,6 +397,28 @@ bool PureFunAA::isReadOnly(const Function *fun) const {
 }
 
 bool PureFunAA::isLocal(const Function *fun) const {
+
+/*
+ *    // FIXME: for serverless exps
+ *   if (fun->getName().find("Aws") != std::string::npos) {
+ *     return true;
+ *   }
+ * 
+ *   if (fun->getName().find("basic_ostream") != std::string::npos) {
+ *     return true;
+ *   }
+ * 
+ *   if (fun->getName().find("basic_string") != std::string::npos) {
+ *     return true;
+ *   }
+ *   if (fun->getName().find("basic_ios") != std::string::npos) {
+ *     return true;
+ *   }
+ * 
+ *   if (fun->getName().find("_ZNSolsEPFRSoS_E") != std::string::npos) {
+ *     return true;
+ *   }
+ */
   if (fun->hasFnAttribute(Attribute::ArgMemOnly))
     return true;
   return isRecursiveProperty(fun, localSet, globalSet, localFunSet,

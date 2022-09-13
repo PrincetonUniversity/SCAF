@@ -356,6 +356,7 @@ public:
                     const Loop *L, AliasResult curRes, Remedies &curRemeds,
                     DesiredAliasResult dAliasRes = DNoOrMustAlias);
 
+
 protected:
   /// Called indirectly by stackHasChanged().
   virtual void uponStackChange();

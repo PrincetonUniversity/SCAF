@@ -2,7 +2,7 @@ SCAF_INSTALL_DEBUG?=$(shell pwd)/scaf-install-debug
 SCAF_INSTALL_RELEASE?=$(shell pwd)/scaf-install-release
 SVF_AVAILABLE?=0
 JOBS?=16
-SPECULATION_MODULES?=0
+SPECULATION_MODULES?=1
 
 CC=clang
 CXX=clang++

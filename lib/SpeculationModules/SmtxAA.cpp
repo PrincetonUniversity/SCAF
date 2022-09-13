@@ -89,6 +89,20 @@ namespace liberty::SpecPriv
     return true;
   }
 
+  //FIXME: implement functionality
+  Remediator::RemedResp SmtxAA::memdep(const Instruction *A, const Instruction *B,
+                        bool loopCarried, DataDepType dataDepTy,
+                        const Loop *L) {
+    RemedResp resp;
+    resp.depRes = Dep;
+    
+    // Lamp profile data is loop sensitive
+    if( !L )
+      return resp;
+
+    return resp;
+  }
+
   LoopAA::ModRefResult SmtxAA::modref(
     const Instruction *A,
     TemporalRelation rel,
