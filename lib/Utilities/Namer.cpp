@@ -153,23 +153,25 @@ Value *Namer::getInstrIdValue(const Instruction *I) {
 }
 
 int Namer::getFuncId(Function *F) {
-  // need to get 
-  //
-
-  if (!F || F->isDeclaration())
-  {
+  if (!F || F->isDeclaration()) {
     return -1;
   }
 
-  if (F->getInstructionCount() == 0)
-  {
+  if (F->getInstructionCount() == 0) {
     return -1;
   }
 
-  
-  auto inst = F->getEntryBlock().getFirstNonPHI();
+  // FIXME: the entry block could also be added
+  auto &bb = F->getEntryBlock();
 
-  return getFuncId(inst);
+  for (auto &I : bb) {
+    auto id = getFuncId(&I);
+    if (id != -1) {
+      return id;
+    }
+  }
+
+  return -1;
 }
 
 int Namer::getFuncId(Instruction *I) {
@@ -181,12 +183,17 @@ int Namer::getFuncId(Instruction *I) {
 }
 
 int Namer::getBlkId(BasicBlock *B) {
-  if (!B)
-  {
+  if (!B) {
     return -1;
   }
-  auto inst = B->getFirstNonPHI();
-  return getBlkId(inst);
+
+  for (auto &I : *B) {
+    auto id = getBlkId(&I);
+    if (id != -1) {
+      return id;
+    }
+  }
+  return -1;
 }
 
 int Namer::getBlkId(Instruction *I) {
