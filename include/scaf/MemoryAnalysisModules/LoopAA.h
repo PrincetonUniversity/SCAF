@@ -356,12 +356,19 @@ public:
                     const Loop *L, AliasResult curRes, Remedies &curRemeds,
                     DesiredAliasResult dAliasRes = DNoOrMustAlias);
 
+  LoopAA* getPrevAA() const { return prevAA; }
+  LoopAA* getNextAA() const { return nextAA; }
+
+  void configure(LoopAA *prev, LoopAA *next) {
+    prevAA = prev;
+    nextAA = next;
+
+    getRealTopAA()->stackHasChanged();
+  }
 
 protected:
   /// Called indirectly by stackHasChanged().
   virtual void uponStackChange();
-
-  LoopAA *getNextAA() const { return nextAA; }
   unsigned getDepth();
 
 private:
