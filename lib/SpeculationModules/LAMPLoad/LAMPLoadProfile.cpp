@@ -301,6 +301,16 @@ bool LAMPLoadProfile::runOnModule(Module& M)
 //                (dyn_cast<CallInst>(IB)->getCalledFunction()->isDeclaration())))
           else if( EX_CALL(IB))
           {
+            CallInst *call = dyn_cast<CallInst>(IB);
+
+            Value *callee = dyn_cast<Function>(call->getCalledValue()->stripPointerCasts());
+            std::string calleeName = callee ? callee->getName() : "";
+
+            if (callee && calleeName.find("LAMP_") != 0)
+              LLVM_DEBUG(dbgs() << lamp_id+1 << ": ex_call: " << *IB << "\n");
+            else 
+              continue;
+
             IdToInstMap[++lamp_id]= &*IB;
             InstToIdMap[&*IB]=lamp_id;
           }
