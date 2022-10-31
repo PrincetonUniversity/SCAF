@@ -26,6 +26,19 @@ namespace liberty
     cl::NotHidden,
     cl::desc("Maximum number of observed flows to report NoModRef"));
 
+  void getSubLoopList(const Loop* L, const Instruction *A, const Instruction *B, std::vector<Loop*> &subLoopList) {
+    for(auto subloop : L->getSubLoops()) {
+      subLoopList.push_back(subloop);
+      if(!(subloop->getSubLoops().empty())) {
+        getSubLoopList(subloop, A, B, subLoopList);
+      }
+    }
+    return;
+  }
+      //if((lamp->numObsInterIterDep(subloop->getHeader(), B, A) > Threshhold) ||
+      //    (lamp->numObsIntraIterDep(subloop->getHeader(), B, A) > Threshhold))
+      //  return Dep;
+
   LoopAA::AliasResult LampOracle::alias(const Value *ptrA, unsigned sizeA,
                                         TemporalRelation rel, const Value *ptrB,
                                         unsigned sizeB, const Loop *L,
@@ -97,8 +110,22 @@ namespace liberty
 
     if((loopCarried && lamp->numObsInterIterDep(L->getHeader(), B, A) <= Threshhold)
         || (!loopCarried && lamp->numObsIntraIterDep(L->getHeader(), B, A) <=Threshhold)) {
+      //errs() << "LAMP in the if statement: " << *A << " to " << *B << "\n";
       resp.depRes = NoDep;
 
+      if(!loopCarried) {
+        std::vector<Loop*> subLoopList;
+        getSubLoopList(L, A, B, subLoopList);
+        for(auto subloop: subLoopList) {
+          if((lamp->numObsInterIterDep(subloop->getHeader(), B, A) > Threshhold) ||
+              (lamp->numObsIntraIterDep(subloop->getHeader(), B, A) > Threshhold)) {
+            //errs() << "LAMP dep in inner loop\n";
+            resp.depRes = Dep;
+            break;
+          }
+        }
+        subLoopList.clear();
+      }
       auto remedy = make_shared<LampRemedy>();
       remedy->srcI = A;
       remedy->dstI = B;
