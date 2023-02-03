@@ -154,7 +154,7 @@ private:
   const Ctx *ctx;
   PerformanceEstimator *perf;
 
-  unordered_set<const Value *> privateInsts;
+  std::unordered_set<const Value *> privateInsts;
 
   void populateCheapPrivRemedies(Ptrs aus, Remedies &R);
   void populateNoWAWRemedies(Ptrs aus, Remedies &R);

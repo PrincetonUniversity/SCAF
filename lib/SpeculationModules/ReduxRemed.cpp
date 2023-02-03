@@ -225,7 +225,7 @@ Remediator::RemedResp ReduxRemediator::regdep(const Instruction *A,
   if (!loopCarried)
     return remedResp;
 
-  auto remedy = make_shared<ReduxRemedy>();
+  auto remedy = std::make_shared<ReduxRemedy>();
   //remedy->cost = DEFAULT_REDUX_REMED_COST;
   remedy->cost = 0;
 
@@ -419,7 +419,7 @@ Remediator::RemedResp ReduxRemediator::memdep(const Instruction *A,
   Remediator::RemedResp remedResp;
   // conservative answer
   remedResp.depRes = DepResult::Dep;
-  auto remedy = make_shared<ReduxRemedy>();
+  auto remedy = std::make_shared<ReduxRemedy>();
   //remedy->cost = DEFAULT_REDUX_REMED_COST;
   remedy->cost = 0;
 

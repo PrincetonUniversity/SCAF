@@ -50,6 +50,7 @@ STATISTIC(numRemat, "Binop rematerialized because use outside of loop");
 
 // STATISTIC(numPrivate, "Private registers lowered to private memory operations");
 
+// FIXME: multiply is also redux
 Reduction::Type Reduction::isAssocAndCommut(const BinaryOperator *add)
 {
   if( AllowFloatingPointReduction && add->getOpcode() == Instruction::FAdd )

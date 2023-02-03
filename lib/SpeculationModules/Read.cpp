@@ -42,7 +42,7 @@ void Read::contextRenamedViaClone(
   updateAu2Ctx2Count( escapes, cmap, amap );
 
   // Update locals
-  updateAu2Ctx2Count( escapes, cmap, amap );
+  updateAu2Ctx2Count( locals, cmap, amap );
 
   // Update integerPredictions
   updateValue2Ctx2Inst( integerPredictions, vmap, cmap );

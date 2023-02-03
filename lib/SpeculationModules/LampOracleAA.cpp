@@ -126,7 +126,7 @@ namespace liberty
         }
         subLoopList.clear();
       }
-      auto remedy = make_shared<LampRemedy>();
+      auto remedy = std::make_shared<LampRemedy>();
       remedy->srcI = A;
       remedy->dstI = B;
       if(perf) {
