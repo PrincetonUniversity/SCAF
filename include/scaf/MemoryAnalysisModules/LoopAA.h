@@ -101,6 +101,9 @@
 #include "llvm/Pass.h"
 #include "llvm/Support/CommandLine.h"
 
+#include "scaf/Utilities/AAQueries.h"
+
+
 #include "Assumptions.h"
 
 namespace liberty {
@@ -112,7 +115,7 @@ extern cl::opt<bool> FULL_UNIVERSAL;
 /// This class defines an interface for chained alias analyses
 /// with well-defined semantics around loops.
 ///
-class LoopAA {
+class LoopAA : public AAQuery {
 public:
   /// UnknownSize - This is a special value which can be used with the
   /// size arguments in alias queries to indicate that the caller does not
@@ -484,6 +487,7 @@ public:
   virtual bool pointsToConstantMemory(const Value *P, const Loop *L);
 };
 
+// TODO YEBIN: replace this with API
 /// This is a wrapper around llvm::AliasAnalysis
 class AAToLoopAA : public FunctionPass, public LoopAA {
   AliasAnalysis *AA;

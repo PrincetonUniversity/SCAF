@@ -12,7 +12,7 @@
 
 namespace liberty {
 using namespace llvm::noelle;
-class LLVMAAResults : public ModulePass, public LoopAA {
+class LLVMAAResults : public ModulePass, public AAQuery {
   const DataLayout *DL;
 
   LegacyAARGetter *AARGetter;
