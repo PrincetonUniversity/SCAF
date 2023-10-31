@@ -1,5 +1,3 @@
-#define DEBUG_TYPE "ctrlspec"
-
 #include "scaf/Utilities/ControlSpeculation.h"
 #include "scaf/MemoryAnalysisModules/CallsiteSearch.h"
 #include "scaf/MemoryAnalysisModules/Introspection.h"
@@ -10,6 +8,8 @@
 #include "llvm/IR/IntrinsicInst.h"
 #include "llvm/Support/Debug.h"
 #include "llvm/Support/raw_ostream.h"
+
+#define DEBUG_TYPE "ctrlspec"
 
 namespace liberty {
 using namespace llvm;

@@ -1,5 +1,3 @@
-#define DEBUG_TYPE "llvm-aa-results"
-
 #include "llvm/ADT/Statistic.h"
 
 #include "llvm/Analysis/AliasAnalysis.h"
@@ -8,6 +6,8 @@
 #include "scaf/Utilities/GetMemOper.h"
 
 #include <vector>
+
+#define DEBUG_TYPE "llvm-aa-results"
 
 namespace liberty {
 using namespace llvm;

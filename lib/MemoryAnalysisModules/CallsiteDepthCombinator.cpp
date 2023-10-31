@@ -1,5 +1,3 @@
-#define DEBUG_TYPE "callsite-depth-combinator-aa"
-
 #include "llvm/ADT/Statistic.h"
 #include "llvm/Support/Debug.h"
 
@@ -12,6 +10,8 @@
 #include "scaf/Utilities/CallBaseFactory.h"
 
 #include <ctime>
+
+#define DEBUG_TYPE "callsite-depth-combinator-aa"
 
 namespace liberty {
 using namespace llvm;

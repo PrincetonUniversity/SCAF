@@ -1,6 +1,7 @@
 
 #include "llvm/ADT/DenseSet.h"
 #include "llvm/Analysis/ValueTracking.h"
+#include "llvm/Analysis/AliasAnalysis.h"
 #include "llvm/IR/Instructions.h"
 #include "llvm/IR/Module.h"
 #include "llvm/Pass.h"
@@ -104,8 +105,8 @@ const Instruction *findNoAliasSource(const Value *v,
   if (!f)
     return NULL;
 
-  if (!f->getAttributes().hasAttribute(0, Attribute::NoAlias) &&
-      !isNoAliasFn(v, &tli))
+  if (!f->getAttributes().hasAttributeAtIndex(0, Attribute::NoAlias) &&
+      !isNoAliasCall(v))
     return NULL;
 
   return source;

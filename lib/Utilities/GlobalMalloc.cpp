@@ -95,7 +95,9 @@ void liberty::findAllocSizeInfo(const Instruction *alloc,
   sizeOfElem = 0;
   *numOfElem = nullptr;
   if (auto allocCall = dyn_cast<CallInst>(alloc)) {
-    if (allocCall->getNumArgOperands() != 1)
+    //FIXME: deprecated getNumArgOperands function for CallInst
+    //replace with arg_size()
+    if (allocCall->arg_size() != 1)
       return;
     const Value *mallocArg = allocCall->getArgOperand(0);
     if (const Instruction *mallocSizeI = dyn_cast<Instruction>(mallocArg)) {

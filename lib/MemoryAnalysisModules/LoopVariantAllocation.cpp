@@ -56,11 +56,11 @@ static bool isNoaliasWithinLoop(const Value *src, const Loop *L,
   if (cs)
     if (L->contains(cs)) {
       if (cs->getCalledFunction())
-        if (cs->getCalledFunction()->getAttributes().hasAttribute(
+        if (cs->getCalledFunction()->getAttributes().hasAttributeAtIndex(
                 0, Attribute::NoAlias))
           return true;
 
-      if (isNoAliasFn(src, &tli))
+      if (isNoAliasCall(src))
         return true;
     }
 

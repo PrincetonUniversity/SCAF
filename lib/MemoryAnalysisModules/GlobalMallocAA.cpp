@@ -108,7 +108,8 @@ private:
       const Function *fcn = call->getCalledFunction();
       if (!fcn)
         return false;
-      for (unsigned i = 0; i < call->getNumArgOperands(); ++i) {
+      //FIXME: getNumArgOperands deprecated, replaced with arg_size
+      for (unsigned i = 0; i < call->arg_size(); ++i) {
         const Value *arg = call->getArgOperand(i);
         if (const GlobalVariable *gvC = dyn_cast<GlobalVariable>(arg)) {
           if (gvC != global)

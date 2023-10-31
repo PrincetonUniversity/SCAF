@@ -1,7 +1,6 @@
-#define DEBUG_TYPE "scalar-evolution-aa"
-
 #include "llvm/ADT/Statistic.h"
 #include "llvm/Analysis/ScalarEvolutionExpressions.h"
+#include "llvm/Analysis/Delinearization.h"
 #include "llvm/IR/Constants.h"
 #include "llvm/IR/LLVMContext.h"
 #include "llvm/IR/Module.h"
@@ -11,6 +10,8 @@
 
 #include "scaf/MemoryAnalysisModules/ClassicLoopAA.h"
 #include "scaf/Utilities/ModuleLoops.h"
+
+#define DEBUG_TYPE "scalar-evolution-aa"
 
 namespace liberty {
 using namespace llvm;
@@ -155,7 +156,8 @@ public:
           const SCEV *ElementSize = SE->getConstant(size1);
           SmallVector<const SCEV *, 4> Subscripts;
           SmallVector<const SCEV *, 4> Sizes;
-          SE->delinearize(sAR, Subscripts, Sizes, ElementSize);
+          //FIXME: why is llvm:: necessary here?
+          llvm::delinearize(*SE, sAR, Subscripts, Sizes, ElementSize);
 
           if (Sizes.size() < 2)
             return false;
@@ -196,7 +198,8 @@ public:
       if (sAR) {
         const SCEV *ElementSize = SE->getConstant(size);
         SmallVector<const SCEV *, 4> Subscripts;
-        SE->delinearize(sAR, Subscripts, Sizes, ElementSize);
+        //FIXME:: why is llvm:: necessary here?
+        llvm::delinearize(*SE, sAR, Subscripts, Sizes, ElementSize);
       }
     }
   }

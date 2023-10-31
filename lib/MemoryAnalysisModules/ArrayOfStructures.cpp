@@ -1,5 +1,3 @@
-#define DEBUG_TYPE "array-of-structures-aa"
-
 #include "llvm/ADT/Statistic.h"
 #include "llvm/Analysis/ScalarEvolutionExpressions.h"
 #include "llvm/IR/Constants.h"
@@ -16,6 +14,7 @@
 #include "scaf/Utilities/ModuleLoops.h"
 
 #include "scaf/MemoryAnalysisModules/NoEscapeFieldsAA.h"
+#define DEBUG_TYPE "array-of-structures-aa"
 
 namespace liberty {
 using namespace llvm;

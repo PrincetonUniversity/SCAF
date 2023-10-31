@@ -1,5 +1,3 @@
-#define DEBUG_TYPE "kill-flow-aa"
-
 #include "llvm/ADT/Statistic.h"
 #include "llvm/Analysis/ValueTracking.h"
 #include "llvm/IR/InstIterator.h"
@@ -20,6 +18,8 @@
 #include <cmath>
 #include <ctime>
 #include <unordered_set>
+
+#define DEBUG_TYPE "kill-flow-aa"
 
 namespace liberty {
 

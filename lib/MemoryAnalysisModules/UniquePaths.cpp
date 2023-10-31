@@ -27,6 +27,7 @@
 
 #include <ctime>
 #include <set>
+#include <map>
 
 using namespace llvm;
 using namespace llvm::noelle;

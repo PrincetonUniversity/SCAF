@@ -72,7 +72,7 @@ static bool isAlloc(const Value *v, const DataLayout &td,
     return false;
 
   // Check for malloc, calloc, realloc, new, et al.
-  if (F->returnDoesNotAlias() || isNoAliasFn(v, &tli))
+  if (F->returnDoesNotAlias() || isNoAliasCall(v))
     return true;
 
   return false;

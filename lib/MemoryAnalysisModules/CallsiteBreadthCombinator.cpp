@@ -1,5 +1,3 @@
-#define DEBUG_TYPE "callsite-breadth-combinator-aa"
-
 #include "scaf/MemoryAnalysisModules/FindSource.h"
 #include "scaf/MemoryAnalysisModules/Introspection.h"
 #include "scaf/MemoryAnalysisModules/KillFlow.h"
@@ -17,6 +15,8 @@
 #include "llvm/Pass.h"
 #include "llvm/Support/Debug.h"
 #include "llvm/Support/raw_ostream.h"
+
+#define DEBUG_TYPE "callsite-breadth-combinator-aa"
 
 using namespace llvm;
 using namespace llvm::noelle;

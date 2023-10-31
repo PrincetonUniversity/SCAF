@@ -9,6 +9,7 @@
 
 #include "scaf/MemoryAnalysisModules/ClassicLoopAA.h"
 #include <set>
+#include <map>
 
 namespace liberty {
 using namespace llvm;
