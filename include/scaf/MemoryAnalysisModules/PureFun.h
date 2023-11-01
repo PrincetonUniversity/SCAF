@@ -14,7 +14,7 @@
   "__log10_finite",
   "__sinh_finite",
 
-// txio
+  // txio
   "__root_epoch",
   "__open_subepoch",
   "__close_epoch",
@@ -59,7 +59,7 @@
 
   "__txio___deferred_calll",
 
-// llvm
+  // llvm
   "llvm.pcmarker",
   "llvm.sqrt.f32",
   "llvm.sqrt.f64",
@@ -104,12 +104,12 @@
   "llvm.prefetch",
   "llvm.pcmarker",
 
-// llvm debug
+  // llvm debug
   "llvm.dbg.value",
   "llvm.dbg.declare",
   "llvm.dbg.addr",
 
-// math.h
+  // math.h
   "acos",
   "acosf",
   "acosh",
@@ -290,7 +290,7 @@
   "y1",
   "yn",
 
-// ctype.h
+  // ctype.h
   "toupper",
   "tolower",
   "isalnum",
@@ -310,13 +310,17 @@
   "__ctype_toupper_loc", // locale-specific backend of toupper()
   "__ctype_tolower_loc",
 
-// stdlib.h
+  // stdlib.h
   "atoi",
+  //FIXME: add back malloc
+  //"calloc",
+  //"malloc",
+  //"free",
 
   "__isnan",
   "__mulsc3",
 
-// string.h
+  // string.h
   "memchr",
   "strchr",
   "strcmp",
@@ -329,12 +333,12 @@
   "strspn",
   "strstr",
 
-// strings.h
+  // strings.h
   "strcasecmp",
   "strncasecmp",
   "bcmp",
 
-// libautocuda.so
+  // libautocuda.so
   "lcuAlloca",
   "lcuCheck",
   "lcuMemArrayRelease",
@@ -347,7 +351,7 @@
   "lcuRegisterGlobal",
   "lcuLaunchGrid",
 
-// cuda.h
+  // cuda.h
   "cuMemcpyHtoD",
   "cuMemcpyHtoD_v2",
   "cuModuleGetGlobal",
@@ -360,5 +364,14 @@
   "cuModuleGetFunction",
   "cuLaunchGrid",
 
-// unistd.h
+  // unistd.h
   "isatty",
+  // FIXME: need to reconsider these
+  //"fopen",
+  //"fclose",
+  //"strstr",
+  //"getline",
+  "llvm.lifetime.start",
+  "llvm.lifetime.start.p0i8",
+  "llvm.lifetime.end",
+  "llvm.lifetime.end.p0i8",

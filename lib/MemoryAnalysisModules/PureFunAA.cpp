@@ -367,26 +367,26 @@ bool PureFunAA::runOnModule(Module &M) {
 }
 
 bool PureFunAA::isReadOnly(const Function *fun) const {
-  // FIXME:
-  if (fun->getName().find("Aws") != std::string::npos) {
-    return true;
-  }
+  // FIXME: for serverless exps
+  //if (fun->getName().find("Aws") != std::string::npos) {
+  //  return true;
+  //}
 
-  if (fun->getName().find("basic_ostream") != std::string::npos) {
-    return true;
-  }
+  //if (fun->getName().find("basic_ostream") != std::string::npos) {
+  //  return true;
+  //}
 
-  if (fun->getName().find("basic_string") != std::string::npos) {
-    return true;
-  }
+  //if (fun->getName().find("basic_string") != std::string::npos) {
+  //  return true;
+  //}
 
-  if (fun->getName().find("basic_ios") != std::string::npos) {
-    return true;
-  }
+  //if (fun->getName().find("basic_ios") != std::string::npos) {
+  //  return true;
+  //}
 
-  if (fun->getName().find("_ZNSolsEPFRSoS_E") != std::string::npos) {
-    return true;
-  }
+  //if (fun->getName().find("_ZNSolsEPFRSoS_E") != std::string::npos) {
+  //  return true;
+  //}
 
   if (fun->hasFnAttribute(Attribute::ReadOnly))
     return true;
@@ -395,25 +395,25 @@ bool PureFunAA::isReadOnly(const Function *fun) const {
 }
 
 bool PureFunAA::isLocal(const Function *fun) const {
-  // FIXME:
-  if (fun->getName().find("Aws") != std::string::npos) {
-    return true;
-  }
+  // FIXME: for serverless exps
+  //if (fun->getName().find("Aws") != std::string::npos) {
+  //  return true;
+  //}
 
-  if (fun->getName().find("basic_ostream") != std::string::npos) {
-    return true;
-  }
+  //if (fun->getName().find("basic_ostream") != std::string::npos) {
+  //  return true;
+  //}
 
-  if (fun->getName().find("basic_string") != std::string::npos) {
-    return true;
-  }
-  if (fun->getName().find("basic_ios") != std::string::npos) {
-    return true;
-  }
+  //if (fun->getName().find("basic_string") != std::string::npos) {
+  //  return true;
+  //}
+  //if (fun->getName().find("basic_ios") != std::string::npos) {
+  //  return true;
+  //}
 
-  if (fun->getName().find("_ZNSolsEPFRSoS_E") != std::string::npos) {
-    return true;
-  }
+  //if (fun->getName().find("_ZNSolsEPFRSoS_E") != std::string::npos) {
+  //  return true;
+  //}
 
   if (fun->hasFnAttribute(Attribute::ArgMemOnly))
     return true;
