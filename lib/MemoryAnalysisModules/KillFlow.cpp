@@ -950,13 +950,13 @@ LoopAA::ModRefResult KillFlow::modref(const Instruction *i1,
 
       // check whether the pointer of the earlier op (from previous iter) is
       // killed before the load
-      else if (earlierPtr && pointerKilledBefore(L, earlierPtr, load,
-                                                 queryStart, AnalysisTimeout)) {
-        ++numKilledBackwardLoadFlows;
-        LLVM_DEBUG(errs() << "Removed the mod bit at AAA\n");
-        // res = ModRefResult(res & ~Mod);
-        res = NoModRef;
-      }
+      //else if (earlierPtr && pointerKilledBefore(L, earlierPtr, load,
+      //                                           queryStart, AnalysisTimeout)) {
+      //  ++numKilledBackwardLoadFlows;
+      //  LLVM_DEBUG(errs() << "Removed the mod bit at AAA\n");
+      //  // res = ModRefResult(res & ~Mod);
+      //  res = NoModRef;
+      //}
     }
 
     // handle WAR and WAW
@@ -974,11 +974,11 @@ LoopAA::ModRefResult KillFlow::modref(const Instruction *i1,
 
       // check whether the pointer of the earlier op (from previous iter) is
       // killed before the store
-      else if (earlierPtr && pointerKilledBefore(L, earlierPtr, store,
-                                                 queryStart, AnalysisTimeout)) {
-        ++numKilledBackwardStore;
-        res = NoModRef;
-      }
+      //else if (earlierPtr && pointerKilledBefore(L, earlierPtr, store,
+      //                                           queryStart, AnalysisTimeout)) {
+      //  ++numKilledBackwardStore;
+      //  res = NoModRef;
+      //}
     }
   }
 
