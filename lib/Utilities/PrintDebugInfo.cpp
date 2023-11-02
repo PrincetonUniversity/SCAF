@@ -17,5 +17,19 @@ void liberty::printInstDebugInfo(Instruction *I) {
       errs() << " (line:";
 
     errs() << debugLoc.getLine() << ", col:" << debugLoc.getCol() << ")";
+
+    DILocation *loc = debugLoc.get();
+    loc = loc->getInlinedAt();
+    while (loc) {
+      DIScope *scope = dyn_cast<DIScope>(loc->getScope());
+      if (scope) {
+        std::string filename = std::string(scope->getFilename());
+        errs() << " (inlined at filename:" << filename << ", line:";
+      } else {
+        errs() << " (inlined at line:";
+      }
+      errs() << loc->getLine() << ", col:" << loc->getColumn() << ")";
+      loc = loc->getInlinedAt();
+    }
   }
 }
