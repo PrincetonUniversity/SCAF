@@ -105,8 +105,13 @@ const Instruction *findNoAliasSource(const Value *v,
   if (!f)
     return NULL;
 
+  // FIXME: correctly ported from llvm13
+  // where hasAttribute(unsigned Index, Attribute::AttrKind Kind)
+  // However, why do we need index in the first place?
   if (!f->getAttributes().hasAttributeAtIndex(0, Attribute::NoAlias) &&
-      !isNoAliasCall(v))
+      // isNoAliasFn (deprecated) checked for noAlias attribute & allocation function
+      // isNoAliasCall checks only for noAlias attribute
+      !(isNoAliasCall(v) || isAllocationFn(v, &tli)))
     return NULL;
 
   return source;

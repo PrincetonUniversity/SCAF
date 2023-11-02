@@ -13,7 +13,6 @@
 #include "llvm/IR/Instructions.h"
 #include "llvm/Analysis/LoopInfo.h"
 #include "llvm/Support/raw_ostream.h"
-#include <set>
 #include <map>
 
 namespace liberty

@@ -60,7 +60,7 @@ static bool isNoaliasWithinLoop(const Value *src, const Loop *L,
                 0, Attribute::NoAlias))
           return true;
 
-      if (isNoAliasCall(src))
+      if (isNoAliasCall(src) || isAllocationFn(src, &tli))
         return true;
     }
 
