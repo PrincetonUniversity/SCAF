@@ -60,7 +60,10 @@ static bool isNoaliasWithinLoop(const Value *src, const Loop *L,
                 0, Attribute::NoAlias))
           return true;
 
-      if (isNoAliasCall(src))
+      // isNoAliasFn (deprecated) checked for noAlias attribute & allocation function
+      // isNoAliasCall checks only for noAlias attribute
+      // https://reviews.llvm.org/D116800
+      if (isNoAliasCall(src) || isAllocationFn(src, &tli))
         return true;
     }
 

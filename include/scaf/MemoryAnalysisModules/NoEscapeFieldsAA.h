@@ -8,7 +8,6 @@
 #include "llvm/Pass.h"
 
 #include "scaf/MemoryAnalysisModules/ClassicLoopAA.h"
-#include <set>
 #include <map>
 
 namespace liberty {
