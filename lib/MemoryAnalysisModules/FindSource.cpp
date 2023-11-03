@@ -111,6 +111,7 @@ const Instruction *findNoAliasSource(const Value *v,
   if (!f->getAttributes().hasAttributeAtIndex(0, Attribute::NoAlias) &&
       // isNoAliasFn (deprecated) checked for noAlias attribute & allocation function
       // isNoAliasCall checks only for noAlias attribute
+      // https://reviews.llvm.org/D116800
       !(isNoAliasCall(v) || isAllocationFn(v, &tli)))
     return NULL;
 

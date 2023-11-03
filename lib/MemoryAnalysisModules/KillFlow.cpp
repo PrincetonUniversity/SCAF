@@ -950,6 +950,7 @@ LoopAA::ModRefResult KillFlow::modref(const Instruction *i1,
 
       // check whether the pointer of the earlier op (from previous iter) is
       // killed before the load
+      // Killflow bug fixed in commit 8322cba
       //else if (earlierPtr && pointerKilledBefore(L, earlierPtr, load,
       //                                           queryStart, AnalysisTimeout)) {
       //  ++numKilledBackwardLoadFlows;
@@ -974,6 +975,7 @@ LoopAA::ModRefResult KillFlow::modref(const Instruction *i1,
 
       // check whether the pointer of the earlier op (from previous iter) is
       // killed before the store
+      // Killflow bug fixed in commit 8322cba
       //else if (earlierPtr && pointerKilledBefore(L, earlierPtr, store,
       //                                           queryStart, AnalysisTimeout)) {
       //  ++numKilledBackwardStore;
