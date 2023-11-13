@@ -1,4 +1,5 @@
 #include "llvm/ADT/Statistic.h"
+#include "llvm/Analysis/ScalarEvolution.h"
 #include "llvm/Analysis/ScalarEvolutionExpressions.h"
 #include "llvm/IR/Constants.h"
 #include "llvm/IR/GetElementPtrTypeIterator.h"
@@ -97,8 +98,6 @@ public:
 
       ModuleLoops &mloops = getAnalysis<ModuleLoops>();
       ScalarEvolution &scev = mloops.getAnalysis_ScalarEvolution(fcn);
-      // ScalarEvolution &scev = getAnalysis<
-      // ScalarEvolutionWrapperPass>(*fcn).getSE();
       if (scev.isSCEVable(a->getType()))
         if (const SCEV *ss = scev.getSCEVAtScope(a, L))
           if (const SCEVAddRecExpr *induc = dyn_cast<SCEVAddRecExpr>(ss))
@@ -301,6 +300,7 @@ public:
     AU.addRequired<ModuleLoops>();
     AU.addRequired<NoCaptureFcn>();
     AU.addRequired<NonCapturedFieldsAnalysis>();
+    AU.addRequired<ScalarEvolutionWrapperPass>();
     AU.setPreservesAll(); // Does not transform code
   }
 

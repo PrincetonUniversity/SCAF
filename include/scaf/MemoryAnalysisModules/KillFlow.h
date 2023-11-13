@@ -2,6 +2,7 @@
 #define LLVM_LIBERTY_KILL_FLOW_H
 
 #include "llvm/Analysis/PostDominators.h"
+#include "llvm/Analysis/ScalarEvolution.h"
 #include "llvm/Analysis/ScalarEvolutionExpressions.h"
 #include "llvm/IR/DataLayout.h"
 #include "llvm/IR/Dominators.h"

@@ -1,4 +1,5 @@
 #include "llvm/ADT/Statistic.h"
+#include "llvm/Analysis/ScalarEvolution.h"
 #include "llvm/Analysis/ScalarEvolutionExpressions.h"
 #include "llvm/Analysis/Delinearization.h"
 #include "llvm/IR/Constants.h"
@@ -42,6 +43,8 @@ public:
   static bool alwaysGreaterThan(ScalarEvolution *SE, const SCEV *difference,
                                 const Loop *L, const APInt &positive,
                                 const APInt &negative) {
+    if(difference->getSCEVType() == llvm::scCouldNotCompute)
+      return false;
     const ConstantRange range = SE->getSignedRange(difference);
 
     //    errs() << "alwaysGreaterThan( " << range << ", " << positive << ", "
@@ -96,15 +99,17 @@ public:
       }
 
     // At least one must stride
-    if (step1 == zero && step2 == zero)
+    if (step1 == zero && step2 == zero) {
+      errs() << "No stride???\n";
       return false;
+    }
 
     //    errs() << "stepGreaterThan:\n"
     //           << " earlier: " << size1 << " bytes from " << *base1 << " by "
     //           << *step1 << " byte increments\n"
     //           << "   later: " << size2 << " bytes from " << *base2 << " by "
     //           << *step2 << " byte increments\n\n";
-
+    
     // Consider the case where ptr2>ptr1:
     {
       const SCEV *diffBases = SE->getMinusSCEV(base2, base1);
@@ -526,9 +531,11 @@ public:
 
       if (stepGreaterThan(SE, L, s1, size1, s2, size2, multiDimArrayEligible)) {
         ++numNoAlias;
+        errs() << "SCEV disproved this!\n";
         return NoAlias;
       } else if (notOverlappingStrides(SE, L, s1, size1, s2, size2)) {
         ++numNoAlias;
+        errs() << "SCEV disproved this!\n";
         return NoAlias;
       }
     }
@@ -552,6 +559,7 @@ public:
   void getAnalysisUsage(AnalysisUsage &AU) const {
     LoopAA::getAnalysisUsage(AU);
     AU.addRequired<ModuleLoops>();
+    AU.addRequired<ScalarEvolutionWrapperPass>();
     AU.setPreservesAll(); // Does not transform code
   }
 
