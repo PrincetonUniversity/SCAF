@@ -16,19 +16,14 @@
 #include <unordered_set>
 #include <unordered_map>
 
-//using namespace llvm;
-//using namespace llvm::noelle;
-using namespace liberty;
-
-namespace llvm {
-struct PDGBuilder : public ModulePass {
+namespace liberty::pdgtester {
+struct PDGTester : public ModulePass {
 public:
   static char ID;
-  PDGBuilder() : ModulePass(ID) {
+  PDGTester() : ModulePass(ID) {
   }
-  virtual ~PDGBuilder() {}
+  virtual ~PDGTester() {}
 
-  // bool doInitialization (Module &M) override ;
   void getAnalysisUsage(AnalysisUsage &AU) const override;
   bool runOnModule(Module &M) override;
   void runOnFunction(Function &F);
@@ -53,4 +48,4 @@ private:
                                     Loop *loop, LoopAA *aa, PDG &pdg);
 
 };
-} // namespace llvm
+} 

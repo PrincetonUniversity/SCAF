@@ -20,10 +20,10 @@
 #include "llvm/ADT/iterator_range.h"
 
 #include "scaf/Utilities/ModuleLoops.h"
-#include "scaf/MemoryAnalysisModules/PDGBuilder.h"
+#include "scaf/MemoryAnalysisModules/PDGTester.h"
 #include "Assumptions.h"
 
-#define DEBUG_TYPE "pdgbuilder"
+#define DEBUG_TYPE "pdgtester"
 
 enum MemDepType {
   MEM_RAW = 0x4,
@@ -31,19 +31,16 @@ enum MemDepType {
   MEM_WAW = 0x1,
 };
 
-using namespace llvm;
-using namespace llvm::noelle;
 using namespace liberty;
+using namespace liberty::pdgtester;
 
 static cl::opt<bool> DumpPDG(
     "dump-pdg", cl::init(false), cl::NotHidden,
     cl::desc("Dump PDG"));
 
-void llvm::PDGBuilder::getAnalysisUsage(AnalysisUsage &AU) const {
-  //AU.addRequired<TargetLibraryInfoWrapperPass>();
+void PDGTester::getAnalysisUsage(AnalysisUsage &AU) const {
   AU.addRequired<LoopInfoWrapperPass>();
   AU.addRequired< LoopAA >();
-  //AU.addRequired<PostDominatorTreeWrapperPass>();
   AU.addRequired<ScalarEvolutionWrapperPass>();
   AU.addRequired<TargetTransformInfoWrapperPass>();
   AU.addRequired<AssumptionCacheTracker>();
@@ -53,7 +50,7 @@ void llvm::PDGBuilder::getAnalysisUsage(AnalysisUsage &AU) const {
   AU.setPreservesAll();
 }
 
-bool llvm::PDGBuilder::runOnModule(Module &M){
+bool PDGTester::runOnModule(Module &M){
   DL = &M.getDataLayout();
 
   ModuleLoops &mloops = getAnalysis< ModuleLoops >();
@@ -73,30 +70,19 @@ bool llvm::PDGBuilder::runOnModule(Module &M){
       auto pdg = getLoopPDG(l, aa);
     
       loops.insert(loops.end(), l->getSubLoops().begin(), l->getSubLoops().end());
+      //TODO: port in Dump PDG interfage
       if(DumpPDG) {
         std::string filename;
         raw_string_ostream ros(filename);
         ros << "pdg-function-" << F.getName() << "-loop-" << this->loopCount++ << ".dot";
-        //llvm::noelle::DGPrinter::writeClusteredGraph<PDG, Value>(ros.str(), pdg.get());
       }
     }
-    
-    
-    //std::vector<Loop*> loops(li->begin(), li->end());
-    //while(!loops.empty()) {
-    //  Loop *l = loops.back();
-    //  errs() << "Loop: " << l->getHeader()->getName() << "\n";
-    //  loops.pop_back();
-    //  auto pdg = getLoopPDG(l, aa);
-    //
-    //  loops.insert(loops.end(), l->getSubLoops().begin(), l->getSubLoops().end());
-    //}
   }
   return false;
 }
 
-std::unique_ptr<llvm::noelle::PDG> llvm::PDGBuilder::getLoopPDG(Loop *loop, LoopAA *aa) {
-  auto pdg = std::make_unique<llvm::noelle::PDG>(loop);
+std::unique_ptr<PDG> PDGTester::getLoopPDG(Loop *loop, LoopAA *aa) {
+  auto pdg = std::make_unique<PDG>(loop);
 
   LLVM_DEBUG(errs() << "constructEdgesFromMemory with CAF ...\n");
   constructEdgesFromMemory(*pdg, loop, aa);
@@ -104,7 +90,7 @@ std::unique_ptr<llvm::noelle::PDG> llvm::PDGBuilder::getLoopPDG(Loop *loop, Loop
   return pdg;
 }
 
-void llvm::PDGBuilder::constructEdgesFromMemory(PDG &pdg, Loop *loop,
+void PDGTester::constructEdgesFromMemory(PDG &pdg, Loop *loop,
                                                  LoopAA *aa) {
   errs() << "Starting " << loop->getHeader()->getParent()->getName() << ":" << loop->getName() << "\n";
   noctrlspec.setLoopOfInterest(loop->getHeader());
@@ -142,7 +128,7 @@ void llvm::PDGBuilder::constructEdgesFromMemory(PDG &pdg, Loop *loop,
 
 // query memory dep conservatively (with only memory analysis modules in the
 // stack)
-uint8_t llvm::PDGBuilder::queryMemoryDep(Instruction *src, Instruction *dst,
+uint8_t PDGTester::queryMemoryDep(Instruction *src, Instruction *dst,
                                       LoopAA::TemporalRelation FW,
                                       LoopAA::TemporalRelation RV, Loop *loop,
                                       LoopAA *aa, PDG &pdg) {
@@ -222,7 +208,7 @@ uint8_t llvm::PDGBuilder::queryMemoryDep(Instruction *src, Instruction *dst,
   return res;
 }
 
-uint8_t llvm::PDGBuilder::queryIntraIterationMemoryDep(Instruction *src,
+uint8_t PDGTester::queryIntraIterationMemoryDep(Instruction *src,
                                                      Instruction *dst,
                                                      Loop *loop, LoopAA *aa,
                                                      PDG &pdg) {
@@ -232,7 +218,7 @@ uint8_t llvm::PDGBuilder::queryIntraIterationMemoryDep(Instruction *src,
   return 0;
 }
 
-uint8_t llvm::PDGBuilder::queryLoopCarriedMemoryDep(Instruction *src,
+uint8_t PDGTester::queryLoopCarriedMemoryDep(Instruction *src,
                                                  Instruction *dst, Loop *loop,
                                                  LoopAA *aa, PDG &pdg) {
   // there is always a feasible path for inter-iteration deps
@@ -244,5 +230,5 @@ uint8_t llvm::PDGBuilder::queryLoopCarriedMemoryDep(Instruction *src,
   return queryMemoryDep(src, dst, LoopAA::Before, LoopAA::After, loop, aa, pdg);
 }
 
-char PDGBuilder::ID = 0;
-static RegisterPass< PDGBuilder > X("pdgbuilder", "PDGBuilder", false, true);
+char PDGTester::ID = 0;
+static RegisterPass< PDGTester > X("pdgtester", "PDGTester", false, true);

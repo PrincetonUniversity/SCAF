@@ -31,7 +31,7 @@
 
 #include "Assumptions.h"
 
-namespace llvm::noelle {
+namespace liberty::pdgtester {
 
 /*
  * Program Dependence Graph Node and Edge
@@ -406,8 +406,8 @@ public:
   bool isRemovableDependence() const {
     return isRemovable;
   }
-  std::optional<SetOfRemedies> getRemedies() const {
-    return (remeds) ? std::make_optional<SetOfRemedies>(*remeds) : std::nullopt;
+  std::optional<llvm::noelle::SetOfRemedies> getRemedies() const {
+    return (remeds) ? std::make_optional<llvm::noelle::SetOfRemedies>(*remeds) : std::nullopt;
   }
 
   void setControl(bool ctrl) {
@@ -417,15 +417,15 @@ public:
   void setLoopCarried(bool lc) {
     isLoopCarried = lc;
   }
-  void setRemedies(std::optional<SetOfRemedies> R) {
+  void setRemedies(std::optional<llvm::noelle::SetOfRemedies> R) {
     if (R) {
-      remeds = std::make_unique<SetOfRemedies>(*R);
+      remeds = std::make_unique<llvm::noelle::SetOfRemedies>(*R);
       isRemovable = true;
     }
   }
-  void addRemedies(const Remedies_ptr &R) {
+  void addRemedies(const llvm::noelle::Remedies_ptr &R) {
     if (!remeds) {
-      remeds = std::make_unique<SetOfRemedies>();
+      remeds = std::make_unique<llvm::noelle::SetOfRemedies>();
       isRemovable = true;
     }
     remeds->insert(R);
@@ -503,7 +503,7 @@ protected:
 
   DataDependenceType dataDepType;
 
-  SetOfRemedies_ptr remeds;
+  llvm::noelle::SetOfRemedies_ptr remeds;
 };
 
 /*

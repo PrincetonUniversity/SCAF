@@ -23,7 +23,7 @@
 #include "DGBase.h"
 #include "llvm/IR/Value.h"
 
-namespace llvm::noelle {
+namespace liberty::pdgtester {
 
 /*
  * Program Dependence Graph.
