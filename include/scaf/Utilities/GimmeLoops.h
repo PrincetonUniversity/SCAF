@@ -1,6 +1,10 @@
 #ifndef GIMME_LOOPS_H
 #define GIMME_LOOPS_H
 
+#include "llvm/Analysis/TargetTransformInfo.h"
+#include "llvm/IR/IntrinsicInst.h"
+#include "llvm/IR/LegacyPassManagers.h"
+
 namespace llvm {
 class AnalysisResolver;
 class DataLayout;
@@ -15,6 +19,7 @@ class LoopInfoWrapperPass;
 class ScalarEvolution;
 class ScalarEvolutionWrapperPass;
 class AssumptionCacheTracker;
+class TargetTransformInfoWrapperPass;
 
 namespace legacy {
 class FunctionPassManager;
@@ -33,11 +38,13 @@ struct MyPMDataManager;
 /// about any function you want.
 /// This is very inefficient, but it will work.
 struct GimmeLoops {
-  GimmeLoops() : td(0), tli(0), dtp(0), dt(0), pdt(0), li(0), se(0), mod(0) {}
+  GimmeLoops() : td(0), tli(0), dtp(0), dt(0), pdt(0), li(0), se(0), mod(0), tti(0) {}
+
+  GimmeLoops(PMTopLevelManager* pmt) : td(0), tli(0), dtp(0), dt(0), pdt(0), li(0), se(0), mod(0), tti(0), pmt(pmt) {}
 
   GimmeLoops(const DataLayout *target, Function *fcn,
              bool computeScalarEvolution = false)
-      : td(0), tli(0), dtp(0), dt(0), pdt(0), li(0), se(0), mod(0) {
+      : td(0), tli(0), dtp(0), dt(0), pdt(0), li(0), se(0), mod(0), tti(0), pmt(0) {
     init(target, fcn, computeScalarEvolution);
   }
 
@@ -74,7 +81,9 @@ private:
   ScalarEvolutionWrapperPass *sep;
   ScalarEvolution *se;
   AssumptionCacheTracker *act;
+  TargetTransformInfoWrapperPass *tti;
 
+  PMTopLevelManager *pmt;
   MyPMDataManager *ppp;
   Module *mod;
 };

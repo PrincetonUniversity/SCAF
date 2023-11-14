@@ -1,10 +1,11 @@
-#define DEBUG_TYPE "moduleloops"
-
 #include "llvm/IR/DataLayout.h"
 #include "llvm/IR/Function.h"
 #include "llvm/Support/raw_ostream.h"
+#include "llvm/IR/LegacyPassManagers.h"
 
 #include "scaf/Utilities/ModuleLoops.h"
+
+#define DEBUG_TYPE "moduleloops"
 
 namespace liberty {
 using namespace llvm;
@@ -14,9 +15,9 @@ GimmeLoops &ModuleLoops::compute(const Function *fcn) {
     // Evil, but okay because NONE of these passes modify the IR
     Function *non_const_function = const_cast<Function *>(fcn);
 
-    // errs() << "Computing loops for " << fcn->getName() << '\n';
+    auto pmt = this->getResolver()->getPMDataManager().getTopLevelManager();
 
-    results[fcn] = new GimmeLoops();
+    results[fcn] = new GimmeLoops(pmt);
     results[fcn]->init(td, non_const_function, true);
   }
 
