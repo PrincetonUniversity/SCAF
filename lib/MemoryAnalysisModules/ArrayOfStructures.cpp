@@ -300,7 +300,6 @@ public:
     AU.addRequired<ModuleLoops>();
     AU.addRequired<NoCaptureFcn>();
     AU.addRequired<NonCapturedFieldsAnalysis>();
-    AU.addRequired<ScalarEvolutionWrapperPass>();
     AU.setPreservesAll(); // Does not transform code
   }
 
