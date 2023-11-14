@@ -19,12 +19,8 @@
 
 #include "llvm/ADT/iterator_range.h"
 
-//#include "scaf/Utilities/ReportDump.h"
-//#include "scaf/Utilities/Metadata.h"
-
-//#include "noelle/core/PDGPrinter.hpp"
 #include "scaf/Utilities/ModuleLoops.h"
-#include "scaf/MemoryAnalysisModules/GetMemoryDependences.h"
+#include "scaf/MemoryAnalysisModules/PDGBuilder.h"
 #include "Assumptions.h"
 
 #define DEBUG_TYPE "pdgbuilder"

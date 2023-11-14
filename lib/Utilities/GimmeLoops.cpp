@@ -68,8 +68,6 @@ GimmeLoops::~GimmeLoops() {
     delete act;
   if (ppp)
     delete ppp;
-  if(tti)
-    delete tti;
 }
 
 void GimmeLoops::init(const DataLayout *target,
@@ -79,9 +77,6 @@ void GimmeLoops::init(const DataLayout *target,
 
   td = &mod->getDataLayout();
   tlip = new TargetLibraryInfoWrapperPass();
-
-  auto tira = new TargetIRAnalysis();
-  tti = new TargetTransformInfoWrapperPass(*tira);
 
   dtp = new DominatorTreeWrapperPass();
 
@@ -105,7 +100,6 @@ void GimmeLoops::init(const DataLayout *target,
   // getAnalysisUsage.
   // This way it is known what should be returned on getAnalysis
   ar = new AnalysisResolver(*ppp);
-  ar->addAnalysisImplsPair(&TargetTransformInfoWrapperPass::ID, tti);
   act->setResolver(ar);
 
   // in this case it seems that DominatorTreeWrapperPass did not need to be
@@ -130,18 +124,14 @@ void GimmeLoops::init(const DataLayout *target,
   ar->addAnalysisImplsPair(&PostDominatorTreeWrapperPass::ID, pdtp);
   ar->addAnalysisImplsPair(&LoopInfoWrapperPass::ID, lip);
   ar->addAnalysisImplsPair(&AssumptionCacheTracker::ID, act);
-  ar->addAnalysisImplsPair(&TargetTransformInfoWrapperPass::ID, tti);
   sep->setResolver(ar);
 
-  tti->doInitialization(*mod);
   act->doInitialization(*mod);
   tlip->doInitialization(*mod);
   dtp->doInitialization(*mod);
   pdtp->doInitialization(*mod);
   lip->doInitialization(*mod);
   sep->doInitialization(*mod);
-  tti->runOnModule(*mod);
-  ppp->recordAvailableAnalysis(tti);
 
   act->runOnModule(*mod);
   ppp->recordAvailableAnalysis(act);
