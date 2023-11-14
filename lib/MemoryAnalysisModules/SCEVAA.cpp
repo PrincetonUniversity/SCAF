@@ -100,7 +100,6 @@ public:
 
     // At least one must stride
     if (step1 == zero && step2 == zero) {
-      errs() << "No stride???\n";
       return false;
     }
 
@@ -531,11 +530,9 @@ public:
 
       if (stepGreaterThan(SE, L, s1, size1, s2, size2, multiDimArrayEligible)) {
         ++numNoAlias;
-        errs() << "SCEV disproved this!\n";
         return NoAlias;
       } else if (notOverlappingStrides(SE, L, s1, size1, s2, size2)) {
         ++numNoAlias;
-        errs() << "SCEV disproved this!\n";
         return NoAlias;
       }
     }
