@@ -43,8 +43,6 @@ public:
   static bool alwaysGreaterThan(ScalarEvolution *SE, const SCEV *difference,
                                 const Loop *L, const APInt &positive,
                                 const APInt &negative) {
-    if(difference->getSCEVType() == llvm::scCouldNotCompute)
-      return false;
     const ConstantRange range = SE->getSignedRange(difference);
 
     //    errs() << "alwaysGreaterThan( " << range << ", " << positive << ", "
@@ -112,6 +110,10 @@ public:
     // Consider the case where ptr2>ptr1:
     {
       const SCEV *diffBases = SE->getMinusSCEV(base2, base1);
+      //7ac1c7b: getMinusSCEV now returns CouldNotCompute for pointers with different bases
+      //TODO: Is there a way to handle this case?
+      if(diffBases->getSCEVType() == llvm::scCouldNotCompute)
+        return false;
       const ConstantRange diffBasesRange = SE->getSignedRange(diffBases);
 
       const SCEV *diffStep = SE->getMinusSCEV(step2, step1);
@@ -497,16 +499,20 @@ public:
     //  in pointers is greater than the access size during any iteration.
     if (Rel == LoopAA::Same) {
       const SCEV *diff = SE->getMinusSCEV(s1, s2);
-      if (alwaysGreaterThan(SE, diff, L, size2, size1)) {
-        ++numNoAlias;
-        return NoAlias;
-      }
+      //7ac1c7b: getMinusSCEV now returns CouldNotCompute for pointers with different bases
+      //If this is the case, skip the reverse as well
+      if(diff->getSCEVType() != llvm::scCouldNotCompute) {
+        if (alwaysGreaterThan(SE, diff, L, size2, size1)) {
+          ++numNoAlias;
+          return NoAlias;
+        }
 
-      // Try the same in reverse
-      diff = SE->getMinusSCEV(s2, s1);
-      if (alwaysGreaterThan(SE, diff, L, size1, size2)) {
-        ++numNoAlias;
-        return NoAlias;
+        // Try the same in reverse
+        diff = SE->getMinusSCEV(s2, s1);
+        if (alwaysGreaterThan(SE, diff, L, size1, size2)) {
+          ++numNoAlias;
+          return NoAlias;
+        }
       }
     } else {
       // We want to subtract these SCEVs to demonstrate that the difference

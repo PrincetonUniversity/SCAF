@@ -15,6 +15,8 @@ GimmeLoops &ModuleLoops::compute(const Function *fcn) {
     // Evil, but okay because NONE of these passes modify the IR
     Function *non_const_function = const_cast<Function *>(fcn);
 
+    //Fix needed due to llvm commit bf22593
+    //AssumptionCache now independently checks for TargetTransformInfoWrapperPass, requires PMTopLevelManager
     auto pmt = this->getResolver()->getPMDataManager().getTopLevelManager();
 
     results[fcn] = new GimmeLoops(pmt);
