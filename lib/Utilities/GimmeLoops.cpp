@@ -3,6 +3,7 @@
 #include "llvm/Analysis/PostDominators.h"
 #include "llvm/Analysis/ScalarEvolution.h"
 #include "llvm/Analysis/TargetLibraryInfo.h"
+#include "llvm/Analysis/TargetTransformInfo.h"
 #include "llvm/IR/DataLayout.h"
 #include "llvm/IR/Dominators.h"
 #include "llvm/IR/LegacyPassManagers.h"
@@ -76,6 +77,7 @@ void GimmeLoops::init(const DataLayout *target,
 
   td = &mod->getDataLayout();
   tlip = new TargetLibraryInfoWrapperPass();
+
   dtp = new DominatorTreeWrapperPass();
 
   pdtp = new PostDominatorTreeWrapperPass();
@@ -86,6 +88,7 @@ void GimmeLoops::init(const DataLayout *target,
   sep = new ScalarEvolutionWrapperPass();
 
   ppp = new MyPMDataManager();
+  ppp->setTopLevelManager(pmt);
 
   AnalysisResolver *ar = 0;
 
@@ -96,6 +99,8 @@ void GimmeLoops::init(const DataLayout *target,
   // Add the implementations of the all the analyses required in
   // getAnalysisUsage.
   // This way it is known what should be returned on getAnalysis
+  ar = new AnalysisResolver(*ppp);
+  act->setResolver(ar);
 
   // in this case it seems that DominatorTreeWrapperPass did not need to be
   // added, nor the tgtLibInfo
@@ -121,11 +126,15 @@ void GimmeLoops::init(const DataLayout *target,
   ar->addAnalysisImplsPair(&AssumptionCacheTracker::ID, act);
   sep->setResolver(ar);
 
+  act->doInitialization(*mod);
   tlip->doInitialization(*mod);
   dtp->doInitialization(*mod);
   pdtp->doInitialization(*mod);
   lip->doInitialization(*mod);
   sep->doInitialization(*mod);
+
+  act->runOnModule(*mod);
+  ppp->recordAvailableAnalysis(act);
 
   tlip->runOnModule(*mod);
   ppp->recordAvailableAnalysis(tlip);
@@ -149,6 +158,7 @@ void GimmeLoops::init(const DataLayout *target,
 
   sep->runOnFunction(*fcn);
   ppp->recordAvailableAnalysis(sep);
+
 
   // tli = &tlip->getTLI();
   dt = &dtp->getDomTree();
