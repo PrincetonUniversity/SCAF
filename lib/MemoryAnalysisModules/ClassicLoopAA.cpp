@@ -5,7 +5,7 @@
 #include "scaf/Utilities/IsVolatile.h"
 
 using namespace llvm;
-using namespace llvm::noelle;
+using namespace arcana::noelle;
 using namespace liberty;
 
 /// May not call down the LoopAA stack, but may top

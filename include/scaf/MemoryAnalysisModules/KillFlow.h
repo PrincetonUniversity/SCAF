@@ -13,7 +13,7 @@
 #include "scaf/Utilities/ModuleLoops.h"
 
 namespace liberty {
-using namespace llvm::noelle;
+using namespace arcana::noelle;
 class KillFlow : public ModulePass, public LoopAA {
   typedef std::pair<const Function *, const Value *> FcnPtrPair;
   typedef DenseMap<FcnPtrPair, bool> FcnKills;

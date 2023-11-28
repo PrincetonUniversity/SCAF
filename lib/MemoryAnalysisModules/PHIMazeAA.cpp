@@ -9,7 +9,7 @@
 #include "scaf/MemoryAnalysisModules/LoopAA.h"
 
 using namespace llvm;
-using namespace llvm::noelle;
+using namespace arcana::noelle;
 
 class PHIMazeAA : public ModulePass, public liberty::ClassicLoopAA {
 

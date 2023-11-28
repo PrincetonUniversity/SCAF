@@ -13,7 +13,7 @@
 #include <vector>
 
 namespace liberty {
-using namespace llvm::noelle;
+using namespace arcana::noelle;
 
 class PureFunAA : public llvm::ModulePass, public liberty::ClassicLoopAA {
 

@@ -406,8 +406,8 @@ public:
   bool isRemovableDependence() const {
     return isRemovable;
   }
-  std::optional<llvm::noelle::SetOfRemedies> getRemedies() const {
-    return (remeds) ? std::make_optional<llvm::noelle::SetOfRemedies>(*remeds) : std::nullopt;
+  std::optional<arcana::noelle::SetOfRemedies> getRemedies() const {
+    return (remeds) ? std::make_optional<arcana::noelle::SetOfRemedies>(*remeds) : std::nullopt;
   }
 
   void setControl(bool ctrl) {
@@ -417,15 +417,15 @@ public:
   void setLoopCarried(bool lc) {
     isLoopCarried = lc;
   }
-  void setRemedies(std::optional<llvm::noelle::SetOfRemedies> R) {
+  void setRemedies(std::optional<arcana::noelle::SetOfRemedies> R) {
     if (R) {
-      remeds = std::make_unique<llvm::noelle::SetOfRemedies>(*R);
+      remeds = std::make_unique<arcana::noelle::SetOfRemedies>(*R);
       isRemovable = true;
     }
   }
-  void addRemedies(const llvm::noelle::Remedies_ptr &R) {
+  void addRemedies(const arcana::noelle::Remedies_ptr &R) {
     if (!remeds) {
-      remeds = std::make_unique<llvm::noelle::SetOfRemedies>();
+      remeds = std::make_unique<arcana::noelle::SetOfRemedies>();
       isRemovable = true;
     }
     remeds->insert(R);
@@ -503,7 +503,7 @@ protected:
 
   DataDependenceType dataDepType;
 
-  llvm::noelle::SetOfRemedies_ptr remeds;
+  arcana::noelle::SetOfRemedies_ptr remeds;
 };
 
 /*
@@ -1019,4 +1019,4 @@ std::vector<DGEdge<T> *> DG<T>::sortDependences(
   return v;
 }
 
-} // namespace llvm::noelle
+} // namespace arcana::noelle

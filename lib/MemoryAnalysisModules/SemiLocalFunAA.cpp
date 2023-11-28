@@ -13,7 +13,7 @@
 namespace liberty {
 
 using namespace llvm;
-using namespace llvm::noelle;
+using namespace arcana::noelle;
 
 bool SemiLocalFunAA::isSemiLocalProp(const Instruction *inst) {
   if (PureFunAA::isBadDeref(inst)) {

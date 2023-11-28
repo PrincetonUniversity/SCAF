@@ -2,7 +2,7 @@
 
 namespace liberty {
 using namespace llvm;
-using namespace llvm::noelle;
+using namespace arcana::noelle;
 
 LoopAA::AliasResult SimpleAA::alias(const Value *ptrA, unsigned sizeA,
                                     TemporalRelation rel, const Value *ptrB,

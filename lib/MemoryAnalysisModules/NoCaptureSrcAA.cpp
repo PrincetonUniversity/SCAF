@@ -13,7 +13,7 @@
 #include "scaf/Utilities/FindAllTransUses.h"
 
 using namespace llvm;
-using namespace llvm::noelle;
+using namespace arcana::noelle;
 
 class NoCaptureSrcAA : public ModulePass, public liberty::ClassicLoopAA {
 

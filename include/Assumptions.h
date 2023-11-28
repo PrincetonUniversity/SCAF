@@ -14,7 +14,7 @@
 
 using namespace llvm;
 
-namespace llvm {
+namespace arcana {
   namespace noelle {
 
     template <class T> class DGEdge;

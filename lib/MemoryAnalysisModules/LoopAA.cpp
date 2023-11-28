@@ -14,7 +14,7 @@
 
 namespace liberty {
 using namespace llvm;
-using namespace llvm::noelle;
+using namespace arcana::noelle;
 
 char LoopAA::ID = 0;
 char NoLoopAA::ID = 0;
