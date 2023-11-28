@@ -4,7 +4,7 @@
 #include "scaf/MemoryAnalysisModules/LoopAA.h"
 namespace liberty {
 using namespace llvm;
-using namespace llvm::noelle;
+using namespace arcana::noelle;
 
 struct SimpleAA : public LoopAA // Not a pass!
 {

@@ -2,7 +2,7 @@
 #include "scaf/Utilities/ControlSpeculation.h"
 
 using namespace llvm;
-using namespace llvm::noelle;
+using namespace arcana::noelle;
 using namespace liberty;
 
 uint8_t liberty::disproveMemoryDep(Instruction *src, Instruction *dst,

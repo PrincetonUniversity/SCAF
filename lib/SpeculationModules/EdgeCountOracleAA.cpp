@@ -20,7 +20,7 @@
 namespace liberty
 {
 using namespace llvm;
-using namespace llvm::noelle;
+using namespace arcana::noelle;
 
 STATISTIC(numQueries,          "Num queries in cntr spec AA");
 STATISTIC(numNoModRef,         "Num no-mod-ref results in cntr spec AA");

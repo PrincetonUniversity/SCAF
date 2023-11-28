@@ -13,7 +13,7 @@
 
 namespace liberty
 {
-using namespace llvm::noelle;
+using namespace arcana::noelle;
 
 STATISTIC(numNoAlias, "Num no-alias / no-modref");
 STATISTIC(numSubQueries,  "Num sub-queries spawned");

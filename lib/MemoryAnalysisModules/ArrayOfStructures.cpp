@@ -19,7 +19,7 @@
 
 namespace liberty {
 using namespace llvm;
-using namespace llvm::noelle;
+using namespace arcana::noelle;
 
 STATISTIC(numEligible, "Num eligible");
 STATISTIC(numNoAlias, "Num no-alias/no-modref");

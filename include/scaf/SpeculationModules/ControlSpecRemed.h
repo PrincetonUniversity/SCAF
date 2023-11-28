@@ -18,7 +18,7 @@
 
 namespace liberty {
 using namespace llvm;
-using namespace llvm::noelle;
+using namespace arcana::noelle;
 
 class ControlSpecRemedy : public Remedy {
 public:

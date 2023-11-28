@@ -18,7 +18,7 @@
 
 namespace liberty {
 using namespace llvm;
-using namespace llvm::noelle;
+using namespace arcana::noelle;
 
 // Serves as an adaptor between LoopAA and ControlSpeculator
 struct EdgeCountOracle : public LoopAA // Not a pass!

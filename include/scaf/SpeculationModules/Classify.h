@@ -15,7 +15,7 @@ namespace liberty
 namespace SpecPriv
 {
 using namespace llvm;
-using namespace llvm::noelle;
+using namespace arcana::noelle;
 
 /// Represents a partitioning of the loop's memory footprint by access pattern
 struct HeapAssignment : public UpdateOnClone

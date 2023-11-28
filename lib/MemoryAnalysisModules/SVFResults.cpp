@@ -10,7 +10,7 @@
 
 namespace liberty {
 using namespace llvm;
-using namespace llvm::noelle;
+using namespace arcana::noelle;
 
 STATISTIC(numNoModRef, "Number of NoModRef from svf-results");
 STATISTIC(numNoAlias, "Number of no alias from svf-results");

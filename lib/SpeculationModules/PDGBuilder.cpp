@@ -32,7 +32,7 @@
 #include "Assumptions.h"
 
 using namespace llvm;
-using namespace llvm::noelle;
+using namespace arcana::noelle;
 using namespace liberty;
 
 static cl::opt<bool> DumpPDG(
@@ -120,7 +120,7 @@ bool llvm::PDGBuilder::runOnModule (Module &M){
       std::string filename;
       raw_string_ostream ros(filename);
       ros << "pdg-function-" << loop->getHeader()->getParent()->getName() << "-loop" << this->loopCount++ << "-refined.dot";
-      llvm::noelle::DGPrinter::writeClusteredGraph<PDG, Value>(ros.str(), pdg.get());
+      arcana::noelle::DGPrinter::writeClusteredGraph<PDG, Value>(ros.str(), pdg.get());
     }
   }
 
@@ -158,7 +158,7 @@ bool llvm::PDGBuilder::runOnModule (Module &M){
       }
       LoopAA *aa = getAnalysis< LoopAA >().getTopAA();
 
-      auto pdg = std::make_unique<llvm::noelle::PDG>(loop);
+      auto pdg = std::make_unique<arcana::noelle::PDG>(loop);
 
       queryLoopCarriedMemoryDep(src, dst, loop, aa, *pdg);
       queryIntraIterationMemoryDep(src, dst, loop, aa, *pdg);
@@ -176,8 +176,8 @@ bool llvm::PDGBuilder::runOnModule (Module &M){
   return false;
 }
 
-std::unique_ptr<llvm::noelle::PDG> llvm::PDGBuilder::getLoopPDG(Loop *loop) {
-  auto pdg = std::make_unique<llvm::noelle::PDG>(loop);
+std::unique_ptr<arcana::noelle::PDG> llvm::PDGBuilder::getLoopPDG(Loop *loop) {
+  auto pdg = std::make_unique<arcana::noelle::PDG>(loop);
 
   REPORT_DUMP(errs() << "constructEdgesFromMemory with CAF ...\n");
   auto llvmaa = getAnalysisIfAvailable<LLVMAAResults>();

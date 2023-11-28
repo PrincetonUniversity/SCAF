@@ -14,7 +14,7 @@ namespace liberty
 {
 using namespace llvm;
 using namespace SpecPriv;
-using namespace llvm::noelle;
+using namespace arcana::noelle;
 
 struct MinMaxReductionInfo {
   const CmpInst *cmpInst;

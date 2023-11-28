@@ -17,7 +17,7 @@
 namespace liberty
 {
 using namespace SpecPriv;
-using namespace llvm::noelle;
+using namespace arcana::noelle;
 
   class KillFlow_CtrlSpecAware : public ModulePass, public LoopAA
   {

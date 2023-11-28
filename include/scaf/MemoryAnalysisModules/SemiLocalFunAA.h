@@ -35,7 +35,7 @@ template <> struct DenseMapInfo<liberty::Formal> {
 } // namespace llvm
 
 namespace liberty {
-using namespace llvm::noelle;
+using namespace arcana::noelle;
 class SemiLocalFunAA : public ModulePass, public liberty::ClassicLoopAA {
 
   typedef DenseSet<const Function *> FuncSet;

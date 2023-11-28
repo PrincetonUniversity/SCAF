@@ -40,7 +40,7 @@ class CallSite;
 
 namespace liberty {
 using namespace llvm;
-using namespace llvm::noelle;
+using namespace arcana::noelle;
 
 // See KillFlow.h
 class KillFlow;

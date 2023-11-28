@@ -11,7 +11,7 @@
 #include "scaf/MemoryAnalysisModules/LoopAA.h"
 
 namespace liberty {
-using namespace llvm::noelle;
+using namespace arcana::noelle;
 class LLVMAAResults : public ModulePass, public LoopAA {
   const DataLayout *DL;
 

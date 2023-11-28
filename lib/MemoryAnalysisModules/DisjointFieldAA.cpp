@@ -20,7 +20,7 @@
 #include "scaf/MemoryAnalysisModules/NoEscapeFieldsAA.h"
 
 using namespace llvm;
-using namespace llvm::noelle;
+using namespace arcana::noelle;
 
 STATISTIC(numNoAliases, "Number of no-alias results given by disjoint fields");
 

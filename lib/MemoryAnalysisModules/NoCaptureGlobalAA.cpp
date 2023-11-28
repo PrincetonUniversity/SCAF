@@ -16,7 +16,7 @@
 
 using namespace liberty;
 using namespace llvm;
-using namespace llvm::noelle;
+using namespace arcana::noelle;
 
 STATISTIC(numQueries, "Queries");
 STATISTIC(numNoAlias, "No-alias");

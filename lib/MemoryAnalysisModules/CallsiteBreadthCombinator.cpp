@@ -19,7 +19,7 @@
 #include "llvm/Support/raw_ostream.h"
 
 using namespace llvm;
-using namespace llvm::noelle;
+using namespace arcana::noelle;
 using namespace liberty;
 
 STATISTIC(numHitsIF, "Num cache hits (I-F)");

@@ -12,7 +12,7 @@
 
 namespace liberty {
 using namespace llvm;
-using namespace llvm::noelle;
+using namespace arcana::noelle;
 
 /* A pass which identifies fields of sane types which
  * are accessed, but of which references never escape.

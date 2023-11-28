@@ -11,7 +11,7 @@
 #include "scaf/MemoryAnalysisModules/TypeSanity.h"
 
 using namespace llvm;
-using namespace llvm::noelle;
+using namespace arcana::noelle;
 
 class FieldMallocAA : public ModulePass, public liberty::ClassicLoopAA {
 
