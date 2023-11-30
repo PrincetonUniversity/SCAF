@@ -395,7 +395,7 @@ void AcyclicAA::accumulateRecursiveTypes(Function &fcn, TypeSet &visited,
         if (BitCastInst *bcI = dyn_cast<BitCastInst>(UserI)) {
           if (PointerType *new_ptr = dyn_cast<PointerType>(bcI->getDestTy())) {
             if (PointerType *new_base =
-                    dyn_cast<PointerType>(new_ptr->getElementType())) {
+                    dyn_cast<PointerType>(new_ptr->getPointerElementType())) {
 
               // if( gep->getNumIndices() != 1 )
               //  continue;
@@ -424,7 +424,7 @@ void AcyclicAA::accumulateRecursiveTypes(Function &fcn, TypeSet &visited,
     }
 
     // recursive GEP!
-    if (ptr->getElementType() != base)
+    if (ptr->getPointerElementType() != base)
       continue;
 
     if (visited.count(base))

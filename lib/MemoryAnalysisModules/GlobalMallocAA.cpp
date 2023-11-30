@@ -146,7 +146,7 @@ public:
 
     for (GlobalIt global = M.global_begin(); global != M.global_end();
          ++global) {
-      Type *type = global->getType()->getElementType();
+      Type *type = global->getType()->getPointerElementType();
       if (type->isPointerTy()) {
         for (UseIt use = global->user_begin(); use != global->user_end();
              ++use) {

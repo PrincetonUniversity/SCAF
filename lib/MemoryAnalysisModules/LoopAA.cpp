@@ -675,7 +675,7 @@ LoopAA::ModRefResult AAToLoopAA::modref(const Instruction *A,
         const Value *ptrA = getMemOper(A);
         PointerType *pty = cast<PointerType>(ptrA->getType());
         const unsigned sizeA =
-            getDataLayout()->getTypeSizeInBits(pty->getElementType()) / 8;
+            getDataLayout()->getTypeSizeInBits(pty->getPointerElementType()) / 8;
 
         // Conservatively reverse the query (see note a t top of fcn)
         ModRefResult r = Raise(AA->getModRefInfo(B, ptrA, sizeA));
@@ -688,7 +688,7 @@ LoopAA::ModRefResult AAToLoopAA::modref(const Instruction *A,
       } else if (const Value *ptrB = getMemOper(B)) {
         PointerType *pty = cast<PointerType>(ptrB->getType());
         const unsigned sizeB =
-            getDataLayout()->getTypeSizeInBits(pty->getElementType()) / 8;
+            getDataLayout()->getTypeSizeInBits(pty->getPointerElementType()) / 8;
 
         ModRefResult r = Raise(AA->getModRefInfo(A, ptrB, sizeB));
         if (r == NoModRef)

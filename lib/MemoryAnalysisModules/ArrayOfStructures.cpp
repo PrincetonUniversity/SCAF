@@ -185,7 +185,7 @@ public:
     // aka first index of the gep)
     const PointerType *gepPtrOpType =
         dyn_cast<PointerType>(gep1->getPointerOperandType());
-    if (gepPtrOpType && gepPtrOpType->getElementType()->isStructTy() &&
+    if (gepPtrOpType && gepPtrOpType->getPointerElementType()->isStructTy() &&
         gep1->getNumIndices() > 1 && gep2->getNumIndices() > 1) {
 
       bool staticallyDiffIndexFound = false;
