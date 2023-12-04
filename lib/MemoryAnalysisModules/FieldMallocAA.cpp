@@ -107,7 +107,7 @@ public:
       return;
 
     PointerType *ptrOpTy = cast<PointerType>(gep->getPointerOperandType());
-    if (!ptrOpTy->getElementType()->isPointerTy())
+    if (!ptrOpTy->getPointerElementType()->isPointerTy())
       return;
 
     bool isSane = TAA->isSane(ptrOpTy);
@@ -158,9 +158,9 @@ public:
     PointerType *Ty1 = dyn_cast<PointerType>(GEP1->getPointerOperandType());
     PointerType *Ty2 = dyn_cast<PointerType>(GEP2->getPointerOperandType());
 
-    if (!Ty1 || !isa<StructType>(Ty1->getElementType()))
+    if (!Ty1 || !isa<StructType>(Ty1->getPointerElementType()))
       return MayAlias;
-    if (!Ty2 || !isa<StructType>(Ty2->getElementType()))
+    if (!Ty2 || !isa<StructType>(Ty2->getPointerElementType()))
       return MayAlias;
 
     if (badFieldTypes.count(Ty1) || badFieldTypes.count(Ty2))

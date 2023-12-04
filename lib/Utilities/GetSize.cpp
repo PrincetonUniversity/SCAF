@@ -24,15 +24,16 @@ unsigned getSize(const Value *value, const DataLayout *TD) {
 unsigned getTargetSize(const Value *value, const DataLayout *TD) {
   Type *type = value->getType();
 
+  // FIXME: getElementType is deprecated
   Type *targetType;
   if (auto seqType = dyn_cast<ArrayType>(type))
-    targetType = seqType->getElementType();
+    targetType = seqType->getPointerElementType();
   if (auto seqType = dyn_cast<VectorType>(type))
-    targetType = seqType->getElementType();
+    targetType = seqType->getPointerElementType();
   else {
     PointerType *pType = dyn_cast<PointerType>(type);
     assert(pType && "Must be a SequentialType or PointerType");
-    targetType = pType->getElementType();
+    targetType = pType->getPointerElementType();
   }
 
   return getSize(targetType, TD);

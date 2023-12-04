@@ -61,7 +61,7 @@ bool liberty::findNoCaptureGlobalSrcs(const GlobalValue *global,
 bool liberty::findNoCaptureGlobalMallocSrcs(
     const GlobalValue *global, std::vector<const Instruction *> &mallocSrcs,
     const TargetLibraryInfo *tli) {
-  Type *type = global->getType()->getElementType();
+  Type *type = global->getType()->getPointerElementType();
   if (!type->isPointerTy())
     return false;
   std::vector<const Instruction *> srcs;

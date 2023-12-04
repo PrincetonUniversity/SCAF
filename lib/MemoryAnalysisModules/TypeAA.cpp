@@ -344,16 +344,16 @@ bool TypeSanityAnalysis::addInsane(Type *t) {
 
   PointerType *ptrty = dyn_cast<PointerType>(t);
   if (ptrty)
-    addInsane(ptrty->getElementType());
+    addInsane(ptrty->getPointerElementType());
 
   // Sequential types (array, vector)
   auto *vec= dyn_cast<VectorType>(t);
   if (vec)
-    addInsane(vec->getElementType());
+    addInsane(vec->getPointerElementType());
 
   auto *arr = dyn_cast<ArrayType>(t);
   if (arr)
-    addInsane(arr->getElementType());
+    addInsane(arr->getPointerElementType());
 
   // Composite type (including struct, union)
   auto *composite = dyn_cast<StructType>(t);
@@ -512,11 +512,11 @@ bool TypeSanityAnalysis::isSane(Type *t) const {
 // flatten arrays-of/pointers-to/vectors-of to the element types, recursively.
 Type *TypeSanityAnalysis::getBaseType(Type *t) {
   if (auto *arr = dyn_cast<ArrayType>(t))
-    return getBaseType(arr->getElementType());
+    return getBaseType(arr->getPointerElementType());
   if (auto *vec = dyn_cast<VectorType>(t))
-    return getBaseType(vec->getElementType());
+    return getBaseType(vec->getPointerElementType());
   else if (PointerType *ptr = dyn_cast<PointerType>(t))
-    return getBaseType(ptr->getElementType());
+    return getBaseType(ptr->getPointerElementType());
   else
     return t;
 }
@@ -580,11 +580,11 @@ bool TypeSanityAnalysis::typeContainedWithin(Type *container,
   //  (i.e. access to type int[] may access all of the
   //   elements of the array)
   if (auto *arrty = dyn_cast<ArrayType>(container)) {
-    if (typeContainedWithin(arrty->getElementType(), element))
+    if (typeContainedWithin(arrty->getPointerElementType(), element))
       return true;
   }
   if (auto *vecty= dyn_cast<VectorType>(container)) {
-    if (typeContainedWithin(vecty->getElementType(), element))
+    if (typeContainedWithin(vecty->getPointerElementType(), element))
       return true;
   }
 
@@ -630,7 +630,7 @@ LoopAA::AliasResult TypeAA::aliasCheck(const Pointer &P1, TemporalRelation rel,
   if (!PT1 || !PT2)
     return NoAlias;
 
-  Type *elt1 = PT1->getElementType(), *elt2 = PT2->getElementType();
+  Type *elt1 = PT1->getPointerElementType(), *elt2 = PT2->getPointerElementType();
 
   TypeSanityAnalysis &tsa = getAnalysis<TypeSanityAnalysis>();
 
@@ -677,7 +677,7 @@ LoopAA::AliasResult TypeAA::aliasCheck(const Pointer &P1, TemporalRelation rel,
 
     const Value *parent_i = gep_i->getPointerOperand();
     Type *parentty_i =
-        dyn_cast<PointerType>(parent_i->getType())->getElementType();
+        dyn_cast<PointerType>(parent_i->getType())->getPointerElementType();
     if (!parentty_i || !tsa.isSane(parentty_i))
       return MayAlias;
 
@@ -689,7 +689,7 @@ LoopAA::AliasResult TypeAA::aliasCheck(const Pointer &P1, TemporalRelation rel,
 
       const Value *parent_j = gep_j->getPointerOperand();
       Type *parentty_j =
-          dyn_cast<PointerType>(parent_j->getType())->getElementType();
+          dyn_cast<PointerType>(parent_j->getType())->getPointerElementType();
       if (!parentty_j || !tsa.isSane(parentty_j))
         return MayAlias;
 

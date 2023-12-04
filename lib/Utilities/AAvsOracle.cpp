@@ -60,8 +60,8 @@ bool AAvsOracle_EarlyHelper::gather(Function *oracle, Truths &collection,
       continue;
     }
 
-    const unsigned s1 = td.getTypeSizeInBits(pty1->getElementType()) / 8,
-                   s2 = td.getTypeSizeInBits(pty2->getElementType()) / 8;
+    const unsigned s1 = td.getTypeSizeInBits(pty1->getPointerElementType()) / 8,
+                   s2 = td.getTypeSizeInBits(pty2->getPointerElementType()) / 8;
 
     collection.push_back(Truth());
     collection.back().desc = desc;

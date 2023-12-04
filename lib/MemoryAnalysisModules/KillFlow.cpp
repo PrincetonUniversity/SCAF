@@ -322,8 +322,8 @@ bool KillFlow::killAllIdx(const Value *killidx, const Value *basePtr,
   // that's the case then no need to check the dominated idx, it will be
   // contained in one of the indexes of the kill.
   const PointerType *basePtrTy = dyn_cast<PointerType>(basePtr->getType());
-  if (basePtrTy && basePtrTy->getElementType()->isArrayTy() && idxID == 1) {
-    ArrayType *auType = dyn_cast<ArrayType>(basePtrTy->getElementType());
+  if (basePtrTy && basePtrTy->getPointerElementType()->isArrayTy() && idxID == 1) {
+    ArrayType *auType = dyn_cast<ArrayType>(basePtrTy->getPointerElementType());
     uint64_t numOfElemInAU = auType->getNumElements();
     // check that the killidx starts from 0 up to numOfElemInAU with step 1
 
@@ -392,7 +392,7 @@ bool KillFlow::killAllIdx(const Value *killidx, const Value *basePtr,
   const PointerType *baseObjTy = dyn_cast<PointerType>(basePtr->getType());
   if (!baseObjTy)
     return false;
-  const Type *elemObjTy = baseObjTy->getElementType();
+  const Type *elemObjTy = baseObjTy->getPointerElementType();
 
   if (!elemObjTy->isIntegerTy() && !elemObjTy->isFloatingPointTy() &&
       !elemObjTy->isPointerTy() && !elemObjTy->isStructTy()) {
@@ -400,10 +400,10 @@ bool KillFlow::killAllIdx(const Value *killidx, const Value *basePtr,
     return false;
   }
 
-  const Type *type = baseGVSrc->getType()->getElementType();
+  const Type *type = baseGVSrc->getType()->getPointerElementType();
   if (!type->isPointerTy())
     return false;
-  const Type *elemType = (dyn_cast<PointerType>(type))->getElementType();
+  const Type *elemType = (dyn_cast<PointerType>(type))->getPointerElementType();
 
   if (elemType != elemObjTy)
     return false;

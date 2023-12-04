@@ -100,7 +100,7 @@ void NonCapturedFieldsAnalysis::eraseDefinitions(StructType *structty,
 void NonCapturedFieldsAnalysis::collectDefsFromGlobalVariable(
     GlobalVariable *gv) {
   PointerType *pointer_to_global = gv->getType();
-  Type *ty = pointer_to_global->getElementType();
+  Type *ty = pointer_to_global->getPointerElementType();
 
   if (gv->hasInitializer())
     collectDefsFromGlobalVariable(gv, ty, gv->getInitializer());
@@ -126,12 +126,12 @@ void NonCapturedFieldsAnalysis::collectDefsFromGlobalVariable(
 
   else if (ArrayType *arrty = dyn_cast<ArrayType>(ty))
     for (unsigned i = 0, N = arrty->getNumElements(); i < N; ++i)
-      collectDefsFromGlobalVariable(gv, arrty->getElementType(),
+      collectDefsFromGlobalVariable(gv, arrty->getPointerElementType(),
                                     initor->getAggregateElement(i));
 
   else if (VectorType *vecty = dyn_cast<VectorType>(ty))
     for (unsigned i = 0, N = vecty->getArrayNumElements(); i < N; ++i)
-      collectDefsFromGlobalVariable(gv, vecty->getElementType(),
+      collectDefsFromGlobalVariable(gv, vecty->getPointerElementType(),
                                     initor->getAggregateElement(i));
 }
 
@@ -230,7 +230,7 @@ bool checkRawStructIndexing(const Value *val, StructType **structBaseOut,
       if (const BitCastInst *bcI = dyn_cast<BitCastInst>(U)) {
         if (PointerType *dstT = dyn_cast<PointerType>(bcI->getDestTy())) {
           if (StructType *structTy =
-                  dyn_cast<StructType>(dstT->getElementType())) {
+                  dyn_cast<StructType>(dstT->getPointerElementType())) {
 
             // get index. since we have i8*, will be byte offset. Check if
             // we have a field at this offset for the found struct
@@ -269,7 +269,7 @@ bool checkRawStructIndexing(const Value *val, StructType **structBaseOut,
       if (BitCastInst *bcI = dyn_cast<BitCastInst>(U)) {
         if (PointerType *dstT = dyn_cast<PointerType>(bcI->getDestTy())) {
           if (StructType *structTy =
-                  dyn_cast<StructType>(dstT->getElementType())) {
+                  dyn_cast<StructType>(dstT->getPointerElementType())) {
 
             if (structTy->getNumElements() == 0)
               continue;
@@ -277,7 +277,7 @@ bool checkRawStructIndexing(const Value *val, StructType **structBaseOut,
             // check that the type of the first element of the struct matches
             // with the pointer type of the destTy of the bitcast
             if (structTy->getElementType(0) !=
-                cast<PointerType>(cI->getDestTy())->getElementType())
+                cast<PointerType>(cI->getDestTy())->getPointerElementType())
               continue;
 
             *structBaseOut = structTy;
@@ -319,7 +319,7 @@ bool NonCapturedFieldsAnalysis::isFieldPointer(const Value *value,
   if (!ptr)
     return false;
 
-  *structBaseOut = dyn_cast<StructType>(ptr->getElementType());
+  *structBaseOut = dyn_cast<StructType>(ptr->getPointerElementType());
 
   if (!*structBaseOut)
     return false;
