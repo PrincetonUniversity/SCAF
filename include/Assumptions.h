@@ -18,11 +18,11 @@ using namespace llvm;
 namespace arcana {
   namespace noelle {
 
-    template <class T> class DGEdge;
+    template <class T, class SubT> class DGEdge;
 
     // Criticism is a PDG edge with a boolean value to differentiate loop-carried
     // from intra-iteration edges. Also specify type of dep (mem/reg/ctrl)
-    typedef DGEdge<Value> Criticism;
+    typedef DGEdge<Value, Value> Criticism;
 
     typedef std::set<Criticism *> Criticisms;
 
