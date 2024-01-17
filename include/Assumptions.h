@@ -2,6 +2,7 @@
 #define LLVM_LIBERTY_ASSUMPTIONS_H
 
 #include "llvm/Pass.h"
+#include "llvm/IR/Instructions.h"
 #include "llvm/Support/CommandLine.h"
 #include "llvm/IR/DataLayout.h"
 #include "llvm/Analysis/AliasAnalysis.h"
@@ -16,8 +17,7 @@ using namespace llvm;
 
 namespace arcana::noelle {
 
-template <class T, class SubT>
-class DGEdge;
+template <class T, class SubT> class DGEdge;
 
 // Criticism is a PDG edge with a boolean value to differentiate loop-carried
 // from intra-iteration edges. Also specify type of dep (mem/reg/ctrl)
@@ -54,7 +54,7 @@ public:
     return false;
   }
 
-  virtual ~Remedy() {}
+//  virtual ~Remedy() {}
 };
 
 typedef std::shared_ptr<Remedies> Remedies_ptr;
