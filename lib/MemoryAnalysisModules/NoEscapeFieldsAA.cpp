@@ -126,12 +126,12 @@ void NonCapturedFieldsAnalysis::collectDefsFromGlobalVariable(
 
   else if (ArrayType *arrty = dyn_cast<ArrayType>(ty))
     for (unsigned i = 0, N = arrty->getNumElements(); i < N; ++i)
-      collectDefsFromGlobalVariable(gv, arrty->getPointerElementType(),
+      collectDefsFromGlobalVariable(gv, arrty->getElementType(),
                                     initor->getAggregateElement(i));
 
   else if (VectorType *vecty = dyn_cast<VectorType>(ty))
     for (unsigned i = 0, N = vecty->getArrayNumElements(); i < N; ++i)
-      collectDefsFromGlobalVariable(gv, vecty->getPointerElementType(),
+      collectDefsFromGlobalVariable(gv, vecty->getElementType(),
                                     initor->getAggregateElement(i));
 }
 

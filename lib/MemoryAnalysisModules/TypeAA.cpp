@@ -349,11 +349,11 @@ bool TypeSanityAnalysis::addInsane(Type *t) {
   // Sequential types (array, vector)
   auto *vec= dyn_cast<VectorType>(t);
   if (vec)
-    addInsane(vec->getPointerElementType());
+    addInsane(vec->getElementType());
 
   auto *arr = dyn_cast<ArrayType>(t);
   if (arr)
-    addInsane(arr->getPointerElementType());
+    addInsane(arr->getElementType());
 
   // Composite type (including struct, union)
   auto *composite = dyn_cast<StructType>(t);
