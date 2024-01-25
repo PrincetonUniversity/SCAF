@@ -293,6 +293,8 @@ public:
       return false;
 
     const SCEV *diffBases = SE->getMinusSCEV(base1, base2);
+    if(diffBases->getSCEVType() == scCouldNotCompute)
+      return false;
     const ConstantRange diffBasesRange = SE->getSignedRange(diffBases);
 
     const SCEV *rem = SE->getURemExpr(diffBases, step);

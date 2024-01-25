@@ -512,9 +512,9 @@ bool TypeSanityAnalysis::isSane(Type *t) const {
 // flatten arrays-of/pointers-to/vectors-of to the element types, recursively.
 Type *TypeSanityAnalysis::getBaseType(Type *t) {
   if (auto *arr = dyn_cast<ArrayType>(t))
-    return getBaseType(arr->getPointerElementType());
+    return getBaseType(arr->getElementType());
   if (auto *vec = dyn_cast<VectorType>(t))
-    return getBaseType(vec->getPointerElementType());
+    return getBaseType(vec->getElementType());
   else if (PointerType *ptr = dyn_cast<PointerType>(t))
     return getBaseType(ptr->getPointerElementType());
   else
@@ -580,11 +580,11 @@ bool TypeSanityAnalysis::typeContainedWithin(Type *container,
   //  (i.e. access to type int[] may access all of the
   //   elements of the array)
   if (auto *arrty = dyn_cast<ArrayType>(container)) {
-    if (typeContainedWithin(arrty->getPointerElementType(), element))
+    if (typeContainedWithin(arrty->getElementType(), element))
       return true;
   }
   if (auto *vecty= dyn_cast<VectorType>(container)) {
-    if (typeContainedWithin(vecty->getPointerElementType(), element))
+    if (typeContainedWithin(vecty->getElementType(), element))
       return true;
   }
 
