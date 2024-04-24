@@ -187,7 +187,7 @@ public:
           bool sameIndex = diffIndex->isZero(); 
 
           const SCEV *diffSCEV = SE->getMinusSCEV(
-              step, SE->getMulExpr(ElementSize, Sizes[relevantSizeIndex]));
+              step1, SE->getMulExpr(ElementSize, Sizes[relevantSizeIndex]));
           const ConstantRange diffRange = SE->getSignedRange(diffSCEV);
           bool check = diffRange.getSignedMin().sge(0);
 
