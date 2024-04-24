@@ -137,30 +137,41 @@ public:
       // handle SCEVs with different subloops and semantically equivalent but
       // syntactically hard to process bases). Not applicable for inner most
       // loop accesses (useful for multi-dim array accesses)
-      // FIXME: disable for now
-      // What case is this trying to check?
-      // Incorrectly marks accesses with different bases and equal stride as noalias
-      // e.g. A[i][j] and A[i-1][j] for i
-      /*
+      // FIXME: should disprove cases such as: A[i][j] and A[i][j-1] for i
       if (diffStepRange.getSignedMin() == 0 && multiDimArrayEligible) {
 
         const SCEVUnknown *ptrBase1 =
             dyn_cast<SCEVUnknown>(SE->getPointerBase(ptr1));
         if (!ptrBase1)
           return false;
+        const SCEVUnknown *ptrBase2 =
+            dyn_cast<SCEVUnknown>(SE->getPointerBase(ptr2));
+        if (!ptrBase2)
+          return false;
+        if(ptrBase1 != ptrBase2)
+          return false;
 
-        const SCEV *ptrSCEV = SE->getMinusSCEV(ptr1, ptrBase1);
+        const SCEV *ptrSCEV1 = SE->getMinusSCEV(ptr1, ptrBase1);
 
-        const SCEVAddRecExpr *sAR = dyn_cast<SCEVAddRecExpr>(ptrSCEV);
+        const SCEVAddRecExpr *sAR1 = dyn_cast<SCEVAddRecExpr>(ptrSCEV1);
 
-        if (sAR) {
+        const SCEV *ptrSCEV2 = SE->getMinusSCEV(ptr2, ptrBase2);
+
+        const SCEVAddRecExpr *sAR2 = dyn_cast<SCEVAddRecExpr>(ptrSCEV2);
+
+        if (sAR1 && sAR2) {
           // const SCEV *base = sAR->getStart();
-          const SCEV *step = sAR->getStepRecurrence(*SE);
+          const SCEV *step1 = sAR1->getStepRecurrence(*SE);
 
           const SCEV *ElementSize = SE->getConstant(size1);
           SmallVector<const SCEV *, 4> Subscripts;
           SmallVector<const SCEV *, 4> Sizes;
           SE->delinearize(sAR, Subscripts, Sizes, ElementSize);
+
+          const SCEV *ElementSize2 = SE->getConstant(size2);
+          SmallVector<const SCEV *, 4> Subscripts2;
+          SmallVector<const SCEV *, 4> Sizes2;
+          SE->delinearize(sAR2, Subscripts2, Sizes2, ElementSize2);
 
           if (Sizes.size() < 2)
             return false;
@@ -169,12 +180,18 @@ public:
           // the elementSize). the other sizes refer to outer loops if any
           unsigned relevantSizeIndex = Sizes.size() - 2;
 
+          // Add check for matching indexes to address the following problem:
+          // Incorrectly marks accesses with different bases and equal stride as noalias
+          // e.g. A[i][j] and A[i-1][j] for i
+          const SCEV *diffIndex = SE->getMinusSCEV(Subscripts[relevantSizeIndex], Subscripts2[relevantSizeIndex]);
+          bool sameIndex = diffIndex->isZero(); 
+
           const SCEV *diffSCEV = SE->getMinusSCEV(
               step, SE->getMulExpr(ElementSize, Sizes[relevantSizeIndex]));
           const ConstantRange diffRange = SE->getSignedRange(diffSCEV);
           bool check = diffRange.getSignedMin().sge(0);
 
-          if (check) {
+          if (check && sameIndex) {
             ++numNoAliasMD;
             LLVM_DEBUG(errs()
                        << "stepGreaterThan:\n"
@@ -182,7 +199,7 @@ public:
             return true;
           }
         }
-      }*/
+      }
     }
     return false;
   }
