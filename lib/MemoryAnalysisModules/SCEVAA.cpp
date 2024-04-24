@@ -166,7 +166,7 @@ public:
           const SCEV *ElementSize = SE->getConstant(size1);
           SmallVector<const SCEV *, 4> Subscripts;
           SmallVector<const SCEV *, 4> Sizes;
-          SE->delinearize(sAR, Subscripts, Sizes, ElementSize);
+          SE->delinearize(sAR1, Subscripts, Sizes, ElementSize);
 
           const SCEV *ElementSize2 = SE->getConstant(size2);
           SmallVector<const SCEV *, 4> Subscripts2;
