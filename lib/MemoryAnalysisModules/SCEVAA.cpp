@@ -137,6 +137,11 @@ public:
       // handle SCEVs with different subloops and semantically equivalent but
       // syntactically hard to process bases). Not applicable for inner most
       // loop accesses (useful for multi-dim array accesses)
+      // FIXME: disable for now
+      // What case is this trying to check?
+      // Incorrectly marks accesses with different bases and equal stride as noalias
+      // e.g. A[i][j] and A[i-1][j] for i
+      /*
       if (diffStepRange.getSignedMin() == 0 && multiDimArrayEligible) {
 
         const SCEVUnknown *ptrBase1 =
@@ -177,7 +182,7 @@ public:
             return true;
           }
         }
-      }
+      }*/
     }
     return false;
   }
