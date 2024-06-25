@@ -120,7 +120,7 @@ static unsigned getArgSize(const CallBase &CS) {
     switch (II->getIntrinsicID()) {
     default:
       break;
-    case Intrinsic::memcpy:
+    //case Intrinsic::memcpy:
     case Intrinsic::memmove: {
       if (ConstantInt *LenCI = dyn_cast<ConstantInt>(II->getArgOperand(2)))
         Len = LenCI->getZExtValue();
