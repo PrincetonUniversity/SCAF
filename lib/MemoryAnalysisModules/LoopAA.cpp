@@ -48,9 +48,7 @@ static RegisterPass<EvalLoopAA>
 //------------------------------------------------------------------------
 // Methods of the LoopAA interface
 
-LoopAA::LoopAA() : td(0), tli(0), nextAA(0), prevAA(0) {
-  errs() << "SCAF LoopAA has been created\n";
-}
+LoopAA::LoopAA() : td(0), tli(0), nextAA(0), prevAA(0) {}
 
 LoopAA::~LoopAA() {
   if (nextAA)

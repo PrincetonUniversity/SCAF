@@ -120,7 +120,7 @@ static unsigned getArgSize(const CallBase &CS) {
     switch (II->getIntrinsicID()) {
     default:
       break;
-    //case Intrinsic::memcpy:
+    case Intrinsic::memcpy:
     case Intrinsic::memmove: {
       if (ConstantInt *LenCI = dyn_cast<ConstantInt>(II->getArgOperand(2)))
         Len = LenCI->getZExtValue();
@@ -187,7 +187,8 @@ bool SemiLocalFunAA::globalsAlias(const GlobalSet globals, const Value *P,
 
     const int globalSize = liberty::getTargetSize(*global, TD);
     if (aa->alias(P, Size, Same, *global, globalSize, NULL, R)) {
-      return true;
+      errs() << "Disabled the true in globalsAlias\n";
+      //return true;
     }
   }
 
@@ -246,7 +247,7 @@ bool SemiLocalFunAA::runOnModule(Module &M) {
       initGlobalMod(funP, mods, refs, funcs);
       funcs.clear();
 
-      LLVM_DEBUG(errs() << " mods: ";
+      (errs() << " mods: ";
                  for (GlobalSet::iterator i = mods.begin(), e = mods.end();
                       i != e; ++i) errs()
                  << (*i)->getName() << ", ";
@@ -258,7 +259,7 @@ bool SemiLocalFunAA::runOnModule(Module &M) {
 
       );
     } else {
-      LLVM_DEBUG(errs() << " is not semi-local\n");
+      (errs() << " is not semi-local\n");
     }
   }
 
@@ -405,6 +406,7 @@ LoopAA::ModRefResult SemiLocalFunAA::getModRefInfo(const CallBase &CS,
   if (result != ModRef) {
     for (auto remed : tmpR)
       R.insert(remed);
+    errs() << "Not ModRef result found\n";
   }
 
   return result;
