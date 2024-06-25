@@ -247,7 +247,7 @@ bool SemiLocalFunAA::runOnModule(Module &M) {
       initGlobalMod(funP, mods, refs, funcs);
       funcs.clear();
 
-      (errs() << " mods: ";
+      LLVM_DEBUG(errs() << " mods: ";
                  for (GlobalSet::iterator i = mods.begin(), e = mods.end();
                       i != e; ++i) errs()
                  << (*i)->getName() << ", ";
@@ -259,7 +259,7 @@ bool SemiLocalFunAA::runOnModule(Module &M) {
 
       );
     } else {
-      (errs() << " is not semi-local\n");
+      LLVM_DEBUG(errs() << " is not semi-local\n");
     }
   }
 
