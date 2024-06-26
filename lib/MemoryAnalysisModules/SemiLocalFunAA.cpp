@@ -405,10 +405,10 @@ LoopAA::ModRefResult SemiLocalFunAA::getModRefInfo(const CallBase &CS,
   }
 
   if (result != ModRef) {
-    result = ModRef;
-    //for (auto remed : tmpR)
-    //  R.insert(remed);
-    errs() << "Not ModRef result found, changed to ModRef\n";
+    for (auto remed : tmpR)
+      R.insert(remed);
+    errs() << "Not ModRef result found\n";
+    errs() << "     " << fun->getName() << "\n";
   }
 
   return result;
