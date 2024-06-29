@@ -563,6 +563,8 @@ bool TypeSanityAnalysis::typeContainedWithin(Type *container,
       if (typeContainedWithin(structty->getElementType(i), element))
         return true;
 
+  return false;
+
   // Don't need to handle union types, because
   // union types are by definition not sane,
   // hence they were handled earlier.
