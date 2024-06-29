@@ -120,9 +120,7 @@ static unsigned getArgSize(const CallBase &CS) {
     switch (II->getIntrinsicID()) {
     default:
       break;
-    case Intrinsic::memcpy: {
-      errs() << "YEBIN: Found a memcpy\n";
-    }
+    case Intrinsic::memcpy: 
     case Intrinsic::memmove: {
       if (ConstantInt *LenCI = dyn_cast<ConstantInt>(II->getArgOperand(2)))
         Len = LenCI->getZExtValue();
@@ -154,6 +152,7 @@ SemiLocalFunAA::aliasedArgumentsModRef(const CallBase &CS,
 
   const Function *fun = CS.getCalledFunction();
   assert(fun);
+  errs() << "Inside aliasedArgsModRef, fun: " << fun->getName() << "\n";
 
   for (unsigned i = 0; i < CS.arg_size(); ++i) {
     const Value *arg = CS.getArgOperand(i);
@@ -171,6 +170,7 @@ SemiLocalFunAA::aliasedArgumentsModRef(const CallBase &CS,
       }
     }
   }
+  errs() << "       result: " << result << "\n";
 
   return result;
 }
